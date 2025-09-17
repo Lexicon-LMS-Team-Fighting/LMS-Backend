@@ -12,6 +12,7 @@ public class Program
 
         builder.Services.ConfigureSql(builder.Configuration);
         builder.Services.ConfigureControllers();
+        builder.Services.ConfigureValidationFilter(); // Register custom validation filter and suppress default model validation
 
         builder.Services.AddRepositories();
         builder.Services.AddServiceLayer();
@@ -23,7 +24,6 @@ public class Program
         builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MapperProfile>());
         builder.Services.ConfigureCors();
         builder.Services.ConfigureOpenApi();
-       
 
         var app = builder.Build();
 

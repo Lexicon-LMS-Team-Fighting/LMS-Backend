@@ -31,9 +31,9 @@ public static class ExceptionMiddlewareExtetensions
                     }
                     else
                     {
-                        statusCode = StatusCodes.Status500InternalServerError;
+                        statusCode = StatusCodes.Status501NotImplemented;
                         detail = environment.IsDevelopment()
-                            ? contextFeature.Error.Message
+                            ? contextFeature.Error.ToString()
                             : "An unexpected error occurred.";
                         title = "Internal Server Error";
                     }
@@ -41,8 +41,8 @@ public static class ExceptionMiddlewareExtetensions
                     var problemDetails = problemDetailsFactory.CreateProblemDetails(
                         context,
                         statusCode,
-                        title,
-                        detail,
+                        title:title,
+                        detail: detail,
                         instance: context.Request.Path);
 
                     context.Response.StatusCode = statusCode;

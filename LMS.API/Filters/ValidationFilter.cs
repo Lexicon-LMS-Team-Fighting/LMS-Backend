@@ -30,7 +30,7 @@ public class ValidationFilter : IActionFilter
                 context.ModelState,
                 statusCode: StatusCodes.Status400BadRequest,
                 title: "Validation Failed",
-                detail: "One or more validation errors occurred.",
+                detail: "One or more validation errors occurred. Please refer to the errors property for additional details.",
                 instance: context.HttpContext.Request.Path
             );
 

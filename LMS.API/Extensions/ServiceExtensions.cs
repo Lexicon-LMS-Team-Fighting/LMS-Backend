@@ -74,6 +74,16 @@ public static class ServiceExtensions
             .AddApplicationPart(typeof(AssemblyReference).Assembly);
     }
 
+    public static void ConfigureValidationFilter(this IServiceCollection services)
+    {
+        // Register ValidationFilter dependencies and suppress default model state invalid filter
+        // so that our custom ValidationFilter handles validation errors consistently.
+        services.Configure<ApiBehaviorOptions>(options =>
+        {
+            options.SuppressModelStateInvalidFilter = true;
+        });
+    }
+
     public static void ConfigureSql(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<ApplicationDbContext>(options =>
