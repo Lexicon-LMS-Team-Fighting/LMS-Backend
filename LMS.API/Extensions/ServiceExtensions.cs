@@ -1,4 +1,5 @@
-﻿using LMS.Infractructure.Data;
+﻿using LMS.API.Filters;
+using LMS.Infractructure.Data;
 using LMS.Infractructure.Repositories;
 using LMS.Presentation;
 using LMS.Services;
@@ -67,10 +68,10 @@ public static class ServiceExtensions
         {
             opt.ReturnHttpNotAcceptable = true;
             opt.Filters.Add(new ProducesAttribute("application/json"));
-
+            opt.Filters.Add<ValidationFilter>();
         })
-                .AddNewtonsoftJson()
-                .AddApplicationPart(typeof(AssemblyReference).Assembly);
+            .AddNewtonsoftJson()
+            .AddApplicationPart(typeof(AssemblyReference).Assembly);
     }
 
     public static void ConfigureSql(this IServiceCollection services, IConfiguration configuration)
