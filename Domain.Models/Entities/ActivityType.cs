@@ -12,5 +12,6 @@ public class ActivityType
 {
 	public Guid id { get; set; }
 	public string name { get; set; } = string.Empty;
+
 	//public ICollection<LMSActivity> LMSActivities { get; set; } = new List<LMSActivity>();
 }
