@@ -13,9 +13,13 @@ namespace LMS.Infractructure.Data
         {
         }
 
+        public DbSet<User> Users => Set<User>();
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+
             builder.ApplyConfiguration(new ApplicationUserConfigurations());
         }
     }
