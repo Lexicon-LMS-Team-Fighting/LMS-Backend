@@ -2,11 +2,14 @@
 
 /// <summary>
 /// Represents the relationship between a user and a course.
-/// This entity has a many-to-one relationship between <c>User</c> and <c>Course</c>.
+/// This entity has:  
+/// 1:M relationship between <c>UserCourse</c> and <c>User</c>.
+/// M:1 relationship between <c>UserCourse</c> and <c>Course</c> 
 /// </summary>
 public class UserCourse
 {
 	public Guid UserId { get; set; }
 	public Guid CourseId { get; set; }
-	//public User User { get; set; }
+	//public ICollection<User> Users { get; set; } = new List<User>();
+	//public Course Course { get; set; }
 }									
