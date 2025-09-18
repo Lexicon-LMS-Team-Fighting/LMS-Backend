@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Companies.Infractructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250918150447_AddEntityRelations")]
+    [Migration("20250918153307_AddEntityRelations")]
     partial class AddEntityRelations
     {
         /// <inheritdoc />
@@ -175,9 +175,6 @@ namespace Companies.Infractructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<Guid?>("UserId1")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ActivityId");
@@ -190,8 +187,6 @@ namespace Companies.Infractructure.Migrations
                         .IsUnique();
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("Document", (string)null);
                 });
@@ -228,7 +223,7 @@ namespace Companies.Infractructure.Migrations
 
                     b.HasIndex("ModuleId");
 
-                    b.ToTable("LMSActivity", (string)null);
+                    b.ToTable("Activity", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Module", b =>
@@ -261,39 +256,6 @@ namespace Companies.Infractructure.Migrations
                     b.ToTable("Module", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Models.Entities.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("UserName")
-                        .IsUnique();
-
-                    b.ToTable("User", (string)null);
-                });
-
             modelBuilder.Entity("Domain.Models.Entities.UserCourse", b =>
                 {
                     b.Property<string>("UserId")
@@ -302,14 +264,9 @@ namespace Companies.Infractructure.Migrations
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("UserId1")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("UserId", "CourseId");
 
                     b.HasIndex("CourseId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("UserCourse", (string)null);
                 });
@@ -473,10 +430,6 @@ namespace Companies.Infractructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Models.Entities.User", null)
-                        .WithMany("Documents")
-                        .HasForeignKey("UserId1");
-
                     b.Navigation("Activity");
 
                     b.Navigation("Course");
@@ -489,7 +442,7 @@ namespace Companies.Infractructure.Migrations
             modelBuilder.Entity("Domain.Models.Entities.LMSActivity", b =>
                 {
                     b.HasOne("Domain.Models.Entities.ActivityType", "ActivityType")
-                        .WithMany("LMSActivities")
+                        .WithMany("Activities")
                         .HasForeignKey("ActivityTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -529,10 +482,6 @@ namespace Companies.Infractructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Domain.Models.Entities.User", null)
-                        .WithMany("UserCourses")
-                        .HasForeignKey("UserId1");
 
                     b.Navigation("Course");
 
@@ -592,7 +541,7 @@ namespace Companies.Infractructure.Migrations
 
             modelBuilder.Entity("Domain.Models.Entities.ActivityType", b =>
                 {
-                    b.Navigation("LMSActivities");
+                    b.Navigation("Activities");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.ApplicationUser", b =>
@@ -621,13 +570,6 @@ namespace Companies.Infractructure.Migrations
                     b.Navigation("Activities");
 
                     b.Navigation("Documents");
-                });
-
-            modelBuilder.Entity("Domain.Models.Entities.User", b =>
-                {
-                    b.Navigation("Documents");
-
-                    b.Navigation("UserCourses");
                 });
 #pragma warning restore 612, 618
         }

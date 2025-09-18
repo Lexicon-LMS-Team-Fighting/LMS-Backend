@@ -11,7 +11,7 @@ namespace LMS.Infractructure.Data
         public DbSet<Course> Courses { get; set; }
         public DbSet<UserCourse> UserCourses { get; set; }
         public DbSet<Module> Modules { get; set; }
-        public DbSet<LMSActivity> LMSActivities { get; set; }
+        public DbSet<LMSActivity> Activities { get; set; }
         public DbSet<ActivityType> ActivityTypes { get; set; }
         public DbSet<Document> Documents { get; set; }
 
@@ -22,7 +22,6 @@ namespace LMS.Infractructure.Data
             base.OnModelCreating(builder);
 
             builder.ApplyConfiguration(new ApplicationUserConfigurations());
-            builder.ApplyConfiguration(new UserConfiguration());
             builder.ApplyConfiguration(new CourseConfiguration());
             builder.ApplyConfiguration(new UserCourseConfiguration());
             builder.ApplyConfiguration(new ModuleConfiguration());
