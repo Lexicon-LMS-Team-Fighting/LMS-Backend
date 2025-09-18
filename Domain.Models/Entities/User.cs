@@ -14,7 +14,7 @@ public class User
     public string Email { get; set; } = string.Empty;
 
 
-    //public ICollection<UserCourse> UserCourses { get; set; } = new List<UserCourse>();
+    //public UserCourse UserCourse { get; set; } = null!;
     //public ICollection<Document> Documents { get; set; } = new List<Document>();
 
 
