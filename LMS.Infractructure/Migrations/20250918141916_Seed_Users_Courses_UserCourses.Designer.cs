@@ -4,6 +4,7 @@ using LMS.Infractructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Companies.Infractructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250918141916_Seed_Users_Courses_UserCourses")]
+    partial class Seed_Users_Courses_UserCourses
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -121,25 +124,25 @@ namespace Companies.Infractructure.Migrations
                         new
                         {
                             CourseId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            Description = "Basics in Machine Learning",
+                            Description = "Grunder",
                             EndDate = new DateTime(2025, 12, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Machine Learning 1",
+                            Name = "Intro to CS",
                             StartDate = new DateTime(2025, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             CourseId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            Description = "Basics in Python.",
+                            Description = "Relationsmod.",
                             EndDate = new DateTime(2025, 12, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Python 1",
+                            Name = "Databaser & SQL",
                             StartDate = new DateTime(2025, 9, 15, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             CourseId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            Description = "Basics in Github",
+                            Description = "ASP.NET Core",
                             EndDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Github",
+                            Name = ".NET Web API",
                             StartDate = new DateTime(2025, 10, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
@@ -174,26 +177,26 @@ namespace Companies.Infractructure.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            Email = "pelle@mail.com",
-                            FirstName = "Pelle",
-                            LastName = "Larsson",
-                            UserName = "Pelle123"
+                            Email = "ada@example.com",
+                            FirstName = "Ada",
+                            LastName = "Lovelace",
+                            UserName = "ada"
                         },
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            Email = "anna@mail.com",
-                            FirstName = "Anna",
-                            LastName = "Svensson",
-                            UserName = "Anna1337"
+                            Email = "alan@example.com",
+                            FirstName = "Alan",
+                            LastName = "Turing",
+                            UserName = "alan"
                         },
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            Email = "hakan_it@mail.com",
-                            FirstName = "Håkan",
-                            LastName = "Karlsson",
-                            UserName = "Tech-hakan"
+                            Email = "grace@example.com",
+                            FirstName = "Grace",
+                            LastName = "Hopper",
+                            UserName = "grace"
                         });
                 });
 
