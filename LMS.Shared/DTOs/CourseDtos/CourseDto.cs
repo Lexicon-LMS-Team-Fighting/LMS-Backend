@@ -1,6 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace LMS.Shared.DTOs.CourseDtos;
+
+/// <summary>
+/// Represents a data tranfer object (DTO) for a <see cref="Course"/>. <br />
+/// This DTO is used to transfer course-related data across application layers
+/// without exposing the full domain entity.
+/// </summary>
 public class CourseDto
 {
     public Guid Id { get; set; }
