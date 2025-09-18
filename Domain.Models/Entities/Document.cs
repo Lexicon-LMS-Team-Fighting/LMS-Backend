@@ -2,15 +2,15 @@
 
 
 /// <summary>
-/// Represents a document within the learning management domain.
-/// A document is uploaded or associated with a user, and may belong
-/// to a course, module, or activity.
+/// Represents a document within the learning management domain. <br />
+/// A document is uploaded or associated with a user, and may belong <br />
+/// to a course, module, or activity. <br />
 /// 
-/// Has the following relations: 
-/// Optional M:1 with <see cref="User"/>
-/// Optional M:1 with <see cref="Course"/>
-/// Optional M:1 with <see cref="Module"/>
-/// Optional M:1 with <see cref="Activity"/>
+/// Has the following relations: <br /> 
+/// Optional M:1 with <see cref="User"/> <br />
+/// Optional M:1 with <see cref="Course"/> <br />
+/// Optional M:1 with <see cref="Module"/> <br />
+/// Optional M:1 with <see cref="Activity"/> <br />
 /// </summary>
 public class Document
 {
