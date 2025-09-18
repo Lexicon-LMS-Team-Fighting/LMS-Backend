@@ -1,14 +1,14 @@
 ﻿namespace Domain.Models.Entities;
 
 /// <summary>
-/// Represents a learning management system (LMS) activity.
-/// An activity belongs to a module, is categorized by an <see cref="ActivityType"/>,
-/// and may contain related documents.
+/// Represents a learning management system (LMS) activity. <br />
+/// An activity belongs to a module, is categorized by an <see cref="ActivityType"/>, <br />
+/// and may contain related documents. <br />
 /// 
-/// The entity has:
-/// M:1 relationship with <see cref="Module"/>.
-/// M:1 relationship with <see cref="ActivityType"/>
-/// 1:M relationship with <see cref="Document"/>
+/// The entity has: <br />
+/// M:1 relationship with <see cref="Module"/>. <br />
+/// M:1 relationship with <see cref="ActivityType"/> <br />
+/// 1:M relationship with <see cref="Document"/> <br />
 /// </summary>
 public class LMSActivity
 {
