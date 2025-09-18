@@ -1,4 +1,6 @@
-﻿namespace Domain.Models.Entities;
+﻿using System.Diagnostics;
+
+namespace Domain.Models.Entities;
 
 
 /// <summary>
@@ -15,7 +17,7 @@
 public class Document
 {
 	public Guid Id { get; set; }
-	public Guid UserId { get; set; }
+	public string UserId { get; set; } = null!;
 	public Guid CourseId { get; set; }
 	public Guid ModuleId { get; set; }
 	public Guid ActivityId { get; set; }
@@ -24,9 +26,8 @@ public class Document
 	public string? Description { get; set; }
 	public DateTime TimeStamp { get; set; }
 
-	// Todo: un-comment relations when relations are added
-	//public User? User { get; set; }
-	//public Course? Course { get; set; }
-	//public Module? Module { get; set; }
-	//public Activity? Activity { get; set; }
+	public ApplicationUser User { get; set; } = null!;
+	public Course? Course { get; set; }
+	public Module? Module { get; set; }
+	public LMSActivity? Activity { get; set; }
 }

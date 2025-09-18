@@ -10,9 +10,8 @@ namespace Domain.Models.Entities;
 /// </summary>
 public class ActivityType
 {
-	public Guid id { get; set; }
-	public string name { get; set; } = string.Empty;
+	public Guid Id { get; set; }
+	public string Name { get; set; } = string.Empty;
 
-	// ToDo: Un-comment and implement the relationship when LMSActivity is defined.
-	//public ICollection<LMSActivity> LMSActivities { get; set; } = new List<LMSActivity>();
+	public ICollection<LMSActivity> LMSActivities { get; set; } = new List<LMSActivity>();
 }
