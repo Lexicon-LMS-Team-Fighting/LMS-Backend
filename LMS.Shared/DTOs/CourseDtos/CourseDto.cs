@@ -13,4 +13,9 @@ public class CourseDto
     [Required]
     public DateTime EndDate { get; set; }
 
+    //Relations
+    // TODO: Un-comment this one UserDto is implemented.
+    //public ICollection<UserDto> Users { get; set; } = new();
+    //public ICollection<DocumentDto> Documents { get; set; } = new();
+    //public ICollection<ModuleDto> Modules { get; set; } = new();
 }
