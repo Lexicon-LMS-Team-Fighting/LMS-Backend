@@ -1,28 +1,29 @@
-﻿namespace Domain.Models.Entities
+﻿namespace Domain.Models.Entities;
 
 /// <summary>
-/// Entity Module
-/// Represents the relationship between a Module and Activity, Module and Document, Module and Course.
-/// 
-/// This entity has the following relations: 1:m with Activity, 1:m with Document.
+/// Represents a module for a course.
+/// <para>
+/// This entity has the following relations: <br />
+/// 1:M with <see cref="LMSActivity"/>. <br />
+/// Optional 1:M with <see cref="Document"/>. <br />
+/// M:1 with <see cref="Course"/>. <br />
+/// </para>
 /// </summary>
+public class Module
 {
-    public class Module
-    {
-        public Guid Id { get; set; }
-        public Guid CourseId { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+    public Guid Id { get; set; }
+    public Guid CourseId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
 
-        // Navigation Relations
-        // TODO: Add relations 
-        //public ICollection<Document> Documents { get; set; } = new List<Document>();
-        //public ICollection<Activity> Activities { get; set; } = new List<Activity>();
+    // Navigation Relations
+    // TODO: Add relations 
+    //public ICollection<Document>? Documents { get; set; } = new List<Document>();
+    //public ICollection<LMSActivity> Activities { get; set; } = new List<Activity>();
 
-        // Foreign Key
-        // TODO: Add foreign key
-        //public Course Course { get; set; }
-    }
+    // Foreign Key
+    // TODO: Add foreign key
+    //public Course Course { get; set; }
 }
