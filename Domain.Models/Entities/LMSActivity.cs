@@ -6,8 +6,8 @@
 /// and may contain related documents. <br />
 /// 
 /// The entity has: <br />
-/// M:1 relationship with <see cref="Module"/>. <br />
-/// M:1 relationship with <see cref="ActivityType"/> <br />
+/// 1:1 relationship with <see cref="Module"/>. <br />
+/// 1:1 relationship with <see cref="ActivityType"/> <br />
 /// 1:M relationship with <see cref="Document"/> <br />
 /// </summary>
 public class LMSActivity
@@ -20,8 +20,7 @@ public class LMSActivity
 	public DateTime StartDate { get; set; }
 	public DateTime EndDate { get; set; }
 
-	// Todo: Un-comment bellow relation variables when implementing relations
-	//[ForeignKey(nameof(ActivityTypeId))]
-	//public ActivityType ActivityType { get; set; }
-	//public ICollection<Document> Documents { get; set; } = new List<Document>();
+	public ActivityType ActivityType { get; set; } = null!;
+	public Module Module { get; set; } = null!;
+	public ICollection<Document> Documents { get; set; } = new List<Document>();
 }

@@ -3,13 +3,14 @@
 /// <summary>
 /// Represents the relationship between a user and a course.
 /// This entity has:  
-/// 1:M relationship between <c>UserCourse</c> and <c>User</c>.
-/// M:1 relationship between <c>UserCourse</c> and <c>Course</c> 
+/// 1:1 relationship between <c>UserCourse</c> and <c>User</c>.
+/// 1:1 relationship between <c>UserCourse</c> and <c>Course</c> 
 /// </summary>
 public class UserCourse
 {
-	public Guid UserId { get; set; }
+	public string UserId { get; set; } = null!;
 	public Guid CourseId { get; set; }
-	//public ICollection<User> Users { get; set; } = new List<User>();
-	//public Course Course { get; set; }
-}									
+
+	public ApplicationUser User { get; set; } = null!;
+	public Course Course { get; set; } = null!;
+}
