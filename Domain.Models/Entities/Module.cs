@@ -5,8 +5,8 @@
 /// <para>
 /// This entity has the following relations: <br />
 /// 1:M with <see cref="LMSActivity"/>. <br />
-/// Optional 1:M with <see cref="Document"/>. <br />
-/// M:1 with <see cref="Course"/>. <br />
+/// 1:M with <see cref="Document"/>. <br />
+/// 1:1 with <see cref="Course"/>. <br />
 /// </para>
 /// </summary>
 public class Module

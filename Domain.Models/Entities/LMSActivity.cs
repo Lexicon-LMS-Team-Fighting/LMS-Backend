@@ -6,8 +6,8 @@
 /// and may contain related documents. <br />
 /// 
 /// The entity has: <br />
-/// M:1 relationship with <see cref="Module"/>. <br />
-/// M:1 relationship with <see cref="ActivityType"/> <br />
+/// 1:1 relationship with <see cref="Module"/>. <br />
+/// 1:1 relationship with <see cref="ActivityType"/> <br />
 /// 1:M relationship with <see cref="Document"/> <br />
 /// </summary>
 public class LMSActivity

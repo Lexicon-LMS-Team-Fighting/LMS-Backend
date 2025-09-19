@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LMS.Infractructure.Data.Configurations;
 
+/// <summary>
+/// Configuration for the <see cref="Document"/> entity.
+/// </summary>
 public class DocumentConfiguration : IEntityTypeConfiguration<Document>
 {
     public void Configure(EntityTypeBuilder<Document> builder)

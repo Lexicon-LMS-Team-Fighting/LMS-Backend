@@ -4,12 +4,15 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LMS.Infractructure.Data.Configurations;
 
+/// <summary>
+/// Configuration for the <see cref="Module"/> entity.
+/// </summary>
 public class ModuleConfiguration : IEntityTypeConfiguration<Module>
 {
     public void Configure(EntityTypeBuilder<Module> builder)
     {
         builder.ToTable("Module");
-        
+
         builder.HasKey(e => e.Id);
 
         builder.HasOne(e => e.Course)

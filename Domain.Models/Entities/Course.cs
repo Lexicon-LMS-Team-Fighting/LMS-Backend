@@ -20,5 +20,5 @@ public class Course
 
     public ICollection<Module> Modules { get; set; } = new List<Module>();
     public ICollection<UserCourse> UserCourses { get; set; } = new List<UserCourse>();
-    public ICollection<Document>?Documents { get; set; } = new List<Document>();
+    public ICollection<Document>Documents { get; set; } = new List<Document>();
 }

@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LMS.Infractructure.Data.Configurations;
 
+/// <summary>
+/// Configuration for the <see cref="ActivityType"/> entity.
+/// </summary>
 public class ActivityTypeConfiguration : IEntityTypeConfiguration<ActivityType>
 {
     public void Configure(EntityTypeBuilder<ActivityType> builder)

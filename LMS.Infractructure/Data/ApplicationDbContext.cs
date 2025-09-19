@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Infractructure.Data
 {
+    /// <summary>
+    /// The application's database context, integrating ASP.NET Core Identity with custom entities.
+    /// </summary>
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
     {
         public DbSet<Course> Courses { get; set; }
