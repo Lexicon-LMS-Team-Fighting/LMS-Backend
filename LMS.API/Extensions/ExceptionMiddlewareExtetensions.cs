@@ -17,30 +17,33 @@ public static class ExceptionMiddlewareExtetensions
                 if (contextFeature != null)
                 {
                     var problemDetailsFactory = app.Services.GetRequiredService<ProblemDetailsFactory>();
+                    var environment = app.Services.GetRequiredService<IWebHostEnvironment>();
 
-                    ProblemDetails problemDetails;
                     int statusCode;
+                    string title;
+                    string detail;
 
-                    switch (contextFeature.Error)
+                    if (contextFeature.Error is AppException ex)
                     {
-                        case TokenValidationException tokenValidationException:
-                            statusCode = tokenValidationException.StatusCode;
-                            problemDetails = problemDetailsFactory.CreateProblemDetails(
-                                    context,
-                                    statusCode,
-                                    detail: tokenValidationException.Message,
-                                    instance: context.Request.Path);
-                            break;
-                        default:
-                            statusCode = StatusCodes.Status500InternalServerError;
-                            problemDetails = problemDetailsFactory.CreateProblemDetails(
-                                    context,
-                                    statusCode,
-                                    title: "Internal Server Error",
-                                    detail: contextFeature.Error.Message,
-                                    instance: context.Request.Path);
-                            break;
+                        statusCode = (int)ex.StatusCode;
+                        detail = ex.Message;
+                        title = ex.Title ?? ex.GetType().Name.Replace("Exception", "");
                     }
+                    else
+                    {
+                        statusCode = StatusCodes.Status501NotImplemented;
+                        detail = environment.IsDevelopment()
+                            ? contextFeature.Error.ToString()
+                            : "An unexpected error occurred.";
+                        title = "Internal Server Error";
+                    }
+
+                    var problemDetails = problemDetailsFactory.CreateProblemDetails(
+                        context,
+                        statusCode,
+                        title:title,
+                        detail: detail,
+                        instance: context.Request.Path);
 
                     context.Response.StatusCode = statusCode;
                     await context.Response.WriteAsJsonAsync(problemDetails);

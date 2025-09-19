@@ -143,13 +143,13 @@ public class AuthService : IAuthService
         ApplicationUser? user = await userManager.FindByNameAsync(principal.Identity?.Name!);
 
         if (user == null)
-            throw new TokenValidationException("User not found", StatusCodes.Status400BadRequest);
+            throw new RefreshTokenUserMissingException();
 
         if (user!.RefreshToken != token.RefreshToken)
-            throw new TokenValidationException("Refreshtoken do not match");
+            throw new RefreshTokenMismatchException();
 
         if (user.RefreshTokenExpireTime <= DateTime.Now)
-            throw new TokenValidationException("Refreshtoken has expired");
+            throw new RefreshTokenExpiredException();
 
         this.user = user;
 
