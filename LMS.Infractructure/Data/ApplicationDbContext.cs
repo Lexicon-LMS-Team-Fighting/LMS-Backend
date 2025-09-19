@@ -13,12 +13,17 @@ namespace LMS.Infractructure.Data
         {
         }
 
-        
+        public DbSet<User> Users => Set<User>();
+        public DbSet<Course> Courses => Set<Course>();
+        public DbSet<UserCourse> UserCourses => Set<UserCourse>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
             builder.ApplyConfiguration(new ApplicationUserConfigurations());
+            builder.ApplyConfiguration(new UserConfiguration());
+            builder.ApplyConfiguration(new CourseConfiguration());
+            builder.ApplyConfiguration(new UserCourseConfiguration());
         }
     }
 }
