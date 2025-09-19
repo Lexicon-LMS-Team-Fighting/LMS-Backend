@@ -2,7 +2,7 @@ using System.Net;
 using Domain.Models.Exceptions;
 
 /// <summary>
-/// Base exception type for authorization-related errors.
+/// Base exception type for authorization-related errors <see cref="HttpStatusCode.Unauthorized"/>.
 /// Inherit from this class to create specific authorization exceptions.
 /// </summary>
 public class AuthorizationException : AppException

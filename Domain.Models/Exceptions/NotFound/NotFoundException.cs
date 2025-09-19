@@ -3,7 +3,7 @@
 namespace Domain.Models.Exceptions;
 
 /// <summary>
-/// Base exception type for not found errors.
+/// Base exception type for not found errors <see cref="HttpStatusCode.NotFound"/>.
 /// Inherit from this class to create specific not found exceptions.
 /// </summary>
 public class NotFoundException : AppException

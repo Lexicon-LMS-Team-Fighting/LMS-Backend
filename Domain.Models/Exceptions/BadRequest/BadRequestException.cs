@@ -2,7 +2,7 @@ using System.Net;
 using Domain.Models.Exceptions;
 
 /// <summary>
-/// Base exception type for bad request errors.
+/// Base exception type for bad request errors <see cref="HttpStatusCode.BadRequest"/>.
 /// Inherit from this class to create specific bad request exceptions.
 /// </summary>
 public class BadRequestException : AppException

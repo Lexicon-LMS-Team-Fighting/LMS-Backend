@@ -4,7 +4,7 @@ using System.Net;
 namespace Domain.Models.Exceptions
 {
     /// <summary>
-    /// Base exception type for conflict-related errors.
+    /// Base exception type for conflict-related errors <see cref="HttpStatusCode.Conflict"/>.
     /// Inherit from this class to create specific conflict exceptions.
     /// </summary>
     public class ConflictException : AppException
