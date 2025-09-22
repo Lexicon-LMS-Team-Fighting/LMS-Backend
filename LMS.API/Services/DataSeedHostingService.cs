@@ -94,6 +94,8 @@ public class DataSeedHostingService : IHostedService
     {
         var faker = new Faker<ApplicationUser>("sv").Rules((f, e) =>
         {
+            e.FirstName = f.Name.FirstName();
+            e.LastName = f.Name.LastName();
             e.Email = f.Person.Email;
             e.UserName = f.Person.Email;
         });
