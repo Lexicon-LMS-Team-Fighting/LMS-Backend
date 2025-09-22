@@ -3,8 +3,8 @@
 /// <summary>
 /// Represents the relationship between a user and a course.
 /// This entity has:  
-/// 1:1 relationship between <c>UserCourse</c> and <c>User</c>.
-/// 1:1 relationship between <c>UserCourse</c> and <c>Course</c> 
+/// 1:M relationship between <c>UserCourse</c> and <c>User</c>.
+/// M:1 relationship between <c>UserCourse</c> and <c>Course</c> 
 /// </summary>
 public class UserCourse
 {

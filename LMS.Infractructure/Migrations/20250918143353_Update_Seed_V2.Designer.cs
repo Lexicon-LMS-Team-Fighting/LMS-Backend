@@ -4,6 +4,7 @@ using LMS.Infractructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Companies.Infractructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250918143353_Update_Seed_V2")]
+    partial class Update_Seed_V2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,24 +24,6 @@ namespace Companies.Infractructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Domain.Models.Entities.ActivityType", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("ActivityType", (string)null);
-                });
 
             modelBuilder.Entity("Domain.Models.Entities.ApplicationUser", b =>
                 {
@@ -390,41 +375,6 @@ namespace Companies.Infractructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Models.Entities.Document", b =>
-                {
-                    b.HasOne("Domain.Models.Entities.LMSActivity", "Activity")
-                        .WithMany("Documents")
-                        .HasForeignKey("ActivityId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.Entities.Course", "Course")
-                        .WithMany("Documents")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.Entities.Module", "Module")
-                        .WithMany("Documents")
-                        .HasForeignKey("ModuleId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.Entities.ApplicationUser", "User")
-                        .WithMany("Documents")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Activity");
-
-                    b.Navigation("Course");
-
-                    b.Navigation("Module");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Domain.Models.Entities.UserCourse", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Course", null)
@@ -489,39 +439,6 @@ namespace Companies.Infractructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Domain.Models.Entities.ActivityType", b =>
-                {
-                    b.Navigation("Activities");
-                });
-
-            modelBuilder.Entity("Domain.Models.Entities.ApplicationUser", b =>
-                {
-                    b.Navigation("Documents");
-
-                    b.Navigation("UserCourses");
-                });
-
-            modelBuilder.Entity("Domain.Models.Entities.Course", b =>
-                {
-                    b.Navigation("Documents");
-
-                    b.Navigation("Modules");
-
-                    b.Navigation("UserCourses");
-                });
-
-            modelBuilder.Entity("Domain.Models.Entities.LMSActivity", b =>
-                {
-                    b.Navigation("Documents");
-                });
-
-            modelBuilder.Entity("Domain.Models.Entities.Module", b =>
-                {
-                    b.Navigation("Activities");
-
-                    b.Navigation("Documents");
                 });
 #pragma warning restore 612, 618
         }

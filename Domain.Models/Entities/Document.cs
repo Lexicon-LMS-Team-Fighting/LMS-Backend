@@ -9,10 +9,10 @@ namespace Domain.Models.Entities;
 /// to a course, module, or activity. <br />
 /// 
 /// Has the following relations: <br /> 
-/// Optional 1:1 with <see cref="User"/> <br />
-/// Optional 1:1 with <see cref="Course"/> <br />
-/// Optional 1:1 with <see cref="Module"/> <br />
-/// Optional 1:1 with <see cref="Activity"/> <br />
+/// Optional M:1 with <see cref="User"/> <br />
+/// Optional M:1 with <see cref="Course"/> <br />
+/// Optional M:1 with <see cref="Module"/> <br />
+/// Optional M:1 with <see cref="Activity"/> <br />
 /// </summary>
 public class Document
 {

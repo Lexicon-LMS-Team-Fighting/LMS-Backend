@@ -17,5 +17,11 @@ public class ActivityTypeConfiguration : IEntityTypeConfiguration<ActivityType>
 
         builder.HasIndex(e => e.Name)
             .IsUnique();
+
+        // Update the relationship to use LMSActivities
+        builder.HasMany(e => e.LMSActivities)
+            .WithOne(e => e.ActivityType)
+            .HasForeignKey(e => e.ActivityTypeId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
