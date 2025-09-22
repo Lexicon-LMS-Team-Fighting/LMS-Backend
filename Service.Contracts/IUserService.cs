@@ -9,24 +9,23 @@ namespace Service.Contracts;
 public interface IUserService
 {
 	/// <summary>
-	/// Retrieves a single user by its unique identifier. <br/>
-	/// This method returns a <see cref="UserDto"/>, 
+	/// Retrieves a user by their unique identifier.
 	/// </summary>
-	/// <param name="userId">The unique identifier of the user, typically a string (e.g., GUID as string).</param>
-	/// <returns>
-	/// A task that represents the asynchronous operation. 
-	/// The task result contains the corresponding <see cref="UserDto"/> if found, 
-	/// otherwise it may throw an exception or return <c>null</c> depending on the implementation.
-	/// </returns>
+	/// <param name="userId">The user ID as a string, expected to be a valid GUID.</param>
+	/// <returns>A <see cref="UserDto"/> representing the user.</returns>
+	/// <exception cref="BadRequestException">
+	/// Thrown when the provided <paramref name="userId"/> is not a valid GUID.
+	/// </exception>
+	/// <exception cref="UserNotFoundException">
+	/// Thrown when no user is found with the given <paramref name="userId"/>.
+	/// </exception>
 	Task<UserDto> GetUserAsync(string userId);
 
 	/// <summary>
-	/// Retrieves all users. <br/>
-	/// Returns a collection of <see cref="UserDto"/> objects for use in client-facing layers.
+	/// Retrieves all users from the data source.
 	/// </summary>
 	/// <returns>
-	/// A task that represents the asynchronous operation. 
-	/// The task result contains an enumerable collection of <see cref="UserDto"/> objects.
+	/// A collection of <see cref="UserDto"/> objects representing all users.
 	/// </returns>
 	Task<IEnumerable<UserDto>> GetUsersAsync();
 }

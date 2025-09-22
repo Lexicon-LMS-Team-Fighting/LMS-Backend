@@ -2,5 +2,7 @@
 public interface IServiceManager
 {
     IAuthService AuthService { get; }
+    IUserService UserService { get; }
+
     ITestService TestService { get; } // ToDo: TestService is to be removed when no longer needed.
 }

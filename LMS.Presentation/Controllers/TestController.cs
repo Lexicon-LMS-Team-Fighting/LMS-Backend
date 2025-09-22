@@ -19,9 +19,9 @@ public class TestController: ControllerBase
 	}
 
 	[HttpPost("test")]
-	public async Task<bool> RefreshToken(UserDto item)
+	public async Task<bool> TestMethod(/*string item*/)
 	{
-		_serviceManager.TestService.TestMethod();
+		var result = await _serviceManager.UserService.GetUsersAsync();
 		return true;
 	}
 }

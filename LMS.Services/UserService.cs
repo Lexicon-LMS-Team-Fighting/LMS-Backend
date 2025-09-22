@@ -16,13 +16,24 @@ public class UserService : IUserService
 		_mapper = mapper;
 	}
 
-	public Task<UserDto> GetUserAsync(string userId)
+	/// <inheritdoc/>
+	public async Task<UserDto> GetUserAsync(string userId)
 	{
-		throw new NotImplementedException();
+		if (!Guid.TryParse(userId, out _))
+			throw new BadRequestException($"Provided id: {userId} is not a valid Guid");
+
+		var user = await _unitOfWork.User.GetUserAsync(userId);
+
+		if (user is null) throw new UserNotFoundException(userId); 
+		
+		return _mapper.Map<UserDto>(user);
 	}
 
-	public Task<IEnumerable<UserDto>> GetUsersAsync()
+	/// <inheritdoc/>
+	public async Task<IEnumerable<UserDto>> GetUsersAsync()
 	{
-		throw new NotImplementedException();
+		var user = await _unitOfWork.User.GetUsersAsync();
+
+		return _mapper.Map<IEnumerable<UserDto>>(user);
 	}
 }
