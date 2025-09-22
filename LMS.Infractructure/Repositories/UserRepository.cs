@@ -5,6 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Infractructure.Repositories;
 
+
+/// <summary>
+/// Provides data access operations for <see cref="ApplicationUser"/> entities. <br/>
+/// Inherits common CRUD functionality from <see cref="RepositoryBase{T}"/> 
+/// and implements user-specific queries defined in <see cref="IUserRepository"/>. <br/>
+/// Serves as the concrete repository for managing application users within the system.
+/// </summary>
 public class UserRepository : RepositoryBase<ApplicationUser>, IUserRepository
 {
 	public UserRepository(ApplicationDbContext context): base(context)
