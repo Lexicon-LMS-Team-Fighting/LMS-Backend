@@ -23,12 +23,12 @@ public class UserRepository : RepositoryBase<ApplicationUser>, IUserRepository
 	}
 
 	/// <inheritdoc/>
-	async Task<ApplicationUser?> IUserRepository.GetUserAsync(string userId, bool changeTracking) => 
+	public async Task<ApplicationUser?> GetUserAsync(string userId, bool changeTracking) => 
 		await FindByCondition(u => u.Id.Equals(userId), changeTracking)
 				.FirstOrDefaultAsync();
 
 	/// <inheritdoc/>
-	async Task<List<ApplicationUser>> IUserRepository.GetUsersAsync(bool changeTracking) => 
+	public async Task<List<ApplicationUser>> GetUsersAsync(bool changeTracking) => 
 		await FindAll(changeTracking).ToListAsync();
 	
 

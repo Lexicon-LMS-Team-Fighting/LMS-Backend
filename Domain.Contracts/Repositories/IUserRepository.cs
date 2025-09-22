@@ -20,7 +20,7 @@ public interface IUserRepository: IRepositoryBase<ApplicationUser>
 	/// A task that represents the asynchronous operation. The task result contains the 
 	/// matching <see cref="User"/> or <c>null</c> if not found.
 	/// </returns>
-	Task<ApplicationUser?> GetUserAsync(string userId, bool changeTracking = false);
+	public Task<ApplicationUser?> GetUserAsync(string userId, bool changeTracking = false);
 
 	/// <summary>
 	/// Retrieves all <see cref="User"/> entities from the data source. <br/>
@@ -29,5 +29,5 @@ public interface IUserRepository: IRepositoryBase<ApplicationUser>
 	/// <returns>
 	/// A task that represents the asynchronous operation. The task result contains a list of <see cref="ApplicationUser"/> entities.
 	/// </returns>
-	Task<List<ApplicationUser>> GetUsersAsync(bool changeTracking = false);
+	public Task<List<ApplicationUser>> GetUsersAsync(bool changeTracking = false);
 }
