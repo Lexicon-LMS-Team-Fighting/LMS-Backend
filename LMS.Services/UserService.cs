@@ -5,11 +5,21 @@ using Service.Contracts;
 
 namespace LMS.Services;
 
+
+/// <summary>
+/// Provides operations related to users, including retrieval of single or multiple users.
+/// Implements the <see cref="IUserService"/> interface.
+/// </summary>
 public class UserService : IUserService
 {
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly IMapper _mapper;
 
+	/// <summary>
+	/// Initializes a new instance of the <see cref="UserService"/> class.
+	/// </summary>
+	/// <param name="unitOfWork">The unit of work for repository access.</param>
+	/// <param name="mapper">The AutoMapper instance for mapping domain entities to DTOs.</param>
 	public UserService(IUnitOfWork unitOfWork, IMapper mapper)
 	{
 		_unitOfWork = unitOfWork;
