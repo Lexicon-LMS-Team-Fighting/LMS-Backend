@@ -6,7 +6,7 @@ namespace Domain.Models.Entities;
 /// Represents a type or category of activity within the domain model. <br />
 /// This entity can be used to classify different learning or management activities <br />
 /// (e.g., e-learning, assignment, exercise, and so on). <br />
-/// has a 1:M relationship with <see cref="Activity"/> <br />
+/// has a 1:M relationship with <see cref="LMSActivity"/> <br />
 /// </summary>
 public class ActivityType
 {
