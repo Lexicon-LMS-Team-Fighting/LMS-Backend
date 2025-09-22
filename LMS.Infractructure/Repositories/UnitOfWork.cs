@@ -12,15 +12,20 @@ public class UnitOfWork : IUnitOfWork
     private readonly ApplicationDbContext context;
 
     private readonly Lazy<IUserRepository> _userRepository;
+    private readonly Lazy<ICourseRepository> _courseRepository;
 
     public UnitOfWork(ApplicationDbContext context)
     {
         this.context = context ?? throw new ArgumentNullException(nameof(context));
         _userRepository = new Lazy<IUserRepository>(() => new UserRepository(context));
+        _courseRepository = new Lazy<ICourseRepository>(() => new CourseRepository(context));
     }
 
     /// <inheritdoc/>
 	public IUserRepository User => _userRepository.Value;
+    
+    /// <inheritdoc/>
+	public ICourseRepository Course => _courseRepository.Value;
 
 	public async Task CompleteAsync() => await context.SaveChangesAsync();
 }
