@@ -99,6 +99,10 @@ public static class ServiceExtensions
     {
         services.AddScoped<IServiceManager, ServiceManager>();
 
+		// ToDo: TestService injection is here for testing purposes only, should be removed when no longer needed.
+		services.AddScoped<ITestService, TestService>();
+        services.AddScoped(provider => new Lazy<ITestService>(() => provider.GetRequiredService<ITestService>()));
+
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped(provider => new Lazy<IAuthService>(() => provider.GetRequiredService<IAuthService>()));
     }
