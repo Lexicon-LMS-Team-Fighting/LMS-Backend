@@ -4,7 +4,6 @@ using LMS.Infractructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,11 +11,9 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS.Infractructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250922091752_AddEntityRelations")]
-    partial class AddEntityRelations
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -120,56 +117,6 @@ namespace LMS.Infractructure.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("ApplicationUser", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "11111111-1111-1111-1111-111111111111",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "c32edab9-a747-4e00-b283-0c12851a2f53",
-                            Email = "pelle@mail.com",
-                            EmailConfirmed = false,
-                            FirstName = "Pelle",
-                            LastName = "Larsson",
-                            LockoutEnabled = false,
-                            PhoneNumberConfirmed = false,
-                            RefreshTokenExpireTime = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            SecurityStamp = "66d88be5-fd90-41bf-9df7-49bcbdd03ddf",
-                            TwoFactorEnabled = false,
-                            UserName = "Pelle123"
-                        },
-                        new
-                        {
-                            Id = "22222222-2222-2222-2222-222222222222",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "5a82233d-8980-4202-9f1d-869432136a93",
-                            Email = "anna@mail.com",
-                            EmailConfirmed = false,
-                            FirstName = "Anna",
-                            LastName = "Svensson",
-                            LockoutEnabled = false,
-                            PhoneNumberConfirmed = false,
-                            RefreshTokenExpireTime = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            SecurityStamp = "07751845-5503-460b-96bc-de93c38e786d",
-                            TwoFactorEnabled = false,
-                            UserName = "Anna1337"
-                        },
-                        new
-                        {
-                            Id = "33333333-3333-3333-3333-333333333333",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "9b0f128c-c8b5-4a3f-87a6-06a6c573e514",
-                            Email = "hakan_it@mail.com",
-                            EmailConfirmed = false,
-                            FirstName = "Håkan",
-                            LastName = "Karlsson",
-                            LockoutEnabled = false,
-                            PhoneNumberConfirmed = false,
-                            RefreshTokenExpireTime = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            SecurityStamp = "010434b9-6b72-441c-b88c-b90a90494020",
-                            TwoFactorEnabled = false,
-                            UserName = "Tech-hakan"
-                        });
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Course", b =>
@@ -198,32 +145,6 @@ namespace LMS.Infractructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Course", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            Description = "Basics in Machine Learning",
-                            EndDate = new DateTime(2025, 12, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Machine Learning 1",
-                            StartDate = new DateTime(2025, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            Description = "Basics in Python.",
-                            EndDate = new DateTime(2025, 12, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Python 1",
-                            StartDate = new DateTime(2025, 9, 15, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            Description = "Basics in Github",
-                            EndDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Github",
-                            StartDate = new DateTime(2025, 10, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Document", b =>
@@ -353,33 +274,6 @@ namespace LMS.Infractructure.Migrations
                     b.HasIndex("CourseId");
 
                     b.ToTable("UserCourse", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = "11111111-1111-1111-1111-111111111111",
-                            CourseId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
-                        },
-                        new
-                        {
-                            UserId = "11111111-1111-1111-1111-111111111111",
-                            CourseId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
-                        },
-                        new
-                        {
-                            UserId = "22222222-2222-2222-2222-222222222222",
-                            CourseId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
-                        },
-                        new
-                        {
-                            UserId = "22222222-2222-2222-2222-222222222222",
-                            CourseId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc")
-                        },
-                        new
-                        {
-                            UserId = "33333333-3333-3333-3333-333333333333",
-                            CourseId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
