@@ -18,12 +18,8 @@ public class Module
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
 
-    // Navigation Relations
-    // TODO: Add relations 
-    //public ICollection<Document>? Documents { get; set; } = new List<Document>();
-    //public ICollection<LMSActivity> Activities { get; set; } = new List<Activity>();
-
-    // Foreign Key
-    // TODO: Add foreign key
-    //public Course Course { get; set; }
+    // Foreign Keys / Navigation Properties
+    public Course Course { get; set; } = null!;
+    public ICollection<LMSActivity> LMSActivities { get; set; } = new List<LMSActivity>();
+    public ICollection<Document> Documents { get; set; } = new List<Document>();
 }
