@@ -1,7 +1,4 @@
-﻿
-
-using LMS.Shared.DTOs.UserDtos;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 
 namespace LMS.Presentation.Controllers;
