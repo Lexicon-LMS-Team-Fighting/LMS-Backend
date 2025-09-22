@@ -20,7 +20,8 @@ public class LMSActivity
 	public DateTime StartDate { get; set; }
 	public DateTime EndDate { get; set; }
 
-	public ActivityType ActivityType { get; set; } = null!;
+    // Foreign Keys / Navigation Properties
+    public ActivityType ActivityType { get; set; } = null!;
 	public Module Module { get; set; } = null!;
 	public ICollection<Document> Documents { get; set; } = new List<Document>();
 }

@@ -13,5 +13,6 @@ public class ActivityType
 	public Guid Id { get; set; }
 	public string Name { get; set; } = string.Empty;
 
-	public ICollection<LMSActivity> LMSActivities { get; set; } = new List<LMSActivity>();
+    // Foreign Keys / Navigation Properties
+    public ICollection<LMSActivity> LMSActivities { get; set; } = new List<LMSActivity>();
 }

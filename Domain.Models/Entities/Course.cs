@@ -18,6 +18,7 @@ public class Course
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
 
+    // Foreign Keys / Navigation Properties
     public ICollection<Module> Modules { get; set; } = new List<Module>();
     public ICollection<UserCourse> UserCourses { get; set; } = new List<UserCourse>();
     public ICollection<Document>Documents { get; set; } = new List<Document>();

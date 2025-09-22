@@ -18,6 +18,7 @@ public class Module
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
 
+    // Foreign Keys / Navigation Properties
     public Course Course { get; set; } = null!;
     public ICollection<LMSActivity> LMSActivities { get; set; } = new List<LMSActivity>();
     public ICollection<Document> Documents { get; set; } = new List<Document>();

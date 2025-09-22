@@ -26,7 +26,8 @@ public class Document
 	public string? Description { get; set; }
 	public DateTime TimeStamp { get; set; }
 
-	public ApplicationUser User { get; set; } = null!;
+    // Foreign Keys / Navigation Properties
+    public ApplicationUser User { get; set; } = null!;
 	public Course? Course { get; set; }
 	public Module? Module { get; set; }
 	public LMSActivity? Activity { get; set; }

@@ -11,6 +11,7 @@ public class UserCourse
 	public string UserId { get; set; } = null!;
 	public Guid CourseId { get; set; }
 
-	public ApplicationUser User { get; set; } = null!;
+    // Foreign Keys / Navigation Properties
+    public ApplicationUser User { get; set; } = null!;
 	public Course Course { get; set; } = null!;
 }
