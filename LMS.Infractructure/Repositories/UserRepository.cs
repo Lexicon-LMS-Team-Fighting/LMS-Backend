@@ -5,34 +5,35 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Infractructure.Repositories;
 
-public class UserRepository : RepositoryBase<User>, IUserRepository
+public class UserRepository : RepositoryBase<ApplicationUser>, IUserRepository
 {
 	public UserRepository(ApplicationDbContext context): base(context)
 	{}
 
 	// Not used yet. Parameters set to change.
-	void IRepositoryBase<User>.Create(User entity)
+	void IRepositoryBase<ApplicationUser>.Create(ApplicationUser entity)
 	{
 		throw new NotImplementedException();
 	}
 
 	// Not used yet. Parameters set to change.
-	void IRepositoryBase<User>.Delete(User entity)
+	void IRepositoryBase<ApplicationUser>.Delete(ApplicationUser entity)
 	{
 		throw new NotImplementedException();
 	}
 
-	async Task<User?> IUserRepository.GetUserAsync(Guid userId, bool changeTracking) => 
+	/// <inheritdoc/>
+	async Task<ApplicationUser?> IUserRepository.GetUserAsync(string userId, bool changeTracking) => 
 		await FindByCondition(u => u.Id.Equals(userId), changeTracking)
 				.FirstOrDefaultAsync();
 
-
-	async Task<List<User>> IUserRepository.GetUsersAsync(bool changeTracking) => 
+	/// <inheritdoc/>
+	async Task<List<ApplicationUser>> IUserRepository.GetUsersAsync(bool changeTracking) => 
 		await FindAll(changeTracking).ToListAsync();
 	
 
 	// Not used yet. Parameters set to change.
-	void IRepositoryBase<User>.Update(User entity)
+	void IRepositoryBase<ApplicationUser>.Update(ApplicationUser entity)
 	{
 		throw new NotImplementedException();
 	}
