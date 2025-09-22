@@ -29,12 +29,12 @@ public class UserService : IUserService
 	/// <inheritdoc/>
 	public async Task<UserDto> GetUserAsync(string userId)
 	{
-		if (!Guid.TryParse(userId, out _))
+		if (!Guid.TryParse(userId, out Guid guid))
 			throw new BadRequestException($"Provided id: {userId} is not a valid Guid");
 
 		var user = await _unitOfWork.User.GetUserAsync(userId);
 
-		if (user is null) throw new UserNotFoundException(userId); 
+		if (user is null) throw new UserNotFoundException(guid); 
 		
 		return _mapper.Map<UserDto>(user);
 	}

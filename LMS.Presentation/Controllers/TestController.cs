@@ -19,7 +19,7 @@ public class TestController: ControllerBase
 	}
 
 	[HttpPost("test")]
-	public async Task<bool> TestMethod(/*string item*/)
+	public async Task<bool> TestMethod(string item)
 	{
 		var result = await _serviceManager.UserService.GetUsersAsync();
 		return true;
