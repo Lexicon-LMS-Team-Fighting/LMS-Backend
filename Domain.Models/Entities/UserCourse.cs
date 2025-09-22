@@ -8,8 +8,10 @@
 /// </summary>
 public class UserCourse
 {
-	public Guid UserId { get; set; }
+	public string UserId { get; set; } = null!;
 	public Guid CourseId { get; set; }
-	//public ICollection<User> Users { get; set; } = new List<User>();
-	//public Course Course { get; set; }
-}									
+
+    // Foreign Keys / Navigation Properties
+    public ApplicationUser User { get; set; } = null!;
+	public Course Course { get; set; } = null!;
+}
