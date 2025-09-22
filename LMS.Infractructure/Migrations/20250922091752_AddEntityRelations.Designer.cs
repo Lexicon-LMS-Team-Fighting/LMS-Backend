@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Companies.Infractructure.Migrations
+namespace LMS.Infractructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250918141916_Seed_Users_Courses_UserCourses")]
-    partial class Seed_Users_Courses_UserCourses
+    [Migration("20250922091752_AddEntityRelations")]
+    partial class AddEntityRelations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,24 @@ namespace Companies.Infractructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Domain.Models.Entities.ActivityType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("ActivityType", (string)null);
+                });
 
             modelBuilder.Entity("Domain.Models.Entities.ApplicationUser", b =>
                 {
@@ -43,6 +61,14 @@ namespace Companies.Infractructure.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -94,11 +120,61 @@ namespace Companies.Infractructure.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("ApplicationUser", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "11111111-1111-1111-1111-111111111111",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "c32edab9-a747-4e00-b283-0c12851a2f53",
+                            Email = "pelle@mail.com",
+                            EmailConfirmed = false,
+                            FirstName = "Pelle",
+                            LastName = "Larsson",
+                            LockoutEnabled = false,
+                            PhoneNumberConfirmed = false,
+                            RefreshTokenExpireTime = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            SecurityStamp = "66d88be5-fd90-41bf-9df7-49bcbdd03ddf",
+                            TwoFactorEnabled = false,
+                            UserName = "Pelle123"
+                        },
+                        new
+                        {
+                            Id = "22222222-2222-2222-2222-222222222222",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "5a82233d-8980-4202-9f1d-869432136a93",
+                            Email = "anna@mail.com",
+                            EmailConfirmed = false,
+                            FirstName = "Anna",
+                            LastName = "Svensson",
+                            LockoutEnabled = false,
+                            PhoneNumberConfirmed = false,
+                            RefreshTokenExpireTime = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            SecurityStamp = "07751845-5503-460b-96bc-de93c38e786d",
+                            TwoFactorEnabled = false,
+                            UserName = "Anna1337"
+                        },
+                        new
+                        {
+                            Id = "33333333-3333-3333-3333-333333333333",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "9b0f128c-c8b5-4a3f-87a6-06a6c573e514",
+                            Email = "hakan_it@mail.com",
+                            EmailConfirmed = false,
+                            FirstName = "Håkan",
+                            LastName = "Karlsson",
+                            LockoutEnabled = false,
+                            PhoneNumberConfirmed = false,
+                            RefreshTokenExpireTime = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            SecurityStamp = "010434b9-6b72-441c-b88c-b90a90494020",
+                            TwoFactorEnabled = false,
+                            UserName = "Tech-hakan"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Course", b =>
                 {
-                    b.Property<Guid>("CourseId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
@@ -111,99 +187,163 @@ namespace Companies.Infractructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("date");
 
-                    b.HasKey("CourseId");
+                    b.HasKey("Id");
 
-                    b.ToTable("Courses");
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Course", (string)null);
 
                     b.HasData(
                         new
                         {
-                            CourseId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            Description = "Grunder",
+                            Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            Description = "Basics in Machine Learning",
                             EndDate = new DateTime(2025, 12, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Intro to CS",
+                            Name = "Machine Learning 1",
                             StartDate = new DateTime(2025, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            CourseId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            Description = "Relationsmod.",
+                            Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+                            Description = "Basics in Python.",
                             EndDate = new DateTime(2025, 12, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Databaser & SQL",
+                            Name = "Python 1",
                             StartDate = new DateTime(2025, 9, 15, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            CourseId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            Description = "ASP.NET Core",
+                            Id = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+                            Description = "Basics in Github",
                             EndDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = ".NET Web API",
+                            Name = "Github",
                             StartDate = new DateTime(2025, 10, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
-            modelBuilder.Entity("Domain.Models.Entities.User", b =>
+            modelBuilder.Entity("Domain.Models.Entities.Document", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Email")
+                    b.Property<Guid>("ActivityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ModuleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FirstName")
+                    b.Property<string>("Path")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("TimeStamp")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("UserName")
+                    b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.HasIndex("ActivityId");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            Email = "ada@example.com",
-                            FirstName = "Ada",
-                            LastName = "Lovelace",
-                            UserName = "ada"
-                        },
-                        new
-                        {
-                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            Email = "alan@example.com",
-                            FirstName = "Alan",
-                            LastName = "Turing",
-                            UserName = "alan"
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            Email = "grace@example.com",
-                            FirstName = "Grace",
-                            LastName = "Hopper",
-                            UserName = "grace"
-                        });
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("ModuleId");
+
+                    b.HasIndex("Path")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Document", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.LMSActivity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ActivityTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ModuleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActivityTypeId");
+
+                    b.HasIndex("ModuleId");
+
+                    b.ToTable("Activity", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.Module", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("Module", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.UserCourse", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uniqueidentifier");
@@ -212,32 +352,32 @@ namespace Companies.Infractructure.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("UserCourses");
+                    b.ToTable("UserCourse", (string)null);
 
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            UserId = "11111111-1111-1111-1111-111111111111",
                             CourseId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
                         },
                         new
                         {
-                            UserId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            UserId = "11111111-1111-1111-1111-111111111111",
                             CourseId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         },
                         new
                         {
-                            UserId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            UserId = "22222222-2222-2222-2222-222222222222",
                             CourseId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
                         },
                         new
                         {
-                            UserId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            UserId = "22222222-2222-2222-2222-222222222222",
                             CourseId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc")
                         },
                         new
                         {
-                            UserId = new Guid("33333333-3333-3333-3333-333333333333"),
+                            UserId = "33333333-3333-3333-3333-333333333333",
                             CourseId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         });
                 });
@@ -375,19 +515,88 @@ namespace Companies.Infractructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Models.Entities.UserCourse", b =>
+            modelBuilder.Entity("Domain.Models.Entities.Document", b =>
                 {
-                    b.HasOne("Domain.Models.Entities.Course", null)
-                        .WithMany()
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.HasOne("Domain.Models.Entities.LMSActivity", "Activity")
+                        .WithMany("Documents")
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Models.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.HasOne("Domain.Models.Entities.Course", "Course")
+                        .WithMany("Documents")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("Domain.Models.Entities.Module", "Module")
+                        .WithMany("Documents")
+                        .HasForeignKey("ModuleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Entities.ApplicationUser", "User")
+                        .WithMany("Documents")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Activity");
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Module");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.LMSActivity", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.ActivityType", "ActivityType")
+                        .WithMany("LMSActivities")
+                        .HasForeignKey("ActivityTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Entities.Module", "Module")
+                        .WithMany("LMSActivities")
+                        .HasForeignKey("ModuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ActivityType");
+
+                    b.Navigation("Module");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.Module", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Course", "Course")
+                        .WithMany("Modules")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.UserCourse", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Course", "Course")
+                        .WithMany("UserCourses")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Entities.ApplicationUser", "User")
+                        .WithMany("UserCourses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -439,6 +648,39 @@ namespace Companies.Infractructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.ActivityType", b =>
+                {
+                    b.Navigation("LMSActivities");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.ApplicationUser", b =>
+                {
+                    b.Navigation("Documents");
+
+                    b.Navigation("UserCourses");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.Course", b =>
+                {
+                    b.Navigation("Documents");
+
+                    b.Navigation("Modules");
+
+                    b.Navigation("UserCourses");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.LMSActivity", b =>
+                {
+                    b.Navigation("Documents");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.Module", b =>
+                {
+                    b.Navigation("Documents");
+
+                    b.Navigation("LMSActivities");
                 });
 #pragma warning restore 612, 618
         }

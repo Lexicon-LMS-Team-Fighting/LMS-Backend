@@ -14,15 +14,6 @@ public class UserCourseConfiguration : IEntityTypeConfiguration<UserCourse>
 
         builder.HasKey(x => new { x.UserId, x.CourseId });
 
-        //builder.HasOne<ApplicationUser>()
-        //    .WithMany()
-        //    .HasForeignKey(x => x.UserId)
-        //    .OnDelete(DeleteBehavior.Restrict);
-
-        //builder.HasOne<Course>()
-        //    .WithMany()
-        //    .HasForeignKey(x => x.CourseId)
-        //    .OnDelete(DeleteBehavior.Restrict);
 
         var u1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
         var u2 = Guid.Parse("22222222-2222-2222-2222-222222222222");
