@@ -1,10 +1,7 @@
 ﻿using Bogus;
-using Domain.Models.Entities;
 using LMS.Infractructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Threading;
 
 namespace LMS.API.Services;
 
