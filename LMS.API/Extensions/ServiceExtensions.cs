@@ -1,4 +1,5 @@
-﻿using LMS.Infractructure.Data;
+﻿using LMS.API.Filters;
+using LMS.Infractructure.Data;
 using LMS.Infractructure.Repositories;
 using LMS.Presentation;
 using LMS.Services;
@@ -67,10 +68,20 @@ public static class ServiceExtensions
         {
             opt.ReturnHttpNotAcceptable = true;
             opt.Filters.Add(new ProducesAttribute("application/json"));
-
+            opt.Filters.Add<ValidationFilter>();
         })
-                .AddNewtonsoftJson()
-                .AddApplicationPart(typeof(AssemblyReference).Assembly);
+            .AddNewtonsoftJson()
+            .AddApplicationPart(typeof(AssemblyReference).Assembly);
+    }
+
+    public static void ConfigureValidationFilter(this IServiceCollection services)
+    {
+        // Register ValidationFilter dependencies and suppress default model state invalid filter
+        // so that our custom ValidationFilter handles validation errors consistently.
+        services.Configure<ApiBehaviorOptions>(options =>
+        {
+            options.SuppressModelStateInvalidFilter = true;
+        });
     }
 
     public static void ConfigureSql(this IServiceCollection services, IConfiguration configuration)
@@ -88,7 +99,14 @@ public static class ServiceExtensions
     {
         services.AddScoped<IServiceManager, ServiceManager>();
 
+		// ToDo: TestService injection is here for testing purposes only, should be removed when no longer needed.
+		services.AddScoped<ITestService, TestService>();
+        services.AddScoped(provider => new Lazy<ITestService>(() => provider.GetRequiredService<ITestService>()));
+
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped(provider => new Lazy<IAuthService>(() => provider.GetRequiredService<IAuthService>()));
-    }
+
+		services.AddScoped<IUserService, UserService>();
+		services.AddScoped(provider => new Lazy<IUserService>(() => provider.GetRequiredService<IUserService>()));
+	}
 }
