@@ -8,6 +8,21 @@ namespace Service.Contracts;
 /// </summary>
 public interface ICourseService
 {
+	/// <summary>
+	/// Retrieves a specific course by its unique identifier.
+	/// </summary>
+	/// <param name="courseId">The unique identifier of the course.</param>
+	/// <returns>A <see cref="CourseDto"/> representing the requested course.</returns>
+	/// <exception cref="NotFoundException">
+	/// Thrown when no course is found with the given <paramref name="courseId"/>.
+	/// </exception>
 	Task<CourseDto> GetCourseAsync(Guid courseId);
+
+	/// <summary>
+	/// Retrieves all courses from the data source.
+	/// </summary>
+	/// <returns>
+	/// A collection of <see cref="CourseDto"/> objects representing all users.
+	/// </returns>
 	Task<IEnumerable<CourseDto>> GetCoursesAsync();
 }
