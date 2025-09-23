@@ -22,9 +22,6 @@ namespace LMS.API.Extensions
         /// A <see cref="PaginatedResult{T}"/> containing the items for the current page and metadata
         /// about the pagination state (e.g., total items, total pages, current page, etc.).
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown if the <paramref name="source"/> or <paramref name="pagingParameters"/> is null.
-        /// </exception>
         public static PaginatedResult<T> ToPaginatedResult<T>(this IQueryable<T> source, IPagingParameters pagingParameters)
         {
             var totalItems = source.Count();
