@@ -27,13 +27,9 @@ namespace LMS.API.Extensions
         /// </exception>
         public static PaginatedResult<T> ToPaginatedResult<T>(this IQueryable<T> source, IPagingParameters pagingParameters)
         {
-            if (source == null) throw new ArgumentNullException(nameof(source), "The data source cannot be null.");
-            if (pagingParameters == null) throw new ArgumentNullException(nameof(pagingParameters), "The pagination parameters cannot be null.");
-
-            // Calculate the total number of items in the data source
             var totalItems = source.Count();
 
-            // Retrieve the items for the current page based on the page number and page size
+            // Retrieve the items for the current page
             var items = source
                 .Skip((pagingParameters.PageNumber - 1) * pagingParameters.PageSize)
                 .Take(pagingParameters.PageSize)
