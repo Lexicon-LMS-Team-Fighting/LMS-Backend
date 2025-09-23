@@ -3,9 +3,14 @@
 public interface IUnitOfWork
 {
 	/// <summary>
-	/// Gets the repository for handling <see cref="Models.Entities.User"/> entities.
+	/// Gets the repository for handling <see cref="Models.Entities.ApplicationUser"/> entities.
 	/// </summary>
 	IUserRepository User { get; }
+	
+	/// <summary>
+	/// Gets the repository for handling <see cref="Models.Entities.Course"/> entities.
+	/// </summary>
+	ICourseRepository Course { get; }
 
 	/// <summary>
 	/// Persists all changes made through the repositories in a single transaction.
