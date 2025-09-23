@@ -59,6 +59,6 @@ public class CourseController: ControllerBase
 	)]
 	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CourseDto>))]
 	public async Task<ActionResult<IEnumerable<UserDto>>> GetCourses() =>
-		Ok(await _serviceManager.UserService.GetUsersAsync());
+		Ok(await _serviceManager.CourseService.GetCoursesAsync());
 
 }
