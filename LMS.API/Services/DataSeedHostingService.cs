@@ -62,11 +62,14 @@ public class DataSeedHostingService : IHostedService
         using var scope = serviceProvider.CreateScope();
 
         var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
-        if (!env.IsDevelopment()) return; // Only seed data in development environment
 
         context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+		if (!env.IsDevelopment()) return; // Only seed data in development environment
+        if (await context.Users.AnyAsync(cancellationToken)) return;  // Only seed data if no users exist 
+
 
         ArgumentNullException.ThrowIfNull(roleManager, nameof(roleManager));
         ArgumentNullException.ThrowIfNull(userManager, nameof(userManager));
