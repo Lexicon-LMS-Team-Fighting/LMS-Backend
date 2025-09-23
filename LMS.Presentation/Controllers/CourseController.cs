@@ -39,23 +39,26 @@ public class CourseController: ControllerBase
 		Summary = "Get specified course by ID",
 		Description = "Retrieves course details by their unique GUID identifier."
 	)]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CourseDto>))]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<ActionResult<CourseDto>> GetCourse(Guid guid) =>
 		Ok(await _serviceManager.CourseService.GetCourseAsync(guid));
-	
-	
 
-	///// <summary>Retrieves all users.</summary>
-	///// <returns>
-	///// An <see cref="ActionResult{T}"/> containing a collection of <see cref="UserDto"/> objects.
-	///// </returns>
-	///// <response code="200">Returns the list of users (empty if none exist).</response>
-	//[HttpGet]
-	//[SwaggerOperation(
-	//	Summary = "Get all users",
-	//	Description = "Retrieves a list of all users in the system."
-	//)]
-	//[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDto>))]
-	//public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers() => 
-	//	Ok(await _serviceManager.UserService.GetUsersAsync());
-	
+
+
+	/// <summary>Retrieves all courses.</summary>
+	/// <returns>
+	/// An <see cref="ActionResult{T}"/> containing a collection of <see cref="CourseDto"/> objects.
+	/// </returns>
+	/// <response code="200">Returns the list of users (empty if none exist).</response>
+	[HttpGet]
+	[SwaggerOperation(
+		Summary = "Get all Courses",
+		Description = "Retrieves a list of all Courses in the system."
+	)]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CourseDto>))]
+	public async Task<ActionResult<IEnumerable<UserDto>>> GetCourses() =>
+		Ok(await _serviceManager.UserService.GetUsersAsync());
+
 }
