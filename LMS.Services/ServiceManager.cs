@@ -7,17 +7,20 @@ public class ServiceManager : IServiceManager
 
     // ToDo: TestService related is to be removed when no longer needed.
     private readonly Lazy<ITestService> _testService;
+	private Lazy<IAuthService> _authService;
+	private readonly Lazy<IUserService> _userService;
+    
     public ITestService TestService => _testService.Value;
+    public IAuthService AuthService => _authService.Value;
+    public IUserService UserService => _userService.Value;
 
-
-	private Lazy<IAuthService> authService;
-    public IAuthService AuthService => authService.Value;
-
-    public ServiceManager(
+	public ServiceManager(
         Lazy<ITestService> testService,
-        Lazy<IAuthService> authService)
+        Lazy<IAuthService> authService,
+        Lazy<IUserService> userService)
     {
-        this.authService = authService;
         _testService = testService;
+        _authService = authService;
+        _userService = userService;
     }
 }
