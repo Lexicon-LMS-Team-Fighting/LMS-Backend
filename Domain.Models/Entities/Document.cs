@@ -18,9 +18,9 @@ public class Document
 {
 	public Guid Id { get; set; }
 	public string UserId { get; set; } = null!;
-	public Guid CourseId { get; set; }
-	public Guid ModuleId { get; set; }
-	public Guid ActivityId { get; set; }
+	public Guid? CourseId { get; set; }
+	public Guid? ModuleId { get; set; }
+	public Guid? ActivityId { get; set; }
 	public string Path { get; set; } = string.Empty;
 	public string Name { get; set; } = string.Empty;
 	public string? Description { get; set; }

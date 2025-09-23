@@ -1,9 +1,18 @@
 ﻿using Bogus;
+using Domain.Models.Entities;
 using LMS.Infractructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Threading;
 
 namespace LMS.API.Services;
+
+/// <summary>
+/// A hosted service responsible for seeding the database with initial data.
+/// This service is executed when the application starts in a development environment.
+/// It ensures that the database is populated with roles, users, courses, modules, activities, and other related data.
+/// </summary>
 
 //Add in secret.json
 //{
@@ -11,14 +20,30 @@ namespace LMS.API.Services;
 //}
 public class DataSeedHostingService : IHostedService
 {
+    // Constants for seeding data
+    private const int StudentsCount = 30; // Number of students to generate
+    private const int CoursesCount = 10; // Number of courses to generate
+    private const int MinModulesPerCourse = 1; // Minimum number of modules per course. An exact number is randomly chosen between Min and Max
+    private const int MaxModulesPerCourse = 5; // Maximum number of modules per course. An exact number is randomly chosen between Min and Max
+    private const int MinActivitiesPerModule = 1; // Minimum number of activities per module. An exact number is randomly chosen between Min and Max
+    private const int MaxActivitiesPerModule = 10; // Maximum number of activities per module. An exact number is randomly chosen between Min and Max
+    private const int DocumentsCount = 50; // Number of documents to generate
+    private const string TeacherRole = "Teacher"; // Role name for teachers
+    private const string StudentRole = "Student"; // Role name for students
+
     private readonly IServiceProvider serviceProvider;
     private readonly IConfiguration configuration;
     private readonly ILogger<DataSeedHostingService> logger;
     private UserManager<ApplicationUser> userManager = null!;
     private RoleManager<IdentityRole> roleManager = null!;
-    private const string TeacherRole = "Teacher";
-    private const string StudentRole = "Student";
+    private ApplicationDbContext context = null!;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DataSeedHostingService"/> class.
+    /// </summary>
+    /// <param name="serviceProvider">The service provider for resolving scoped services.</param>
+    /// <param name="configuration">The application configuration for accessing settings.</param>
+    /// <param name="logger">The logger for logging information and errors.</param>
     public DataSeedHostingService(IServiceProvider serviceProvider, IConfiguration configuration, ILogger<DataSeedHostingService> logger)
     {
         this.serviceProvider = serviceProvider;
@@ -26,16 +51,18 @@ public class DataSeedHostingService : IHostedService
         this.logger = logger;
     }
 
+    /// <summary>
+    /// Starts the data seeding process when the application starts.
+    /// </summary>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         using var scope = serviceProvider.CreateScope();
 
         var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
-        if (!env.IsDevelopment()) return;
+        if (!env.IsDevelopment()) return; // Only seed data in development environment
 
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        if (await context.Users.AnyAsync(cancellationToken)) return;
-
+        context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
@@ -44,18 +71,64 @@ public class DataSeedHostingService : IHostedService
 
         try
         {
-            await AddRolesAsync([TeacherRole, StudentRole]);
-            await AddDemoUsersAsync();
-            await AddUsersAsync(20);
+            // Uncomment to clear the database and apply migrations
+            //await ClearDatabaseAsync(cancellationToken);
+
+            // Populate the database with initial data
+            await PopulateDatabase(cancellationToken);
+
             logger.LogInformation("Seed complete");
         }
         catch (Exception ex)
         {
-            logger.LogError($"Data seed fail with error: {ex.Message}");
+            logger.LogError($"Data seed failed with error: {ex.Message}");
             throw;
         }
     }
 
+    /// <summary>
+    /// Clears the database by deleting all data and applying migrations.
+    /// </summary>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    private async Task ClearDatabaseAsync(CancellationToken cancellationToken)
+    {
+        if (await context.Database.EnsureDeletedAsync(cancellationToken))
+        {
+            logger.LogInformation("Database has been deleted.");
+        }
+        else
+        {
+            logger.LogInformation("Database does not exist or could not be deleted.");
+        }
+
+        await context.Database.MigrateAsync(cancellationToken);
+        logger.LogInformation("Database has been recreated and migrations applied.");
+    }
+
+    /// <summary>
+    /// Populates the database with roles, users, courses, modules, activities, and other related data.
+    /// </summary>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    private async Task PopulateDatabase(CancellationToken cancellationToken)
+    {
+        await AddRolesAsync([TeacherRole, StudentRole]);
+        await AddDemoUsersAsync(cancellationToken);
+
+        var courses = await AddCoursesAsync(cancellationToken);
+        var modules = await AddModulesAsync(courses, cancellationToken);
+        var activityTypes = await AddActivityTypesAsync(cancellationToken);
+        var activities = await AddLMSActivitiesAsync(modules, activityTypes, cancellationToken);
+        var students = await AddStudentsAsync(cancellationToken);
+        await AddEnrollmentsAsync(students, courses, cancellationToken);
+        await AddDocumentsAsync(students, courses, modules, activities, cancellationToken);
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Adds roles to the database if they do not already exist.
+    /// </summary>
+    /// <param name="rolenames">An array of role names to add.</param>
     private async Task AddRolesAsync(string[] rolenames)
     {
         foreach (string rolename in rolenames)
@@ -67,21 +140,29 @@ public class DataSeedHostingService : IHostedService
             if (!res.Succeeded) throw new Exception(string.Join("\n", res.Errors));
         }
     }
-    private async Task AddDemoUsersAsync()
+
+    /// <summary>
+    /// Adds demo users (teacher and student) to the database.
+    /// </summary>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    private async Task AddDemoUsersAsync(CancellationToken cancellationToken)
     {
+        if (await context.Users.AnyAsync(cancellationToken))
+            throw new Exception("Users already exist in the database.");
+
         var teacher = new ApplicationUser
         {
             UserName = "teacher@test.com",
             Email = "teacher@test.com"
         };
-        
+
         var student = new ApplicationUser
         {
             UserName = "student@test.com",
             Email = "student@test.com"
         };
 
-        await AddUserToDb([teacher, student]);
+        await AddUserToDbAsync([teacher, student]);
 
         var teacherRoleResult = await userManager.AddToRoleAsync(teacher, TeacherRole);
         if (!teacherRoleResult.Succeeded) throw new Exception(string.Join("\n", teacherRoleResult.Errors));
@@ -90,20 +171,11 @@ public class DataSeedHostingService : IHostedService
         if (!studentRoleResult.Succeeded) throw new Exception(string.Join("\n", studentRoleResult.Errors));
     }
 
-    private async Task AddUsersAsync(int nrOfUsers)
-    {
-        var faker = new Faker<ApplicationUser>("sv").Rules((f, e) =>
-        {
-            e.FirstName = f.Name.FirstName();
-            e.LastName = f.Name.LastName();
-            e.Email = f.Person.Email;
-            e.UserName = f.Person.Email;
-        });
-
-        await AddUserToDb(faker.Generate(nrOfUsers));
-    }
-
-    private async Task AddUserToDb(IEnumerable<ApplicationUser> users)
+    /// <summary>
+    /// Adds users to the database with a default password.
+    /// </summary>
+    /// <param name="users">A collection of users to add.</param>
+    private async Task AddUserToDbAsync(IEnumerable<ApplicationUser> users)
     {
         var passWord = configuration["password"];
         ArgumentNullException.ThrowIfNull(passWord, nameof(passWord));
@@ -114,6 +186,236 @@ public class DataSeedHostingService : IHostedService
             if (!result.Succeeded) throw new Exception(string.Join("\n", result.Errors));
         }
     }
-    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
+    /// <summary>
+    /// Adds courses to the database.
+    /// </summary>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    private async Task<IEnumerable<Course>> AddCoursesAsync(CancellationToken cancellationToken)
+    {
+        if (await context.Courses.AnyAsync(cancellationToken))
+            throw new Exception("Courses already exist in the database.");
+
+        var faker = new Faker<Course>("sv").Rules((f, e) =>
+        {
+            e.Id = Guid.NewGuid();
+            e.Name = f.Company.CatchPhrase();
+            e.Description = f.Lorem.Paragraph();
+            e.StartDate = f.Date.Past(1);
+            e.EndDate = f.Date.Future(1, e.StartDate);
+        });
+
+        var courses = faker.Generate(CoursesCount);
+
+        await context.Courses.AddRangeAsync(courses, cancellationToken);
+
+        return courses;
+    }
+
+    /// <summary>
+    /// Adds modules to the database for the given courses.
+    /// </summary>
+    /// <param name="courses">The courses to add modules to.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    private async Task<IEnumerable<Module>> AddModulesAsync(IEnumerable<Course> courses, CancellationToken cancellationToken)
+    {
+        if (!courses.Any())
+            throw new Exception("No courses available to add modules to.");
+
+        var modules = new List<Module>();
+
+        foreach (var course in courses)
+        {
+            var faker = new Faker<Module>("sv").Rules((f, e) =>
+            {
+                e.Id = Guid.NewGuid();
+                e.CourseId = course.Id;
+                e.Name = f.Company.CatchPhrase();
+                e.Description = f.Lorem.Paragraph();
+                e.StartDate = f.Date.Between(course.StartDate, course.EndDate);
+                e.EndDate = f.Date.Between(e.StartDate, course.EndDate);
+            });
+
+            var modulesCount = new Random().Next(MinModulesPerCourse, MaxModulesPerCourse);
+            var modulesInCourse = faker.Generate(modulesCount);
+
+            modules.AddRange(modulesInCourse);
+        }
+
+        await context.Modules.AddRangeAsync(modules, cancellationToken);
+
+        return modules;
+    }
+
+    /// <summary>
+    /// Adds predefined activity types to the database.
+    /// </summary>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    private async Task<IEnumerable<ActivityType>> AddActivityTypesAsync(CancellationToken cancellationToken)
+    {
+        if (await context.ActivityTypes.AnyAsync(cancellationToken))
+            throw new Exception("Activity types already exist in the database.");
+
+        var activityTypes = new[]
+        {
+           "Föreläsning",
+           "Seminarium",
+           "Laboration",
+           "Grupparbete",
+           "Inlämningsuppgift",
+           "Prov",
+           "Workshop",
+           "Handledning",
+           "Självstudier",
+           "Examination"
+        };
+
+        var activityTypeEntities = activityTypes.Select(name => new ActivityType
+        {
+            Id = Guid.NewGuid(),
+            Name = name
+        }).ToList();
+
+        await context.ActivityTypes.AddRangeAsync(activityTypeEntities, cancellationToken);
+
+        return activityTypeEntities;
+    }
+
+    /// <summary>
+    /// Adds LMS activities to the database for the given modules and activity types.
+    /// </summary>
+    /// <param name="modules">The modules to which activities will be added.</param>
+    /// <param name="activityTypes">The predefined activity types to assign to activities.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A collection of the added LMS activities.</returns>
+    /// <exception cref="Exception">Thrown if no modules are available to add activities to.</exception>
+    private async Task<IEnumerable<LMSActivity>> AddLMSActivitiesAsync(IEnumerable<Module> modules, IEnumerable<ActivityType> activityTypes, CancellationToken cancellationToken)
+    {
+        if (!modules.Any())
+            throw new Exception("No modules available to add activities to.");
+
+        var activities = new List<LMSActivity>();
+
+        foreach (var module in modules)
+        {
+            var faker = new Faker<LMSActivity>("sv").Rules((f, e) =>
+            {
+                e.Id = Guid.NewGuid();
+                e.ModuleId = module.Id;
+                e.ActivityTypeId = f.PickRandom(activityTypes).Id;
+                e.Name = f.Company.CatchPhrase();
+                e.Description = f.Lorem.Paragraph();
+                e.StartDate = f.Date.Between(module.StartDate, module.EndDate);
+                e.EndDate = f.Date.Between(e.StartDate, module.EndDate);
+            });
+
+            var activitiesCount = new Random().Next(MinActivitiesPerModule, MaxActivitiesPerModule);
+            var activitiesInModule = faker.Generate(activitiesCount);
+
+            activities.AddRange(activitiesInModule);
+        }
+
+        await context.LMSActivities.AddRangeAsync(activities, cancellationToken);
+
+        return activities;
+    }
+
+    /// <summary>
+    /// Adds students to the database.
+    /// </summary>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A collection of the added students.</returns>
+    /// <exception cref="Exception">Thrown if the database already contains seeded data.</exception>
+    private async Task<IEnumerable<ApplicationUser>> AddStudentsAsync(CancellationToken cancellationToken)
+    {
+        var faker = new Faker<ApplicationUser>("sv").Rules((f, e) =>
+        {
+            e.Id = Guid.NewGuid().ToString();
+            e.FirstName = f.Name.FirstName();
+            e.LastName = f.Name.LastName();
+            e.Email = f.Person.Email;
+            e.UserName = f.Person.UserName;
+        });
+
+        var students = faker.Generate(StudentsCount);
+        await AddUserToDbAsync(students);
+
+        foreach (var student in students)
+        {
+            var studentRoleResult = await userManager.AddToRoleAsync(student, StudentRole);
+            if (!studentRoleResult.Succeeded) throw new Exception(string.Join("\n", studentRoleResult.Errors));
+        }
+
+        return students;
+    }
+
+    /// <summary>
+    /// Enrolls students into courses.
+    /// </summary>
+    /// <param name="students">The students to enroll.</param>
+    /// <param name="courses">The courses to enroll students into.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <exception cref="Exception">Thrown if students or courses are missing for enrollment.</exception>
+    private async Task AddEnrollmentsAsync(IEnumerable<ApplicationUser> students, IEnumerable<Course> courses, CancellationToken cancellationToken)
+    {
+        if (!students.Any() || !courses.Any())
+            throw new Exception("Students or courses are missing for enrollment.");
+
+        var enrollments = new List<UserCourse>();
+        var coursesList = courses.ToList();
+
+        foreach (var student in students)
+        {
+            enrollments.Add(new UserCourse
+            {
+                UserId = student.Id,
+                CourseId = coursesList[new Random().Next(coursesList.Count)].Id, // Use the indexed list
+            });
+        }
+
+        await context.AddRangeAsync(enrollments, cancellationToken);
+    }
+
+    /// <summary>
+    /// Adds documents to the database, associating them with students, courses, modules, and activities.
+    /// </summary>
+    /// <param name="students">The students to associate with documents.</param>
+    /// <param name="courses">The courses to associate with documents.</param>
+    /// <param name="modules">The modules to associate with documents.</param>
+    /// <param name="activities">The activities to associate with documents.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <exception cref="Exception">Thrown if documents already exist in the database or any required data is missing.</exception>
+    private async Task AddDocumentsAsync(IEnumerable<ApplicationUser> students, IEnumerable<Course> courses, IEnumerable<Module> modules, IEnumerable<LMSActivity> activities, CancellationToken cancellationToken)
+    {
+        if (await context.Documents.AnyAsync(cancellationToken))
+            throw new Exception("Documents already exist in the database.");
+
+        if (!students.Any() || !courses.Any() || !modules.Any())
+            throw new Exception("Insufficient data to create documents.");
+
+        var faker = new Faker<Document>("sv").Rules((f, e) =>
+        {
+            e.Id = Guid.NewGuid();
+            e.UserId = f.PickRandom(students).Id;
+
+            // Randomly decide which properties to assign, ensuring at least one is non-null
+            var assignOptions = new[] { "Course", "Module", "Activity" };
+            var selectedOptions = f.Random.ListItems(assignOptions, f.Random.Int(1, assignOptions.Length));
+
+            e.CourseId = selectedOptions.Contains("Course") ? f.PickRandom(courses).Id : null;
+            e.ModuleId = selectedOptions.Contains("Module") ? f.PickRandom(modules).Id : null;
+            e.ActivityId = selectedOptions.Contains("Activity") ? f.PickRandom(activities).Id : null;
+
+            e.Path = f.System.FilePath();
+            e.Name = f.System.FileName();
+            e.Description = f.Lorem.Sentence();
+            e.TimeStamp = f.Date.Recent(30);
+        });
+
+        var documents = faker.Generate(DocumentsCount);
+
+        await context.Documents.AddRangeAsync(documents, cancellationToken);
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }
