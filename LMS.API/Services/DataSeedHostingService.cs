@@ -18,6 +18,7 @@ namespace LMS.API.Services;
 public class DataSeedHostingService : IHostedService
 {
     // Constants for seeding data
+    private const int TeachersCount = 5; // Number of teachers to generate
     private const int StudentsCount = 30; // Number of students to generate
     private const int CoursesCount = 10; // Number of courses to generate
     private const int MinModulesPerCourse = 1; // Minimum number of modules per course. An exact number is randomly chosen between Min and Max
@@ -25,6 +26,10 @@ public class DataSeedHostingService : IHostedService
     private const int MinActivitiesPerModule = 1; // Minimum number of activities per module. An exact number is randomly chosen between Min and Max
     private const int MaxActivitiesPerModule = 10; // Maximum number of activities per module. An exact number is randomly chosen between Min and Max
     private const int DocumentsCount = 50; // Number of documents to generate
+    private const string DefaultTeacherUserName = "Teacher"; // Default username for teachers
+    private const string DefaultStudentUserName = "Student"; // Default username for students
+    private const string DefaultTeacherEmail = "teacher@test.com"; // Default email for teachers
+    private const string DefaultStudentEmail = "student@test.com"; // Default email for students
     private const string TeacherRole = "Teacher"; // Role name for teachers
     private const string StudentRole = "Student"; // Role name for students
 
@@ -72,7 +77,7 @@ public class DataSeedHostingService : IHostedService
             //await ClearDatabaseAsync(cancellationToken);
 
             // Populate the database with initial data
-            await PopulateDatabase(cancellationToken);
+            await SeedDatabaseAsync(cancellationToken);
 
             logger.LogInformation("Seed complete");
         }
@@ -106,16 +111,15 @@ public class DataSeedHostingService : IHostedService
     /// Populates the database with roles, users, courses, modules, activities, and other related data.
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    private async Task PopulateDatabase(CancellationToken cancellationToken)
+    private async Task SeedDatabaseAsync(CancellationToken cancellationToken)
     {
         await AddRolesAsync([TeacherRole, StudentRole]);
-        await AddDemoUsersAsync(cancellationToken);
-
         var courses = await AddCoursesAsync(cancellationToken);
         var modules = await AddModulesAsync(courses, cancellationToken);
         var activityTypes = await AddActivityTypesAsync(cancellationToken);
         var activities = await AddLMSActivitiesAsync(modules, activityTypes, cancellationToken);
-        var students = await AddStudentsAsync(cancellationToken);
+        await AddTeachersAsync();
+        var students = await AddStudentsAsync();
         await AddEnrollmentsAsync(students, courses, cancellationToken);
         await AddDocumentsAsync(students, courses, modules, activities, cancellationToken);
 
@@ -139,53 +143,7 @@ public class DataSeedHostingService : IHostedService
     }
 
     /// <summary>
-    /// Adds demo users (teacher and student) to the database.
-    /// </summary>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    private async Task AddDemoUsersAsync(CancellationToken cancellationToken)
-    {
-        if (await context.Users.AnyAsync(cancellationToken))
-            throw new Exception("Users already exist in the database.");
-
-        var teacher = new ApplicationUser
-        {
-            UserName = "teacher@test.com",
-            Email = "teacher@test.com"
-        };
-
-        var student = new ApplicationUser
-        {
-            UserName = "student@test.com",
-            Email = "student@test.com"
-        };
-
-        await AddUserToDbAsync([teacher, student]);
-
-        var teacherRoleResult = await userManager.AddToRoleAsync(teacher, TeacherRole);
-        if (!teacherRoleResult.Succeeded) throw new Exception(string.Join("\n", teacherRoleResult.Errors));
-
-        var studentRoleResult = await userManager.AddToRoleAsync(student, StudentRole);
-        if (!studentRoleResult.Succeeded) throw new Exception(string.Join("\n", studentRoleResult.Errors));
-    }
-
-    /// <summary>
-    /// Adds users to the database with a default password.
-    /// </summary>
-    /// <param name="users">A collection of users to add.</param>
-    private async Task AddUserToDbAsync(IEnumerable<ApplicationUser> users)
-    {
-        var passWord = configuration["password"];
-        ArgumentNullException.ThrowIfNull(passWord, nameof(passWord));
-
-        foreach (var user in users)
-        {
-            var result = await userManager.CreateAsync(user, passWord);
-            if (!result.Succeeded) throw new Exception(string.Join("\n", result.Errors));
-        }
-    }
-
-    /// <summary>
-    /// Adds courses to the database.
+    /// Generates and adds courses to the database.
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     private async Task<IEnumerable<Course>> AddCoursesAsync(CancellationToken cancellationToken)
@@ -210,7 +168,7 @@ public class DataSeedHostingService : IHostedService
     }
 
     /// <summary>
-    /// Adds modules to the database for the given courses.
+    /// Generates and adds modules to the database for the given courses.
     /// </summary>
     /// <param name="courses">The courses to add modules to.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
@@ -279,7 +237,7 @@ public class DataSeedHostingService : IHostedService
     }
 
     /// <summary>
-    /// Adds LMS activities to the database for the given modules and activity types.
+    /// Generates and adds LMS activities to the database for the given modules and activity types.
     /// </summary>
     /// <param name="modules">The modules to which activities will be added.</param>
     /// <param name="activityTypes">The predefined activity types to assign to activities.</param>
@@ -318,13 +276,52 @@ public class DataSeedHostingService : IHostedService
     }
 
     /// <summary>
-    /// Adds students to the database.
+    /// Generates and adds students to the database.
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A collection of the added students.</returns>
-    /// <exception cref="Exception">Thrown if the database already contains seeded data.</exception>
-    private async Task<IEnumerable<ApplicationUser>> AddStudentsAsync(CancellationToken cancellationToken)
+    private async Task<IEnumerable<ApplicationUser>> AddStudentsAsync()
     {
+        var students = await AddUsersAsync(StudentsCount, StudentRole);
+
+        // Set one student to have the default username and email
+        var randomStudent = students.ElementAt(new Random().Next(students.Count()));
+        randomStudent.UserName = DefaultStudentUserName;
+        randomStudent.Email = DefaultStudentEmail;
+
+        return students;
+    }
+
+    /// <summary>
+    /// Generates and adds teachers to the database.
+    /// </summary>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A collection of the added teachers.</returns>
+    private async Task<IEnumerable<ApplicationUser>> AddTeachersAsync()
+    {
+        if (await context.Users.AnyAsync())
+            throw new Exception("Users already exist in the database.");
+
+        var teachers = await AddUsersAsync(StudentsCount, TeacherRole);
+
+        // Set one teacher to have the default username and email
+        var randomTeacher = teachers.ElementAt(new Random().Next(teachers.Count()));
+        randomTeacher.UserName = DefaultTeacherUserName;
+        randomTeacher.Email = DefaultTeacherEmail;
+
+        return teachers;
+    }
+
+    /// <summary>
+    /// Generates and adds users to the database with the specified role.
+    /// </summary>
+    /// <param name="count">The number of users to add.</param>
+    /// <param name="role">The role to assign to the users.</param>
+    private async Task<IEnumerable<ApplicationUser>> AddUsersAsync(int count, string role)
+    {
+        var password = configuration["password"];
+        ArgumentNullException.ThrowIfNull(password, nameof(password));
+
         var faker = new Faker<ApplicationUser>("sv").Rules((f, e) =>
         {
             e.Id = Guid.NewGuid().ToString();
@@ -334,16 +331,20 @@ public class DataSeedHostingService : IHostedService
             e.UserName = f.Person.UserName;
         });
 
-        var students = faker.Generate(StudentsCount);
-        await AddUserToDbAsync(students);
+        var users = faker.Generate(count);
 
-        foreach (var student in students)
+        foreach (var user in users)
         {
-            var studentRoleResult = await userManager.AddToRoleAsync(student, StudentRole);
-            if (!studentRoleResult.Succeeded) throw new Exception(string.Join("\n", studentRoleResult.Errors));
+            // Create user with password
+            var result = await userManager.CreateAsync(user, password);
+            if (!result.Succeeded) throw new Exception(string.Join("\n", result.Errors));
+
+            // Assign role to user
+            var roleResult = await userManager.AddToRoleAsync(user, role);
+            if (!roleResult.Succeeded) throw new Exception(string.Join("\n", roleResult.Errors));
         }
 
-        return students;
+        return users;
     }
 
     /// <summary>
