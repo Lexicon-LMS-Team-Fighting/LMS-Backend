@@ -16,9 +16,9 @@ public class TestController: ControllerBase
 	}
 
 	[HttpPost("test")]
-	public async Task<bool> TestMethod(string item)
+	public async Task<bool> TestMethod()
 	{
-		var result = await _serviceManager.UserService.GetUsersAsync();
+		var result = await _serviceManager.CourseService.GetCoursesAsync();
 		return true;
 	}
 }
