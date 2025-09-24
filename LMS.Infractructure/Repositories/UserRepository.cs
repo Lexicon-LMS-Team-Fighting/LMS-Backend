@@ -32,11 +32,16 @@ public class UserRepository : RepositoryBase<ApplicationUser>, IUserRepository
 	/// <inheritdoc/>
 	public async Task<ApplicationUser?> GetUserAsync(string userId, bool changeTracking) => 
 		await FindByCondition(u => u.Id.Equals(userId), changeTracking)
-				.FirstOrDefaultAsync();
+		.Include(u => u.UserCourses)
+		.ThenInclude(uc => uc.Course)
+		.FirstOrDefaultAsync();
 
 	/// <inheritdoc/>
 	public async Task<List<ApplicationUser>> GetUsersAsync(bool changeTracking) => 
-		await FindAll(changeTracking).ToListAsync();
+		await FindAll(changeTracking)
+		.Include(u => u.UserCourses)
+		.ThenInclude(uc => uc.Course)
+		.ToListAsync();
 	
 
 	// Not used yet. Parameters set to change.
