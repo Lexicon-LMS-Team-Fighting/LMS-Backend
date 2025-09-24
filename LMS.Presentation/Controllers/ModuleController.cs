@@ -43,6 +43,7 @@ namespace LMS.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModuleDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ModuleDto>> GetModule(Guid guid) =>
             Ok(await _serviceManager.ModuleService.GetByIdAsync(guid));
 
@@ -60,6 +61,7 @@ namespace LMS.Presentation.Controllers
         )]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<ModuleDto>))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<PaginatedResultDto<ModuleDto>>> GetModules([FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
             Ok(await _serviceManager.ModuleService.GetAllAsync(page, pageSize));
 
@@ -78,6 +80,7 @@ namespace LMS.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ModuleDto>> CreateModule([FromBody] CreateModuleDto module)
         {
             var createdModule = await _serviceManager.ModuleService.CreateAsync(module);
@@ -100,6 +103,7 @@ namespace LMS.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> UpdateModule(Guid guid, [FromBody] UpdateModuleDto module)
         {
             await _serviceManager.ModuleService.UpdateAsync(guid, module);
@@ -119,6 +123,7 @@ namespace LMS.Presentation.Controllers
         //[ProducesResponseType(StatusCodes.Status204NoContent)]
         //[ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         //[ProducesResponseType(StatusCodes.Status403Forbidden)]
+        //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
         //public async Task<IActionResult> DeleteModule(Guid guid)
         //{
         //    await _serviceManager.ModuleService.DeleteAsync(guid);
