@@ -1,0 +1,75 @@
+﻿using Domain.Contracts.Repositories;
+using Domain.Models.Entities;
+using LMS.Infractructure.Data;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace LMS.Infractructure.Repositories
+{
+    /// <summary>
+    /// Repository implementation for managing <see cref="Module"/> entities.
+    /// Inherits common CRUD functionality from <see cref="RepositoryBase{T}"/>.
+    /// </summary>
+    public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
+    {
+        public ModuleRepository(ApplicationDbContext context) : base(context)
+        {
+        }
+
+        /// <summary>
+        /// Retrieves a single <see cref="Module"/> entity by its unique identifier.
+        /// </summary>
+        /// <param name="moduleId">The unique identifier of the module.</param>
+        /// <param name="changeTracking">If true, enables change tracking.</param>
+        /// <returns>The module if found, otherwise null.</returns>
+        public async Task<Module?> GetAsync(Guid moduleId, bool changeTracking = false) =>
+            await FindByCondition(m => m.Id == moduleId, trackChanges: changeTracking)
+                .FirstOrDefaultAsync();
+
+        /// <summary>
+        /// Retrieves all <see cref="Module"/> entities.
+        /// </summary>
+        /// <param name="changeTracking">If true, enables change tracking.</param>
+        /// <returns>A collection of modules.</returns>
+        public async Task<IEnumerable<Module>> GetAllAsync(bool changeTracking = false) =>
+            await FindAll(trackChanges: changeTracking)
+                .ToListAsync();
+
+        /// <summary>
+        /// Retrieves all <see cref="Module"/> entities associated with a specific <see cref="Course"/>.
+        /// </summary>
+        /// <param name="courseId">The unique identifier of the course.</param>
+        /// <param name="changeTracking">If true, enables change tracking.</param>
+        /// <returns>A collection of modules.</returns>
+        public async Task<IEnumerable<Module>> GetByCourseIdAsync(Guid courseId, bool changeTracking = false) =>
+            await FindByCondition(m => m.CourseId == courseId, trackChanges: changeTracking)
+                .ToListAsync();
+
+        /// <summary>
+        /// Adds a new <see cref="Module"/> entity to the database.
+        /// </summary>
+        /// <param name="module">The module to add.</param>
+        /// <param name="changeTracking">If true, enables change tracking.</param>
+        public void CreateAsync(Module module) =>
+            Create(module);
+
+        /// <summary>
+        /// Updates an existing <see cref="Module"/> entity in the database.
+        /// </summary>
+        /// <param name="module">The module to update.</param>
+        /// <param name="changeTracking">If true, enables change tracking.</param>
+        public void UpdateAsync(Module module) =>
+            Update(module);
+
+        /// <summary>
+        /// Deletes a <see cref="Module"/> entity from the database.
+        /// </summary>
+        /// <param name="module">The module to delete.</param>
+        /// <param name="changeTracking">If true, enables change tracking.</param>
+        public void DeleteAsync(Module module) =>
+            Delete(module);
+    }
+}

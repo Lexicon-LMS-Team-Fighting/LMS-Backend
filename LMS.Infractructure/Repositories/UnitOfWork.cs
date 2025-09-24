@@ -13,12 +13,14 @@ public class UnitOfWork : IUnitOfWork
 
     private readonly Lazy<IUserRepository> _userRepository;
     private readonly Lazy<ICourseRepository> _courseRepository;
+    private readonly Lazy<IModuleRepository> _moduleRepository;
 
     public UnitOfWork(ApplicationDbContext context)
     {
         this.context = context ?? throw new ArgumentNullException(nameof(context));
         _userRepository = new Lazy<IUserRepository>(() => new UserRepository(context));
         _courseRepository = new Lazy<ICourseRepository>(() => new CourseRepository(context));
+        _moduleRepository = new Lazy<IModuleRepository>(() => new ModuleRepository(context));
     }
 
     /// <inheritdoc/>
@@ -26,6 +28,7 @@ public class UnitOfWork : IUnitOfWork
     
     /// <inheritdoc/>
 	public ICourseRepository Course => _courseRepository.Value;
+    public IModuleRepository Module => _moduleRepository.Value;
 
-	public async Task CompleteAsync() => await context.SaveChangesAsync();
+    public async Task CompleteAsync() => await context.SaveChangesAsync();
 }
