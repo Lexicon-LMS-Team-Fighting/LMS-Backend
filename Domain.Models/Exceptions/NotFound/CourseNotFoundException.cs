@@ -8,8 +8,8 @@ public class CourseNotFoundException : NotFoundException
     /// <summary>
     /// Initializes a new instance of the <see cref="CourseNotFoundException"/> class with a specified course ID.
     /// </summary>
-    public CourseNotFoundException(Guid courseId)
-        : base($"Course with Id '{courseId}' was not found.") { }
+    public CourseNotFoundException(Guid moduleId)
+        : base($"Course with Id '{moduleId}' was not found.") { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CourseNotFoundException"/> class with a default message.

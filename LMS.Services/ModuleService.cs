@@ -101,13 +101,13 @@ namespace LMS.Services
 
             var course = await _unitOfWork.Course.GetCourseAsync(module.CourseId);
 
-            if (course is null)
-                throw new CourseNotFoundException(module.CourseId);
+            if (course is not null)
+                throw new CourseAlreadyExistsException(module.CourseId);
 
             if (!await IsUniqueNameAsync(module.Name, module.CourseId))
                 throw new ModuleNameAlreadyExistsException(module.Name, module.CourseId);
 
-            if (module.StartDate >= module.EndDate)
+            if (module.StartDate > module.EndDate)
                 throw new InvalidDateRangeException(module.StartDate, module.EndDate);
 
             _unitOfWork.Module.Create(moduleEntity);
