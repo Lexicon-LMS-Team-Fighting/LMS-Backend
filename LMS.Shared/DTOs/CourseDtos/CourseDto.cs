@@ -1,8 +1,4 @@
-﻿using LMS.Shared.DTOs.UserCourseDtos;
-using LMS.Shared.DTOs.UserDtos;
-using System.ComponentModel.DataAnnotations;
-
-namespace LMS.Shared.DTOs.CourseDtos;
+﻿namespace LMS.Shared.DTOs.CourseDtos;
 
 /// <summary>
 /// Represents a data tranfer object (DTO) for a <see cref="Course"/>. <br />

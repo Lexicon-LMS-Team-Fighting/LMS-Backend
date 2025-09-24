@@ -1,7 +1,7 @@
 ﻿namespace Domain.Models.Entities;
 
 /// <summary>
-/// Represents the relationship between a <see cref="Course"/> and 
+/// Represents the relationship between a <see cref="Course"/> and <br />
 /// <see cref="Module"/>, <see cref="Document"/>, <see cref="UserCourse"/>. 
 /// <para>
 /// This entity has: <br />

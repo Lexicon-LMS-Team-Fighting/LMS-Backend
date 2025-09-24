@@ -1,7 +1,4 @@
-﻿using LMS.Shared.DTOs.CourseDtos;
-using LMS.Shared.DTOs.UserCourseDtos;
-
-namespace LMS.Shared.DTOs.UserDtos;
+﻿namespace LMS.Shared.DTOs.UserDtos;
 
 /// <summary>
 /// Represents a data transfer object (DTO) for a user.
