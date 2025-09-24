@@ -1,7 +1,4 @@
-﻿using Domain.Contracts.Pagination;
-using Domain.Models.Pagination;
-
-namespace LMS.API.Extensions
+﻿namespace LMS.Shared.Pagination
 {
     /// <summary>
     /// Provides extension methods for applying pagination logic to data sources.

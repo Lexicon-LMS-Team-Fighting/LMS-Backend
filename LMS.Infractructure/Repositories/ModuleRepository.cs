@@ -25,7 +25,7 @@ namespace LMS.Infractructure.Repositories
         /// <param name="moduleId">The unique identifier of the module.</param>
         /// <param name="changeTracking">If true, enables change tracking.</param>
         /// <returns>The module if found, otherwise null.</returns>
-        public async Task<Module?> GetAsync(Guid moduleId, bool changeTracking = false) =>
+        public async Task<Module?> GetByIdAsync(Guid moduleId, bool changeTracking = false) =>
             await FindByCondition(m => m.Id == moduleId, trackChanges: changeTracking)
                 .FirstOrDefaultAsync();
 
@@ -47,29 +47,5 @@ namespace LMS.Infractructure.Repositories
         public async Task<IEnumerable<Module>> GetByCourseIdAsync(Guid courseId, bool changeTracking = false) =>
             await FindByCondition(m => m.CourseId == courseId, trackChanges: changeTracking)
                 .ToListAsync();
-
-        /// <summary>
-        /// Adds a new <see cref="Module"/> entity to the database.
-        /// </summary>
-        /// <param name="module">The module to add.</param>
-        /// <param name="changeTracking">If true, enables change tracking.</param>
-        public void CreateAsync(Module module) =>
-            Create(module);
-
-        /// <summary>
-        /// Updates an existing <see cref="Module"/> entity in the database.
-        /// </summary>
-        /// <param name="module">The module to update.</param>
-        /// <param name="changeTracking">If true, enables change tracking.</param>
-        public void UpdateAsync(Module module) =>
-            Update(module);
-
-        /// <summary>
-        /// Deletes a <see cref="Module"/> entity from the database.
-        /// </summary>
-        /// <param name="module">The module to delete.</param>
-        /// <param name="changeTracking">If true, enables change tracking.</param>
-        public void DeleteAsync(Module module) =>
-            Delete(module);
     }
 }

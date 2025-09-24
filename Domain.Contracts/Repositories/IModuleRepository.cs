@@ -46,23 +46,5 @@ namespace Domain.Contracts.Repositories
         /// A task that represents the asynchronous operation. The task result contains a collection of <see cref="Module"/> entities.
         /// </returns>
         Task<IEnumerable<Module>> GetByCourseIdAsync(Guid courseId, bool changeTracking = false);
-
-        /// <summary>
-        /// Adds a new <see cref="Module"/> entity to the data source. <br/>
-        /// </summary>
-        /// <param name="module">The <see cref="Module"/> entity to add.</param>
-        void CreateAsync(Module module);
-
-        /// <summary>
-        /// Updates an existing <see cref="Module"/> entity in the data source. <br/>
-        /// </summary>
-        /// <param name="module">The <see cref="Module"/> entity to update.</param>
-        void UpdateAsync(Module module);
-
-        /// <summary>
-        /// Deletes an existing <see cref="Module"/> entity from the data source. <br/>
-        /// </summary>
-        /// <param name="module">The <see cref="Module"/> entity to delete.</param>
-        void DeleteAsync(Module module);
     }
 }
