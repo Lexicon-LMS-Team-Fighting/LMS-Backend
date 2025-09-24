@@ -123,6 +123,7 @@ namespace LMS.Services
         /// <exception cref="ModuleNotFoundException">Thrown if the module is not found.</exception>
         public async Task DeleteAsync(Guid id)
         {
+            // ToDo: Check depentent entities before delete
             var module = await _unitOfWork.Module.GetByIdAsync(id, true);
 
             if (module is null)
