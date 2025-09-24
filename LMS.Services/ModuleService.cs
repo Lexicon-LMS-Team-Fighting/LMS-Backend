@@ -110,6 +110,9 @@ namespace LMS.Services
             if (module.StartDate > module.EndDate)
                 throw new InvalidDateRangeException(module.StartDate, module.EndDate);
 
+            if (module.StartDate < course.StartDate || module.EndDate > course.EndDate)
+                throw new InvalidModuleDateRangeException();
+
             _unitOfWork.Module.Create(moduleEntity);
             await _unitOfWork.CompleteAsync();
 
@@ -148,9 +151,18 @@ namespace LMS.Services
             if (module is null)
                 throw new ModuleNotFoundException(id);
 
+            var courseId = updateDto.CourseId ?? module.CourseId;
+            var course = await _unitOfWork.Course.GetCourseAsync(courseId);
+
+            if (course is null)
+                throw new CourseNotFoundException(courseId);
+
+            if (updateDto.CourseId is not null)
+                module.CourseId = (Guid)updateDto.CourseId;
+
             if (updateDto.Name is not null)
             {
-                if (!await IsUniqueNameAsync(updateDto.Name, module.CourseId))
+                if (!await IsUniqueNameAsync(updateDto.Name, module.CourseId, module.Id))
                     throw new ModuleNameAlreadyExistsException(updateDto.Name, module.CourseId);
 
                 module.Name = updateDto.Name;
@@ -168,20 +180,32 @@ namespace LMS.Services
             if (module.StartDate > module.EndDate)
                 throw new InvalidDateRangeException(module.StartDate, module.EndDate);
 
+            if (module.StartDate < course.StartDate || module.EndDate > course.EndDate)
+                throw new InvalidModuleDateRangeException();
+
             _unitOfWork.Module.Update(module);
             await _unitOfWork.CompleteAsync();
         }
 
         /// <summary>
-        /// Checks if a module name is unique within a specific course.
+        /// Checks if a module name is unique within a specific course, excluding a specific module if provided.
         /// </summary>
-        /// <param name="title">The name of the module to check.</param>
+        /// <param name="name">The name of the module to check.</param>
         /// <param name="courseId">The unique identifier of the course.</param>
-        /// <returns><c>true</c> if the module name is unique; otherwise, <c>false</c>.</returns>
-        public async Task<bool> IsUniqueNameAsync(string title, Guid courseId)
+        /// <param name="excludedModuleId">
+        /// The unique identifier of a module to exclude from the uniqueness check (optional).
+        /// Use this parameter when updating a module to avoid conflicts with its current name.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the module name is unique within the course; otherwise, <c>false</c>.
+        /// </returns>
+        public async Task<bool> IsUniqueNameAsync(string name, Guid courseId, Guid excludedModuleId = default)
         {
             var modules = await _unitOfWork.Module.GetByCourseIdAsync(courseId);
-            return !modules.Any(m => m.Name.Equals(title, StringComparison.OrdinalIgnoreCase));
+
+            return !modules.Any(module =>
+                module.Name.Equals(name, StringComparison.OrdinalIgnoreCase) &&
+                module.Id != excludedModuleId);
         }
     }
 }

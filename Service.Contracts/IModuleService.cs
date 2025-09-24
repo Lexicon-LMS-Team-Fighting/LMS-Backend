@@ -64,7 +64,8 @@ namespace Service.Contracts
         /// </summary>
         /// <param name="title">The name of the module to check.</param>
         /// <param name="courseId">The unique identifier of the course.</param>
+        /// <param name="excludedModuleId">Optional. The unique identifier of a module to exclude from the check (useful when updating).</param>
         /// <returns><c>true</c> if the module name is unique; otherwise, <c>false</c>.</returns>
-        Task<bool> IsUniqueNameAsync(string title, Guid courseId);
+        Task<bool> IsUniqueNameAsync(string title, Guid courseId, Guid excludedModuleId = default);
     }
 }
