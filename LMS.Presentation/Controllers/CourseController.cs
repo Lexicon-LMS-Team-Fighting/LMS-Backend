@@ -1,5 +1,8 @@
 ﻿using LMS.Shared.DTOs.CourseDtos;
+using LMS.Shared.DTOs.ModuleDtos;
+using LMS.Shared.DTOs.PaginationDtos;
 using LMS.Shared.DTOs.UserDtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
@@ -61,4 +64,22 @@ public class CourseController: ControllerBase
 	public async Task<ActionResult<IEnumerable<UserDto>>> GetCourses() =>
 		Ok(await _serviceManager.CourseService.GetCoursesAsync());
 
+    /// <summary>
+    /// Retrieves a paginated list of modules for a specific course.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    /// <param name="page">The page number to retrieve (default is 1).</param>
+    /// <param name="pageSize">The number of items per page (default is 10).</param>
+    /// <returns>A paginated list of modules for the specified course.</returns>
+    [HttpGet("{courseId}/modules")]
+    [Authorize(Roles = "Teacher,Student")]
+    [SwaggerOperation(
+        Summary = "Get all modules for a specific course",
+        Description = "Retrieves all modules associated with the specified course ID."
+    )]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<ModuleDto>))]
+	[ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<PaginatedResultDto<ModuleDto>>> GetModulesByCourseId(Guid courseId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
+        Ok(await _serviceManager.ModuleService.GetAllByCourseIdAsync(courseId, page, pageSize));
 }

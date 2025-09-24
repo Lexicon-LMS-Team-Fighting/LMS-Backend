@@ -64,24 +64,6 @@ namespace LMS.Presentation.Controllers
             Ok(await _serviceManager.ModuleService.GetAllAsync(page, pageSize));
 
         /// <summary>
-        /// Retrieves a paginated list of modules for a specific course.
-        /// </summary>
-        /// <param name="courseId">The unique identifier of the course.</param>
-        /// <param name="page">The page number to retrieve (default is 1).</param>
-        /// <param name="pageSize">The number of items per page (default is 10).</param>
-        /// <returns>A paginated list of modules for the specified course.</returns>
-        [HttpGet("course/{courseId}")]
-        [Authorize(Roles = "Teacher,Student")]
-        [SwaggerOperation(
-            Summary = "Get all modules for a specific course",
-            Description = "Retrieves all modules associated with the specified course ID."
-        )]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<ModuleDto>))]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<PaginatedResultDto<ModuleDto>>> GetModulesByCourseId(Guid courseId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
-            Ok(await _serviceManager.ModuleService.GetAllByCourseIdAsync(courseId, page, pageSize));
-
-        /// <summary>
         /// Creates a new module.
         /// </summary>
         /// <param name="module">The details of the module to create.</param>
