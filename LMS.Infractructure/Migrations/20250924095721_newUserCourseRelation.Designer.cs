@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS.Infractructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250922112619_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250924095721_newUserCourseRelation")]
+    partial class newUserCourseRelation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -105,6 +105,9 @@ namespace LMS.Infractructure.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("UserCourseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -126,6 +129,9 @@ namespace LMS.Infractructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CourseId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
@@ -156,16 +162,16 @@ namespace LMS.Infractructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ActivityId")
+                    b.Property<Guid?>("ActivityId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CourseId")
+                    b.Property<Guid?>("CourseId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("ModuleId")
+                    b.Property<Guid?>("ModuleId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
@@ -417,20 +423,17 @@ namespace LMS.Infractructure.Migrations
                     b.HasOne("Domain.Models.Entities.LMSActivity", "Activity")
                         .WithMany("Documents")
                         .HasForeignKey("ActivityId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Domain.Models.Entities.Course", "Course")
                         .WithMany("Documents")
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Domain.Models.Entities.Module", "Module")
                         .WithMany("Documents")
                         .HasForeignKey("ModuleId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Domain.Models.Entities.ApplicationUser", "User")
                         .WithMany("Documents")
