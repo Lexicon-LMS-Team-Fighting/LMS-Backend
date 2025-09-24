@@ -164,7 +164,7 @@ namespace LMS.Services
             if (updateDto.EndDate.HasValue)
                 module.EndDate = updateDto.EndDate.Value;
 
-            if (module.StartDate >= module.EndDate)
+            if (module.StartDate > module.EndDate)
                 throw new InvalidDateRangeException(module.StartDate, module.EndDate);
 
             _unitOfWork.Module.Update(module);
