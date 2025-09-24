@@ -26,7 +26,7 @@ namespace Domain.Contracts.Repositories
         /// A task that represents the asynchronous operation. The task result contains the 
         /// matching <see cref="Module"/> or <c>null</c> if not found.
         /// </returns>
-        Task<Module?> GetAsync(Guid moduleId, bool changeTracking = false);
+        Task<Module?> GetByIdAsync(Guid moduleId, bool changeTracking = false);
 
         /// <summary>
         /// Retrieves all <see cref="Module"/> entities from the data source. <br/>
