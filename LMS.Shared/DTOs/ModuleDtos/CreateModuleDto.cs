@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,12 +26,15 @@ namespace LMS.Shared.DTOs.ModuleDtos
         /// This property is required and must not be empty.
         /// </summary>
         [Required]
+        [MinLength(3, ErrorMessage = "Module name must be at least 3 characters long.")]
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the description of the module.
         /// This property is optional and can be null or empty if no description is provided.
         /// </summary>
+        [AllowNull]
+        [MinLength(10, ErrorMessage = "Module description must be at least 10 characters long.")]]
         public string? Description { get; set; } = string.Empty;
 
         /// <summary>
