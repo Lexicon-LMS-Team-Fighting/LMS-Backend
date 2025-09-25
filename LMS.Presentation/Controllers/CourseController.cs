@@ -79,6 +79,7 @@ public class CourseController: ControllerBase
     )]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<ModuleDto>))]
 	[ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<PaginatedResultDto<ModuleDto>>> GetModulesByCourseId(Guid courseId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
