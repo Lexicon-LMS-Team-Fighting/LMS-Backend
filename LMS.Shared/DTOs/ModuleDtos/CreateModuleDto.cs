@@ -34,7 +34,7 @@ namespace LMS.Shared.DTOs.ModuleDtos
         /// This property is optional and can be null or empty if no description is provided.
         /// </summary>
         [AllowNull]
-        [MinLength(10, ErrorMessage = "Module description must be at least 10 characters long.")]]
+        [MinLength(10, ErrorMessage = "Module description must be at least 10 characters long.")]
         public string? Description { get; set; } = string.Empty;
 
         /// <summary>
