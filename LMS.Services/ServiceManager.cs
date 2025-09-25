@@ -10,21 +10,25 @@ public class ServiceManager : IServiceManager
 	private Lazy<IAuthService> _authService;
 	private readonly Lazy<IUserService> _userService;
 	private readonly Lazy<ICourseService> _courseService;
+    private readonly Lazy<IModuleService> _moduleService;
 
-	public ITestService TestService => _testService.Value;
+    public ITestService TestService => _testService.Value;
     public IAuthService AuthService => _authService.Value;
     public IUserService UserService => _userService.Value;
     public ICourseService CourseService => _courseService.Value;
+    public IModuleService ModuleService => _moduleService.Value;
 
-	public ServiceManager(
+    public ServiceManager(
         Lazy<ITestService> testService,
         Lazy<IAuthService> authService,
         Lazy<IUserService> userService,
-        Lazy<ICourseService> courseService)
+        Lazy<ICourseService> courseService,
+        Lazy<IModuleService> moduleService)
     {
         _testService = testService;
         _authService = authService;
         _userService = userService;
 		_courseService = courseService;
-	}
+        _moduleService = moduleService;
+    }
 }

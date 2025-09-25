@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Domain.Contracts.Pagination
+namespace LMS.Shared.Pagination
 {
     /// <summary>
     /// Defines the contract for a paginated result.

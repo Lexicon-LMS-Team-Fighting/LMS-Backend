@@ -67,18 +67,17 @@ public class DataSeedHostingService : IHostedService
         userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-		if (!env.IsDevelopment()) return; // Only seed data in development environment
-        if (await context.Users.AnyAsync(cancellationToken)) return;  // Only seed data if no users exist 
+        // Uncomment to clear the database and apply migrations
+        //await ClearDatabaseAsync(cancellationToken);
 
+        if (!env.IsDevelopment()) return; // Only seed data in development environment
+        if (await context.Users.AnyAsync(cancellationToken)) return;  // Only seed data if no users exist 
 
         ArgumentNullException.ThrowIfNull(roleManager, nameof(roleManager));
         ArgumentNullException.ThrowIfNull(userManager, nameof(userManager));
 
         try
         {
-            // Uncomment to clear the database and apply migrations
-            //await ClearDatabaseAsync(cancellationToken);
-
             // Populate the database with initial data
             await SeedDatabaseAsync(cancellationToken);
 
@@ -294,7 +293,9 @@ public class DataSeedHostingService : IHostedService
         // Set one student to have the default username and email
         var randomStudent = students.ElementAt(new Random().Next(students.Count()));
         randomStudent.UserName = DefaultStudentUserName;
+        randomStudent.NormalizedUserName = DefaultStudentUserName.ToUpper();
         randomStudent.Email = DefaultStudentEmail;
+        randomStudent.NormalizedEmail = DefaultStudentEmail.ToUpper();
 
 
         return students;
@@ -315,7 +316,9 @@ public class DataSeedHostingService : IHostedService
         // Set one teacher to have the default username and email
         var randomTeacher = teachers.ElementAt(new Random().Next(teachers.Count()));
         randomTeacher.UserName = DefaultTeacherUserName;
+        randomTeacher.NormalizedUserName = DefaultTeacherUserName.ToUpper();
         randomTeacher.Email = DefaultTeacherEmail;
+        randomTeacher.NormalizedEmail = DefaultTeacherEmail.ToUpper();
 
 
         return teachers;

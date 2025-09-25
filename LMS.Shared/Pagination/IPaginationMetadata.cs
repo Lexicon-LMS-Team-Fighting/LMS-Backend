@@ -1,4 +1,4 @@
-namespace Domain.Contracts.Pagination
+namespace LMS.Shared.Pagination
 {
     /// <summary>
     /// Defines the contract for pagination metadata.
