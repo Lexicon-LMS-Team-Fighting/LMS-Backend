@@ -17,6 +17,7 @@ namespace LMS.Presentation.Controllers;
 /// </remarks>
 [Route("api/course")]
 [ApiController]
+[Authorize]
 public class CourseController: ControllerBase
 {
 	public IServiceManager _serviceManager;
@@ -30,20 +31,26 @@ public class CourseController: ControllerBase
 	/// Retrieves a specific user by their unique identifier.
 	/// </summary>
 	/// <param name="guid">The unique identifier of the course (GUID format).</param>
+	/// <remarks>Requires authentication as either <c>Teacher</c> or <c>Student</c>.</remarks>
 	/// <returns>
 	/// An <see cref="ActionResult{T}"/> containing the <see cref="CourseDto"/> 
 	/// if found, or an appropriate error response.
 	/// </returns>
 	/// <response code="200">Returns the user details.</response>
 	/// <response code="400">If the provided GUID is not valid.</response>
+	/// <response code="401">The request is unauthorized (missing or invalid token).</response>
+	/// <response code="403">The authenticated user does not have the required role.</response>
 	/// <response code="404">If no course is found with the specified GUID.</response>
 	[HttpGet("{guid}")]
+	[Authorize(Roles = "Teacher,Student")]
 	[SwaggerOperation(
 		Summary = "Get specified course by ID",
 		Description = "Retrieves course details by their unique GUID identifier."
 	)]
 	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CourseDto>))]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<ActionResult<CourseDto>> GetCourse(Guid guid) =>
 		Ok(await _serviceManager.CourseService.GetCourseAsync(guid));
@@ -51,22 +58,24 @@ public class CourseController: ControllerBase
 
 
 	/// <summary>Retrieves all courses.</summary>
-	/// <returns>
-	/// An <see cref="ActionResult{T}"/> containing a collection of <see cref="CourseDto"/> objects.
-	/// </returns>
+	/// <remarks>Requires authentication as either <c>Teacher</c> or <c>Student</c>.</remarks>
+	/// <returns>An <see cref="ActionResult{T}"/> containing a collection of <see cref="CourseDto"/> objects.</returns>
 	/// <response code="200">Returns the list of users (empty if none exist).</response>
+	/// <response code="401">The request is unauthorized (missing or invalid token).</response>
+	/// <response code="403">The authenticated user does not have the required role.</response>
 	[HttpGet]
+	[Authorize(Roles = "Teacher,Student")]
 	[SwaggerOperation(
 		Summary = "Get all Courses",
 		Description = "Retrieves a list of all Courses in the system."
 	)]
 	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CourseDto>))]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	public async Task<ActionResult<IEnumerable<UserDto>>> GetCourses() =>
 		Ok(await _serviceManager.CourseService.GetCoursesAsync());
 
-    /// <summary>
-    /// Retrieves a paginated list of modules for a specific course.
-    /// </summary>
+    /// <summary>Retrieves a paginated list of modules for a specific course.</summary>
     /// <param name="courseId">The unique identifier of the course.</param>
     /// <param name="page">The page number to retrieve (default is 1).</param>
     /// <param name="pageSize">The number of items per page (default is 10).</param>
