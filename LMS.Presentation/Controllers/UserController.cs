@@ -38,6 +38,9 @@ public class UserController: ControllerBase
 		Summary = "Get specified user by ID",
 		Description = "Retrieves user details by their unique GUID identifier."
 	)]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDto))]
+	[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+	[ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
 	public async Task<ActionResult<UserDto>> GetUser(string guid) => 
 		Ok(await _serviceManager.UserService.GetUserAsync(guid));
 
