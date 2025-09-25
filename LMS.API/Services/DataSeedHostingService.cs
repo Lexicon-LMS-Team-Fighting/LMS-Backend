@@ -311,7 +311,7 @@ public class DataSeedHostingService : IHostedService
         if (await context.Users.AnyAsync())
             throw new Exception("Users already exist in the database.");
 
-        var teachers = await AddUsersAsync(StudentsCount, TeacherRole);
+        var teachers = await AddUsersAsync(TeachersCount, TeacherRole);
 
         // Set one teacher to have the default username and email
         var randomTeacher = teachers.ElementAt(new Random().Next(teachers.Count()));
