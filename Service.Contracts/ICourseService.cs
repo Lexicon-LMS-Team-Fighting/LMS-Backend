@@ -25,4 +25,11 @@ public interface ICourseService
 	/// A collection of <see cref="CourseDto"/> objects representing all users.
 	/// </returns>
 	Task<IEnumerable<CourseDto>> GetCoursesAsync();
+
+	/// <summary>
+	/// Checks if a course name is unique (i.e., not already in use).
+	/// </summary>
+	/// <param name="name">Name to check.</param>
+	/// <returns>Boolean indicating if the name is already in use.</returns>
+	Task<bool> IsUniqueCourseNameAsync(string name);
 }

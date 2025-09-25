@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Domain.Contracts.Repositories;
+using Domain.Models.Entities;
 using Domain.Models.Exceptions;
 using LMS.Shared.DTOs.CourseDtos;
 using Service.Contracts;
@@ -44,4 +45,9 @@ public class CourseService : ICourseService
 
 		return _mapper.Map<IEnumerable<CourseDto>>(courses);
 	}
+
+	/// <inheritdoc/>
+	public async Task<bool> IsUniqueCourseNameAsync(string name) =>	
+		await _unitOfWork.Course.AnyAsync(name);
+	
 }
