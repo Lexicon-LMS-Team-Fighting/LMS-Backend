@@ -76,6 +76,9 @@ namespace LMS.Services
         /// <returns>A <see cref="PaginatedResultDto{ModuleDto}"/> containing the paginated list of modules for the specified course.</returns>
         public async Task<PaginatedResultDto<ModuleDto>> GetAllByCourseIdAsync(Guid courseId, int pageNumber, int pageSize)
         {
+            if (await _unitOfWork.Course.GetCourseAsync(courseId) is null)
+                throw new CourseNotFoundException(courseId);
+
             var modules = await _unitOfWork.Module.GetByCourseIdAsync(courseId);
 
             var paginatedModules = modules.ToPaginatedResult(new PagingParameters
