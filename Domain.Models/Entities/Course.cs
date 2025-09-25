@@ -1,7 +1,7 @@
 ﻿namespace Domain.Models.Entities;
 
 /// <summary>
-/// Represents the relationship between a <see cref="Course"/> and 
+/// Represents the relationship between a <see cref="Course"/> and <br />
 /// <see cref="Module"/>, <see cref="Document"/>, <see cref="UserCourse"/>. 
 /// <para>
 /// This entity has: <br />
@@ -20,6 +20,6 @@ public class Course
 
     // Foreign Keys / Navigation Properties
     public ICollection<Module> Modules { get; set; } = new List<Module>();
-    public ICollection<UserCourse> UserCourses { get; set; } = new List<UserCourse>();
+	public ICollection<UserCourse> UserCourses { get; set; } = new List<UserCourse>();
     public ICollection<Document>Documents { get; set; } = new List<Document>();
 }

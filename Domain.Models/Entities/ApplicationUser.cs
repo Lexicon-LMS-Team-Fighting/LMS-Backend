@@ -3,8 +3,10 @@
 namespace Domain.Models.Entities;
 
 /// <summary>
-/// Represents an application user with authentication and authorization details.
-/// Inherits from <see cref="IdentityUser"/> to leverage ASP.NET Core Identity features.
+/// Represents an application user with authentication and authorization details. <br />
+/// Inherits from <see cref="IdentityUser"/> to leverage ASP.NET Core Identity features. <br /><br />
+/// 1:M relationship with <see cref="Entities.Document"/>.<br />
+/// M:1 relationship with <see cref="UserCourse"/>.<br />
 /// </summary>
 public class ApplicationUser : IdentityUser
 {

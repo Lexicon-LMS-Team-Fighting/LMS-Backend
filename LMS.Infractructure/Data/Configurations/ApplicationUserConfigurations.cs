@@ -13,9 +13,6 @@ public class ApplicationUserConfigurations : IEntityTypeConfiguration<Applicatio
     {
         builder.ToTable("ApplicationUser");
 
-        builder.HasMany(e => e.UserCourses)
-            .WithOne(e => e.User)
-            .HasForeignKey(e => e.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasKey(a => a.Id);
     }
 }

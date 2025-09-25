@@ -14,5 +14,16 @@ public class UserCourseConfiguration : IEntityTypeConfiguration<UserCourse>
         builder.ToTable("UserCourse");
 
         builder.HasKey(x => new { x.UserId, x.CourseId });
-    }
+
+		builder.HasOne(uc => uc.User)
+			.WithMany(u => u.UserCourses)
+			.HasForeignKey(uc => uc.UserId)
+			.OnDelete(DeleteBehavior.Cascade);
+		
+		builder.HasOne(uc => uc.Course)
+			.WithMany(c => c.UserCourses)
+			.HasForeignKey(uc => uc.CourseId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+	}
 }
