@@ -71,6 +71,11 @@ public class CourseController: ControllerBase
     /// <param name="page">The page number to retrieve (default is 1).</param>
     /// <param name="pageSize">The number of items per page (default is 10).</param>
     /// <returns>A paginated list of modules for the specified course.</returns>
+    /// <response code="200">Returns the paginated list of modules.</response>
+    /// <response code="400">If the provided GUID is not valid.</response>
+    /// <response code="404">If no course is found with the specified GUID.</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="403">Forbidden.</response>
     [HttpGet("{courseId}/modules")]
     [Authorize(Roles = "Teacher,Student")]
     [SwaggerOperation(
@@ -78,10 +83,14 @@ public class CourseController: ControllerBase
         Description = "Retrieves all modules associated with the specified course ID."
     )]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<ModuleDto>))]
-	[ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-	[ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<PaginatedResultDto<ModuleDto>>> GetModulesByCourseId(Guid courseId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
+    public async Task<ActionResult<PaginatedResultDto<ModuleDto>>> GetModulesByCourseId(
+        Guid courseId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10
+    ) =>
         Ok(await _serviceManager.ModuleService.GetAllByCourseIdAsync(courseId, page, pageSize));
 }

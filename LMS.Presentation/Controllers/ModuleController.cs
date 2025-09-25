@@ -34,6 +34,10 @@ namespace LMS.Presentation.Controllers
         /// </summary>
         /// <param name="guid">The unique identifier of the module.</param>
         /// <returns>A <see cref="ModuleDto"/> representing the module.</returns>
+        /// <response code="200">Returns the module details.</response>
+        /// <response code="404">If no module is found with the specified GUID.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
         [HttpGet("{guid}")]
         [Authorize(Roles = "Teacher,Student")]
         [SwaggerOperation(
@@ -53,6 +57,9 @@ namespace LMS.Presentation.Controllers
         /// <param name="page">The page number to retrieve (default is 1).</param>
         /// <param name="pageSize">The number of items per page (default is 10).</param>
         /// <returns>A paginated list of modules.</returns>
+        /// <response code="200">Returns a paginated list of modules.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
         [HttpGet]
         [Authorize(Roles = "Teacher,Student")]
         [SwaggerOperation(
@@ -70,6 +77,11 @@ namespace LMS.Presentation.Controllers
         /// </summary>
         /// <param name="module">The details of the module to create.</param>
         /// <returns>The created module.</returns>
+        /// <response code="201">Returns the created module.</response>
+        /// <response code="400">If the provided module data is invalid.</response>
+        /// <response code="409">If a module with the same identifier already exists.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
         [HttpPost]
         [Authorize(Roles = "Teacher")]
         [SwaggerOperation(
@@ -92,6 +104,12 @@ namespace LMS.Presentation.Controllers
         /// </summary>
         /// <param name="guid">The unique identifier of the module to update.</param>
         /// <param name="module">The updated details of the module.</param>
+        /// <response code="204">Module was successfully updated.</response>
+        /// <response code="400">If the provided module data is invalid.</response>
+        /// <response code="404">If no module is found with the specified GUID.</response>
+        /// <response code="409">If there is a conflict while updating the module.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
         [HttpPut("{guid}")]
         [Authorize(Roles = "Teacher")]
         [SwaggerOperation(
@@ -114,6 +132,10 @@ namespace LMS.Presentation.Controllers
         /// Deletes a module by its unique identifier.
         /// </summary>
         /// <param name="guid">The unique identifier of the module to delete.</param>
+        /// <response code="204">Module was successfully deleted.</response>
+        /// <response code="404">If no module is found with the specified GUID.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
         //[HttpDelete("{guid}")]
         //[Authorize(Roles = "Teacher")]
         //[SwaggerOperation(
