@@ -117,5 +117,8 @@ public static class ServiceExtensions
 
         services.AddScoped<ILMSActivityService, LMSActivityService>();
         services.AddScoped(provider => new Lazy<ILMSActivityService>(() => provider.GetRequiredService<ILMSActivityService>()));
+
+        services.AddScoped<IActivityTypeService, ActivityTypeService>();
+        services.AddScoped(provider => new Lazy<IActivityTypeService>(() => provider.GetRequiredService<IActivityTypeService>()));
     }
 }

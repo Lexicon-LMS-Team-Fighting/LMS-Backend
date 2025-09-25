@@ -26,5 +26,16 @@ namespace Domain.Contracts.Repositories
         /// matching <see cref="ActivityType"/> or <c>null</c> if not found.
         /// </returns>
         Task<ActivityType?> GetByNameAsync(string activityTypeName, bool changeTracking = false);
+
+        /// <summary>
+        /// Retrieves all <see cref="ActivityType"/> entities. <br/>
+        /// </summary>
+        /// <param name="changeTracking">
+        /// If <c>true</c>, Entity Framework change tracking will be enabled (suitable for updates). <br/>
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains a collection of all <see cref="ActivityType"/> entities.
+        /// </returns>
+        Task<IEnumerable<ActivityType>> GetAllAsync(bool changeTracking = false);
     }
 }

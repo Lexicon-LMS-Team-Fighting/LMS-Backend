@@ -1,16 +1,10 @@
 ﻿using LMS.Shared.DTOs.LMSActivityDtos;
-using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.DTOs.PaginationDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 using Swashbuckle.AspNetCore.Annotations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LMS.Presentation.Controllers
 {
@@ -21,7 +15,7 @@ namespace LMS.Presentation.Controllers
     /// </summary>
     [Route("api/lms-activities")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class LMSActivitiesController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;
@@ -45,7 +39,7 @@ namespace LMS.Presentation.Controllers
         /// <response code="401">Unauthorized.</response>
         /// <response code="403">Forbidden.</response>
         [HttpGet("{guid}")]
-        //[Authorize(Roles = "Teacher,Student")]
+        [Authorize(Roles = "Teacher,Student")]
         [SwaggerOperation(
             Summary = "Get specified activity by ID",
             Description = "Retrieves activity details by their unique GUID identifier."
@@ -67,7 +61,7 @@ namespace LMS.Presentation.Controllers
         /// <response code="401">Unauthorized.</response>
         /// <response code="403">Forbidden.</response>
         [HttpGet]
-        //[Authorize(Roles = "Teacher,Student")]
+        [Authorize(Roles = "Teacher,Student")]
         [SwaggerOperation(
             Summary = "Get all activities",
             Description = "Retrieves a list of all activities in the system."
@@ -89,7 +83,7 @@ namespace LMS.Presentation.Controllers
         /// <response code="401">Unauthorized.</response>
         /// <response code="403">Forbidden.</response>
         [HttpPost]
-        //[Authorize(Roles = "Teacher")]
+        [Authorize(Roles = "Teacher")]
         [SwaggerOperation(
             Summary = "Create a new activity",
             Description = "Creates a new LMS activity with the provided details."
@@ -117,7 +111,7 @@ namespace LMS.Presentation.Controllers
         /// <response code="401">Unauthorized.</response>
         /// <response code="403">Forbidden.</response>
         [HttpPut("{guid}")]
-        //[Authorize(Roles = "Teacher")]
+        [Authorize(Roles = "Teacher")]
         [SwaggerOperation(
             Summary = "Update an existing activity",
             Description = "Updates the details of an existing activity identified by its GUID."

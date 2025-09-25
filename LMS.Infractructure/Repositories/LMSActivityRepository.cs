@@ -44,6 +44,7 @@ namespace LMS.Infractructure.Repositories
         /// <returns>A collection of activities for the specified module.</returns>
         public async Task<IEnumerable<LMSActivity>> GetByModuleIdAsync(Guid moduleId, bool changeTracking = false) =>
             await FindByCondition(a => a.ModuleId == moduleId, trackChanges: changeTracking)
+                .Include(a => a.ActivityType)
                 .ToListAsync();
     }
 }

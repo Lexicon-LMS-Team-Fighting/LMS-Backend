@@ -88,7 +88,7 @@ public class CourseController: ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-    public async Task<ActionResult<PaginatedResultDto<LMSActivityDto>>> GetModulesByCourseId(
+    public async Task<ActionResult<PaginatedResultDto<ModuleDto>>> GetModulesByCourseId(
         Guid courseId,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10

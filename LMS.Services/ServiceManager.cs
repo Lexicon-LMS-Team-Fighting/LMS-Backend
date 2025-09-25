@@ -12,6 +12,7 @@ public class ServiceManager : IServiceManager
 	private readonly Lazy<ICourseService> _courseService;
     private readonly Lazy<IModuleService> _moduleService;
     private readonly Lazy<ILMSActivityService> _lmsActivityService;
+    private readonly Lazy<IActivityTypeService> _activityTypeService;
 
     public ITestService TestService => _testService.Value;
     public IAuthService AuthService => _authService.Value;
@@ -19,6 +20,7 @@ public class ServiceManager : IServiceManager
     public ICourseService CourseService => _courseService.Value;
     public IModuleService ModuleService => _moduleService.Value;
     public ILMSActivityService LMSActivityService => _lmsActivityService.Value;
+    public IActivityTypeService ActivityTypeService => _activityTypeService.Value;
 
     public ServiceManager(
         Lazy<ITestService> testService,
@@ -26,7 +28,9 @@ public class ServiceManager : IServiceManager
         Lazy<IUserService> userService,
         Lazy<ICourseService> courseService,
         Lazy<IModuleService> moduleService,
-        Lazy<ILMSActivityService> lmsActivityService)
+        Lazy<ILMSActivityService> lmsActivityService,
+        Lazy<IActivityTypeService> activityTypeService
+        )
     {
         _testService = testService;
         _authService = authService;
@@ -34,5 +38,6 @@ public class ServiceManager : IServiceManager
 		_courseService = courseService;
         _moduleService = moduleService;
         _lmsActivityService = lmsActivityService;
+        _activityTypeService = activityTypeService;
     }
 }

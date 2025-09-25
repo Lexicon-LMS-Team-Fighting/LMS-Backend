@@ -81,7 +81,7 @@ namespace LMS.Services
             if (await _unitOfWork.Module.GetByIdAsync(moduleId) is null)
                 throw new ModuleNotFoundException(moduleId);
 
-            var activities = await _unitOfWork.Module.GetByCourseIdAsync(moduleId);
+            var activities = await _unitOfWork.LMSActivity.GetByModuleIdAsync(moduleId);
 
             var paginatedActivities = activities.ToPaginatedResult(new PagingParameters
             {

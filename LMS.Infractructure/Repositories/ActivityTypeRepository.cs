@@ -34,6 +34,15 @@ namespace LMS.Infractructure.Repositories
         public async Task<ActivityType?> GetByNameAsync(string activityTypeName, bool changeTracking = false) =>
             await FindByCondition(a => a.Name == activityTypeName, trackChanges: changeTracking)
                 .FirstOrDefaultAsync();
+
+        /// <summary>
+        /// Retrieves all <see cref="ActivityType"/> entities.
+        /// </summary>
+        /// <param name="changeTracking">If true, enables change tracking.</param>
+        /// <returns>A collection of activity types.</returns>
+        public async Task<IEnumerable<ActivityType>> GetAllAsync(bool changeTracking = false) =>
+            await FindAll(trackChanges: changeTracking)
+                .ToListAsync();
     }
 
 }
