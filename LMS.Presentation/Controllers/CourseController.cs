@@ -1,4 +1,5 @@
 ﻿using LMS.Shared.DTOs.CourseDtos;
+using LMS.Shared.DTOs.LMSActivityDtos;
 using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.DTOs.PaginationDtos;
 using LMS.Shared.DTOs.UserDtos;

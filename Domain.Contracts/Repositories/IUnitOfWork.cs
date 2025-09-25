@@ -22,6 +22,12 @@ public interface IUnitOfWork
     /// </summary>
     ILMSActivityRepository LMSActivity { get; }
 
+
+    /// <summary>
+    /// Gets the repository for handling <see cref="Models.Entities.ActivityType"/> entities.
+    /// </summary>
+    IActivityTypeRepository ActivityType { get; }
+
     /// <summary>
     /// Persists all changes made through the repositories in a single transaction.
     /// </summary>

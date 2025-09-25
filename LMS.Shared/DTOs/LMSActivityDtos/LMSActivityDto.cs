@@ -17,6 +17,11 @@
         public Guid ModuleId { get; set; }
 
         /// <summary>
+        /// Gets or sets the type of the activity.
+        /// </summary>
+        public string ActivityType { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the name of the activity.
         /// </summary>
         public string Name { get; set; } = string.Empty;

@@ -23,6 +23,7 @@ namespace LMS.Infractructure.Repositories
         /// <returns>The activity entity if found; otherwise, null.</returns>
         public async Task<LMSActivity?> GetByIdAsync(Guid activityId, bool changeTracking = false) =>
             await FindByCondition(a => a.Id == activityId, trackChanges: changeTracking)
+                .Include(a => a.ActivityType)
                 .FirstOrDefaultAsync();
 
         /// <summary>
@@ -32,6 +33,7 @@ namespace LMS.Infractructure.Repositories
         /// <returns>A collection of all activities.</returns>
         public async Task<IEnumerable<LMSActivity>> GetAllAsync(bool changeTracking = false) =>
             await FindAll(trackChanges: changeTracking)
+                .Include(a => a.ActivityType)
                 .ToListAsync();
 
         /// <summary>

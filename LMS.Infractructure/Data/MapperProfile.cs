@@ -2,6 +2,7 @@ using AutoMapper;
 using Domain.Models.Entities;
 using LMS.Shared.DTOs.AuthDtos;
 using LMS.Shared.DTOs.CourseDtos;
+using LMS.Shared.DTOs.LMSActivityDtos;
 using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.DTOs.PaginationDtos;
 using LMS.Shared.DTOs.UserDtos;
@@ -27,6 +28,13 @@ public class MapperProfile : Profile
         // Module mappings
         CreateMap<Module, ModuleDto>();
         CreateMap<CreateModuleDto, Module>()
-            .ForMember(d => d.Id, o => o.MapFrom(_ => Guid.NewGuid())); ;
+            .ForMember(d => d.Id, o => o.MapFrom(_ => Guid.NewGuid()));
+
+        // LMSActivity mappings
+        CreateMap<LMSActivity, LMSActivityDto>()
+            .ForMember(d => d.ActivityType, o => o.MapFrom(s => s.ActivityType != null ? s.ActivityType.Name : string.Empty));
+        CreateMap<CreateLMSActivityDto, LMSActivity>()
+            .ForMember(d => d.Id, o => o.MapFrom(_ => Guid.NewGuid()))
+            .ForMember(d => d.ActivityType, opt => opt.Ignore());
     }
 }

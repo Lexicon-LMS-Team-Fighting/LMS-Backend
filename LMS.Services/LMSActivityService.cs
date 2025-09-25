@@ -57,7 +57,7 @@ namespace LMS.Services
         /// <returns>A <see cref="PaginatedResultDto{LMSActivityDto}"/> containing the paginated list of activities.</returns>
         public async Task<PaginatedResultDto<LMSActivityDto>> GetAllAsync(int pageNumber, int pageSize)
         {
-            var activities = await _unitOfWork.Module.GetAllAsync();
+            var activities = await _unitOfWork.LMSActivity.GetAllAsync();
 
             var paginatedActivities = activities.ToPaginatedResult(new PagingParameters
             {
@@ -103,12 +103,18 @@ namespace LMS.Services
         /// <exception cref="InvalidLMSActivityDateRangeException">Thrown if the activity dates are outside the module's date range.</exception>
         public async Task<LMSActivityDto> CreateAsync(CreateLMSActivityDto activity)
         {
-            var activityEntity = _mapper.Map<Module>(activity);
+            var activityEntity = _mapper.Map<LMSActivity>(activity);
 
             var module = await _unitOfWork.Module.GetByIdAsync(activity.ModuleId);
 
             if (module is null)
                 throw new ModuleNotFoundException(activity.ModuleId);
+
+            var activityType = await _unitOfWork.ActivityType.GetByNameAsync(activity.ActivityType);
+            if (activityType is null)
+                throw new ActivityTypeNotFoundException(activity.ActivityType);
+
+            activityEntity.ActivityTypeId = activityType.Id;
 
             if (!await IsUniqueNameAsync(activity.Name, activity.ModuleId))
                 throw new LMSActivityNameAlreadyExistsException(activity.Name, activity.ModuleId);
@@ -119,8 +125,11 @@ namespace LMS.Services
             if (activity.StartDate < module.StartDate || activity.EndDate > module.EndDate)
                 throw new InvalidLMSActivityDateRangeException();
 
-            _unitOfWork.Module.Create(activityEntity);
+            _unitOfWork.LMSActivity.Create(activityEntity);
             await _unitOfWork.CompleteAsync();
+
+            // To load Activity type entity
+            activityEntity = await _unitOfWork.LMSActivity.GetByIdAsync(activityEntity.Id);
 
             return _mapper.Map<LMSActivityDto>(activityEntity);
         }
@@ -167,6 +176,17 @@ namespace LMS.Services
             if (updateDto.ModuleId is not null)
                 activity.ModuleId = (Guid)updateDto.ModuleId;
 
+            if (updateDto.ActivityType is not null)
+            {
+                var activityType = await _unitOfWork.ActivityType.GetByNameAsync(updateDto.ActivityType);
+
+                if (activityType is null)
+                    throw new ActivityTypeNotFoundException(updateDto.ActivityType);
+
+                activity.ActivityTypeId = activityType.Id;
+                
+            }
+
             if (updateDto.Name is not null)
             {
                 if (!await IsUniqueNameAsync(updateDto.Name, activity.ModuleId, activity.Id))
@@ -191,6 +211,7 @@ namespace LMS.Services
                 throw new InvalidLMSActivityDateRangeException();
 
             _unitOfWork.LMSActivity.Update(activity);
+
             await _unitOfWork.CompleteAsync();
         }
 
@@ -208,7 +229,7 @@ namespace LMS.Services
         /// </returns>
         public async Task<bool> IsUniqueNameAsync(string name, Guid moduleId, Guid excludedActivityId = default)
         {
-            var activities = await _unitOfWork.Module.GetByCourseIdAsync(moduleId);
+            var activities = await _unitOfWork.LMSActivity.GetByModuleIdAsync(moduleId);
 
             return !activities.Any(activity =>
                 activity.Name.Equals(name, StringComparison.OrdinalIgnoreCase) &&
