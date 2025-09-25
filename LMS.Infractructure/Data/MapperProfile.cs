@@ -17,9 +17,9 @@ public class MapperProfile : Profile
 		CreateMap<ApplicationUser, UserDto>()
 		  .ForMember(dest => dest.CourseIds,
 			  opt => opt.MapFrom(src => src.UserCourses.Select(uc => uc.CourseId)));
-       
-        // Course mappings
-        CreateMap<Course, CourseDto>();
+
+		// Course mappings
+		CreateMap<Course, CourseDto>();
 
         // Pagination mappings
         CreateMap<PaginationMetadata, PaginationMetadataDto>();
