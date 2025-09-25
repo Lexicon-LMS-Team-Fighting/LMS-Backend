@@ -83,7 +83,7 @@ public class CourseController: ControllerBase
         Summary = "Get all modules for a specific course",
         Description = "Retrieves all modules associated with the specified course ID."
     )]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<LMSActivityDto>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<ModuleDto>))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]

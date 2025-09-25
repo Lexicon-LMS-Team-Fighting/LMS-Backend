@@ -62,7 +62,7 @@ namespace LMS.Presentation.Controllers
         /// <response code="401">Unauthorized.</response>
         /// <response code="403">Forbidden.</response>
         [HttpGet]
-        //[Authorize(Roles = "Teacher,Student")]
+        [Authorize(Roles = "Teacher,Student")]
         [SwaggerOperation(
             Summary = "Get all modules",
             Description = "Retrieves a list of all modules in the system."
