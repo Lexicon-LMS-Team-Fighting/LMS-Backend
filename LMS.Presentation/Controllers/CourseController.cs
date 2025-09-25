@@ -82,10 +82,10 @@ public class CourseController: ControllerBase
         Description = "Retrieves all modules associated with the specified course ID."
     )]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<ModuleDto>))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
     public async Task<ActionResult<PaginatedResultDto<ModuleDto>>> GetModulesByCourseId(
         Guid courseId,
         [FromQuery] int page = 1,
@@ -93,11 +93,28 @@ public class CourseController: ControllerBase
     ) =>
         Ok(await _serviceManager.ModuleService.GetAllByCourseIdAsync(courseId, page, pageSize));
 
-
-
+	/// <summary>
+	/// Creates a course.
+	/// </summary>
+	/// <remarks> Must be authorized as a <c>Teacher</c> to access this endpoint.</remarks>
+	/// <returns> A <see cref="CourseDto"/> representing the created course, including a link to retrieve it.</returns>
+	/// <param name="createCourseDto">The data required to create the course.</param>
+	/// <response code="201">Returns A link to <see cref="CourseDto"/>.</response>
+	/// <response code="400">The end data is earlier then or equal to start date.</response>
+	/// <response code="401">Unauthorized.</response>
+	/// <response code="403">Forbidden.</response>
+	/// <response code="409">Course with that name already exists.</response>
 	[HttpPost]
 	[Authorize(Roles ="Teacher")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<CourseDto>))]
+	[SwaggerOperation(
+		Summary = "Create a new course",
+		Description = "Creates a new course with the provided details. Requires Teacher role."
+	)]
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(CourseDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
+	[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
+	[ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
 	public async Task<ActionResult<CourseDto>> CreateCourse([FromBody] CreateCourseDto createCourseDto)
 	{
 		var createdCourse = await _serviceManager.CourseService.CreateCourseAsync(createCourseDto);
