@@ -11,6 +11,10 @@ namespace LMS.Infractructure.Repositories
     /// </summary>
     public class LMSActivityRepository : RepositoryBase<LMSActivity>, ILMSActivityRepository
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LMSActivityRepository"/> class with the specified database context.
+        /// </summary>
+        /// <param name="context">The database context to be used by the repository.</param>
         public LMSActivityRepository(ApplicationDbContext context) : base(context)
         {
         }

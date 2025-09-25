@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Domain.Models.Exceptions.BadRequest
 {
     /// <summary>
-    /// Exception type for cases where a provided date range for an activity is out of the date range of its parent course.
+    /// Exception type for cases where a provided date range for an activity is out of the date range of its parent module.
     /// </summary>
     public class InvalidLMSActivityDateRangeException : BadRequestException
     {
@@ -15,7 +15,7 @@ namespace Domain.Models.Exceptions.BadRequest
         /// Initializes a new instance of the <see cref="InvalidLMSActivityDateRangeException"/> class with a default message.
         /// </summary>
         public InvalidLMSActivityDateRangeException()
-            : base("The provided date range is invalid. Please ensure that the activity date range falls within the course date range.")
+            : base("The provided date range is invalid. Please ensure that the activity date range falls within the module date range.")
         { }
     }
 
