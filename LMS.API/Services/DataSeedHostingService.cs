@@ -116,13 +116,17 @@ public class DataSeedHostingService : IHostedService
     private async Task SeedDatabaseAsync(CancellationToken cancellationToken)
     {
         await AddRolesAsync([TeacherRole, StudentRole]);
+        await AddTeachersAsync();
+
+        var students = await AddStudentsAsync();
         var courses = await AddCoursesAsync(cancellationToken);
+        await context.SaveChangesAsync();
+        
+        await AddEnrollmentsAsync(students, courses, cancellationToken);
+
         var modules = await AddModulesAsync(courses, cancellationToken);
         var activityTypes = await AddActivityTypesAsync(cancellationToken);
         var activities = await AddLMSActivitiesAsync(modules, activityTypes, cancellationToken);
-        await AddTeachersAsync();
-        var students = await AddStudentsAsync();
-        await AddEnrollmentsAsync(students, courses, cancellationToken);
         await AddDocumentsAsync(students, courses, modules, activities, cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
@@ -293,6 +297,7 @@ public class DataSeedHostingService : IHostedService
         randomStudent.Email = DefaultStudentEmail;
         randomStudent.NormalizedEmail = DefaultStudentEmail.ToUpper();
 
+
         return students;
     }
 
@@ -306,7 +311,7 @@ public class DataSeedHostingService : IHostedService
         if (await context.Users.AnyAsync())
             throw new Exception("Users already exist in the database.");
 
-        var teachers = await AddUsersAsync(StudentsCount, TeacherRole);
+        var teachers = await AddUsersAsync(TeachersCount, TeacherRole);
 
         // Set one teacher to have the default username and email
         var randomTeacher = teachers.ElementAt(new Random().Next(teachers.Count()));
@@ -314,6 +319,7 @@ public class DataSeedHostingService : IHostedService
         randomTeacher.NormalizedUserName = DefaultTeacherUserName.ToUpper();
         randomTeacher.Email = DefaultTeacherEmail;
         randomTeacher.NormalizedEmail = DefaultTeacherEmail.ToUpper();
+
 
         return teachers;
     }
@@ -367,18 +373,22 @@ public class DataSeedHostingService : IHostedService
 
         var enrollments = new List<UserCourse>();
         var coursesList = courses.ToList();
-
+        var rnd = new Random();
+        
         foreach (var student in students)
         {
+			var randomIndex = rnd.Next(coursesList.Count);
+			
             enrollments.Add(new UserCourse
             {
                 UserId = student.Id,
-                CourseId = coursesList[new Random().Next(coursesList.Count)].Id, // Use the indexed list
+                CourseId = coursesList[randomIndex].Id, // Use the indexed list
             });
         }
 
         await context.AddRangeAsync(enrollments, cancellationToken);
     }
+   
 
     /// <summary>
     /// Adds documents to the database, associating them with students, courses, modules, and activities.

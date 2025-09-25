@@ -15,18 +15,24 @@ public class MapperProfile : Profile
     {
         CreateMap<UserRegistrationDto, ApplicationUser>();
 
-        CreateMap<ApplicationUser, UserDto>();
+		CreateMap<ApplicationUser, UserDto>()
+		  .ForMember(dest => dest.CourseIds,
+			  opt => opt.MapFrom(src => src.UserCourses.Select(uc => uc.CourseId)));
 
-        // Pagination mappings
-        CreateMap<PaginationMetadata, PaginationMetadataDto>();
-        CreateMap(typeof(PaginatedResult<>), typeof(PaginatedResultDto<>));
-
-        // Course mappings
-        CreateMap<Course, CourseDto>();
+		// Course mappings
+		CreateMap<Course, CourseDto>();
 
         // Module mappings
         CreateMap<Module, ModuleDto>();
         CreateMap<CreateModuleDto, Module>()
-            .ForMember(d => d.Id, o => o.MapFrom(_ => Guid.NewGuid())); ;
-    }
+            .ForMember(d => d.Id, o => o.MapFrom(_ => Guid.NewGuid())); 
+
+        // Pagination mappings
+        CreateMap<PaginationMetadata, PaginationMetadataDto>();
+        CreateMap(typeof(PaginatedResult<>), typeof(PaginatedResultDto<>));
+	}
 }
+
+   
+
+        
