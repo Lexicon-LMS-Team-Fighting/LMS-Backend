@@ -49,7 +49,6 @@ public class CourseController: ControllerBase
 		Ok(await _serviceManager.CourseService.GetCourseAsync(guid));
 
 
-
 	/// <summary>Retrieves all courses.</summary>
 	/// <returns>
 	/// An <see cref="ActionResult{T}"/> containing a collection of <see cref="CourseDto"/> objects.
@@ -93,4 +92,15 @@ public class CourseController: ControllerBase
         [FromQuery] int pageSize = 10
     ) =>
         Ok(await _serviceManager.ModuleService.GetAllByCourseIdAsync(courseId, page, pageSize));
+
+
+
+	[HttpPost]
+	[Authorize(Roles ="Teacher")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<CourseDto>))]
+	public async Task<ActionResult<CourseDto>> CreateCourse([FromBody] CreateCourseDto createCourseDto)
+	{
+		var createdCourse = await _serviceManager.CourseService.CreateCourseAsync(createCourseDto);
+		return CreatedAtAction(nameof(GetCourse), new { Guid = createdCourse.Id }, createdCourse);
+	}
 }

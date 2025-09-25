@@ -27,6 +27,14 @@ public interface ICourseService
 	Task<IEnumerable<CourseDto>> GetCoursesAsync();
 
 	/// <summary>
+	/// Creates a new course based on the provided data.
+	/// </summary>
+	/// <param name="createCourseDto">The data for the course to create.</param>
+	/// <returns>A <see cref="CourseDto"/> representing the newly created course.</returns>
+	Task<CourseDto> CreateCourseAsync(CreateCourseDto createCourseDto);
+
+
+	/// <summary>
 	/// Checks if a course name is unique (i.e., not already in use).
 	/// </summary>
 	/// <param name="name">Name to check.</param>

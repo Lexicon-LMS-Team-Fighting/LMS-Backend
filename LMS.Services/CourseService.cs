@@ -2,6 +2,8 @@
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using Domain.Models.Exceptions;
+using Domain.Models.Exceptions.BadRequest;
+using Domain.Models.Exceptions.Conflict;
 using LMS.Shared.DTOs.CourseDtos;
 using Service.Contracts;
 
@@ -44,6 +46,24 @@ public class CourseService : ICourseService
 		var courses = await _unitOfWork.Course.GetCoursesAsync();
 
 		return _mapper.Map<IEnumerable<CourseDto>>(courses);
+	}
+
+	/// <inheritdoc/>
+	public async Task<CourseDto> CreateCourseAsync(CreateCourseDto createCourseDto)
+	{
+		var course = _mapper.Map<Course>(createCourseDto);
+		
+		var nameExists = await IsUniqueCourseNameAsync(course.Name);
+
+		if (nameExists) throw new CourseNameAlreadyExistsException(course.Name);
+		
+		if (course.StartDate >= course.EndDate)
+			throw new InvalidDateRangeException(course.StartDate, course.EndDate);
+
+		_unitOfWork.Course.Create(course);
+		await _unitOfWork.CompleteAsync();
+
+		return _mapper.Map<CourseDto>(course);
 	}
 
 	/// <inheritdoc/>
