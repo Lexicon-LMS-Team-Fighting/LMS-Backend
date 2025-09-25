@@ -20,7 +20,6 @@ public class Course
 
     // Foreign Keys / Navigation Properties
     public ICollection<Module> Modules { get; set; } = new List<Module>();
-	public Guid CourseId { get; set; }
 	public ICollection<UserCourse> UserCourses { get; set; } = new List<UserCourse>();
     public ICollection<Document>Documents { get; set; } = new List<Document>();
 }
