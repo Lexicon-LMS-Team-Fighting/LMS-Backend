@@ -1,6 +1,4 @@
-using Domain.Contracts.Pagination;
-
-namespace Domain.Models.Pagination
+namespace LMS.Shared.Pagination
 {
     /// <summary>
     /// Represents metadata information for a paginated result.

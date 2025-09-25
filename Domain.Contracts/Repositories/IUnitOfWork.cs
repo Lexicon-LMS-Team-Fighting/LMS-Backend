@@ -12,9 +12,14 @@ public interface IUnitOfWork
 	/// </summary>
 	ICourseRepository Course { get; }
 
-	/// <summary>
-	/// Persists all changes made through the repositories in a single transaction.
+    /// <summary>
+	///	Gets the repository for handling <see cref="Models.Entities.Module"/> entities.
 	/// </summary>
-	/// <returns>A task representing the asynchronous save operation.</returns>
-	Task CompleteAsync();
+    IModuleRepository Module { get; }
+
+    /// <summary>
+    /// Persists all changes made through the repositories in a single transaction.
+    /// </summary>
+    /// <returns>A task representing the asynchronous save operation.</returns>
+    Task CompleteAsync();
 }

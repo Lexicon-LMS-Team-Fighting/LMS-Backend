@@ -1,4 +1,4 @@
-namespace Domain.Models.Pagination
+namespace LMS.Shared.Pagination
 {
     public class PagingParameters : PagingParametersBase
     {
