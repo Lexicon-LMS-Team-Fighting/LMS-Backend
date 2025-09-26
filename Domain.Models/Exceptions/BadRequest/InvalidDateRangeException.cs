@@ -11,7 +11,10 @@ namespace Domain.Models.Exceptions.BadRequest
     /// </summary>
     public class InvalidDateRangeException : BadRequestException
     {
-        public InvalidDateRangeException(DateTime start, DateTime end)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="InvalidDateRangeException"/> class with a custom message.
+		/// </summary>
+		public InvalidDateRangeException(DateTime start, DateTime end)
             : base($"The provided date range is invalid: Start Date ({start}) must be earlier than End Date ({end}).") { }
 
         /// <summary>

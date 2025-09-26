@@ -15,6 +15,11 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
 {
 	public CourseRepository(ApplicationDbContext context) : base(context)
 	{}
+	
+	/// <inheritdoc/>
+	public async Task<bool> AnyAsync(string name) => 
+		await FindAnyAsync(a => a.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+	
 
 	/// <inheritdoc/>
 	public async Task<Course?> GetCourseAsync(Guid courseId, bool changeTracking = false) => 

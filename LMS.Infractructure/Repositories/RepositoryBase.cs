@@ -13,7 +13,12 @@ public abstract class RepositoryBase<T> : IRepositoryBase<T>, IInternalRepositor
         DbSet = context.Set<T>();
     }
 
-    public IQueryable<T> FindAll(bool trackChanges = false) =>
+    /// <inheritdoc/>
+    public async Task<bool> FindAnyAsync(Expression<Func<T, bool>> expression)
+        => await DbSet.AnyAsync(expression);
+
+
+	public IQueryable<T> FindAll(bool trackChanges = false) =>
         !trackChanges ? DbSet.AsNoTracking() :
                         DbSet;
 
