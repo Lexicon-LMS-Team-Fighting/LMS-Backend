@@ -15,12 +15,14 @@ public class MapperProfile : Profile
     {
         CreateMap<UserRegistrationDto, ApplicationUser>();
 
+        // User mappings
 		CreateMap<ApplicationUser, UserDto>()
 		  .ForMember(dest => dest.CourseIds,
 			  opt => opt.MapFrom(src => src.UserCourses.Select(uc => uc.CourseId)));
 
 		// Course mappings
 		CreateMap<Course, CourseDto>();
+        CreateMap<CreateCourseDto, Course>();
 
         // Module mappings
         CreateMap<Module, ModuleDto>();

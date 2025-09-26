@@ -15,7 +15,6 @@ public class CourseDto
 
 	//Relations
 	//TODO: Un-comment this one UserDto is implemented
-	public Guid CourseId { get; set; }
 	public ICollection<string> UserIds { get; set; } = new List<string>();
     //public ICollection<DocumentDto> Documents { get; set; } = new();
     //public ICollection<ModuleDto> Modules { get; set; } = new();
