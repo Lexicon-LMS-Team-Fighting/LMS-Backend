@@ -114,5 +114,8 @@ public static class ServiceExtensions
 
         services.AddScoped<IModuleService, ModuleService>();
         services.AddScoped(provider => new Lazy<IModuleService>(() => provider.GetRequiredService<IModuleService>()));
+
+        services.AddScoped<IDocumentService, DocumentService>();
+        services.AddScoped(provider => new Lazy<IDocumentService>(() => provider.GetRequiredService<IDocumentService>()));
     }
 }

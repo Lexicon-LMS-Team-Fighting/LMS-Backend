@@ -18,6 +18,11 @@ public interface IUnitOfWork
     IModuleRepository Module { get; }
 
     /// <summary>
+    /// Gets the repository for handling <see cref="Models.Entities.Document"/> entities.
+    /// </summary>
+    IDocumentRepository Document { get; }
+
+    /// <summary>
     /// Persists all changes made through the repositories in a single transaction.
     /// </summary>
     /// <returns>A task representing the asynchronous save operation.</returns>
