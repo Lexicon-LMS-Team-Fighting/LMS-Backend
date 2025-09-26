@@ -1,4 +1,5 @@
-﻿using LMS.Shared.DTOs.ModuleDtos;
+﻿using LMS.Shared.DTOs.LMSActivityDtos;
+using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.DTOs.PaginationDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -127,6 +128,36 @@ namespace LMS.Presentation.Controllers
             await _serviceManager.ModuleService.UpdateAsync(guid, module);
             return NoContent();
         }
+
+        /// <summary>
+        /// Retrieves a paginated list of activities for a specific module.
+        /// </summary>
+        /// <param name="moduleId">The unique identifier of the module.</param>
+        /// <param name="page">The page number to retrieve (default is 1).</param>
+        /// <param name="pageSize">The number of items per page (default is 10).</param>
+        /// <returns>A paginated list of activities for the specified module.</returns>
+        /// <response code="200">Returns the paginated list of activities.</response>
+        /// <response code="400">If the provided GUID is not valid.</response>
+        /// <response code="404">If no module is found with the specified GUID.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
+        [HttpGet("{moduleId}/activities")]
+        [Authorize(Roles = "Teacher,Student")]
+        [SwaggerOperation(
+            Summary = "Get all activities for a specific module",
+            Description = "Retrieves all activities associated with the specified module ID."
+        )]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<LMSActivityDto>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
+        public async Task<ActionResult<PaginatedResultDto<LMSActivityDto>>> GetActivitiesByModuleId(
+            Guid moduleId,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10
+        ) =>
+            Ok(await _serviceManager.LMSActivityService.GetAllByModuleIdAsync(moduleId, page, pageSize));
 
         /// <summary>
         /// Deletes a module by its unique identifier.
