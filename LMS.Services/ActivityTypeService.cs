@@ -40,11 +40,9 @@ namespace LMS.Services
 
 
         /// <summary>
-        /// Retrieves a paginated list of all activities.
+        /// Retrieves a list of all activities.
         /// </summary>
-        /// <param name="pageNumber">The page number to retrieve.</param>
-        /// <param name="pageSize">The number of items per page.</param>
-        /// <returns>A <see cref="PaginatedResultDto{LMSActivityDto}"/> containing the paginated list of activities.</returns>
+        /// <returns>A <see cref="IEnumerable{LMSActivityDto}"/> containing the list of all activities.</returns>
         public async Task<IEnumerable<string>> GetAllAsync()
         {
             var activityTypes = await _unitOfWork.ActivityType.GetAllAsync();

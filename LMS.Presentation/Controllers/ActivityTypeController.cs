@@ -1,5 +1,6 @@
 ﻿using LMS.Shared.DTOs.LMSActivityDtos;
 using LMS.Shared.DTOs.PaginationDtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
@@ -18,6 +19,7 @@ namespace LMS.Presentation.Controllers
     /// </summary>
     [Route("api/activity-types")]
     [ApiController]
+    [Authorize]
     public class ActivityTypeController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;
@@ -39,11 +41,14 @@ namespace LMS.Presentation.Controllers
         /// <response code="401">Unauthorized.</response>
         /// <response code="403">Forbidden.</response>
         [HttpGet]
+        [Authorize(Roles = "Teacher,Student")]
         [SwaggerOperation(
             Summary = "Get all activity types",
             Description = "Retrieves all activity types available in the system."
         )]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<string>))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<IEnumerable<string>>> GetActivityTypes() =>
             Ok(await _serviceManager.ActivityTypeService.GetAllAsync());
     }
