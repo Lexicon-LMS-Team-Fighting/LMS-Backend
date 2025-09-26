@@ -39,5 +39,5 @@ public interface ICourseService
 	/// </summary>
 	/// <param name="name">Name to check.</param>
 	/// <returns>Boolean indicating if the name is already in use.</returns>
-	Task<bool> IsUniqueCourseNameAsync(string name);
+	Task<bool> IsNotUniqueCourseNameAsync(string name);
 }

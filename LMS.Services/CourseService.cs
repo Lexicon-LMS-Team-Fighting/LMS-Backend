@@ -53,7 +53,7 @@ public class CourseService : ICourseService
 	{
 		var course = _mapper.Map<Course>(createCourseDto);
 		
-		var nameExists = await IsUniqueCourseNameAsync(course.Name);
+		var nameExists = await IsNotUniqueCourseNameAsync(course.Name);
 
 		if (nameExists) throw new CourseNameAlreadyExistsException(course.Name);
 		
@@ -67,7 +67,7 @@ public class CourseService : ICourseService
 	}
 
 	/// <inheritdoc/>
-	public async Task<bool> IsUniqueCourseNameAsync(string name) =>	
+	public async Task<bool> IsNotUniqueCourseNameAsync(string name) =>	
 		await _unitOfWork.Course.AnyAsync(name);
 	
 }
