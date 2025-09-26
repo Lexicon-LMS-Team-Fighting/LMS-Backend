@@ -18,7 +18,7 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
 	
 	/// <inheritdoc/>
 	public async Task<bool> AnyAsync(string name) => 
-		await FindAnyAsync(a => a.Name.Equals(name));
+		await FindAnyAsync(a => a.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 	
 
 	/// <inheritdoc/>
