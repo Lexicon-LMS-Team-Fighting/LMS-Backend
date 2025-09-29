@@ -20,7 +20,7 @@ namespace Service.Contracts
         /// </summary>
         /// <param name="id">The unique identifier of the module.</param>
         /// <returns>A <see cref="ModuleDto"/> representing the module.</returns>
-        Task<ModuleDto> GetByIdAsync(Guid id);
+        Task<ModuleDetailedDto> GetByIdAsync(Guid id);
 
         /// <summary>
         /// Retrieves a paginated list of all modules.

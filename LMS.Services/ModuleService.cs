@@ -36,16 +36,16 @@ namespace LMS.Services
         /// Retrieves a module by its unique identifier.
         /// </summary>
         /// <param name="id">The unique identifier of the module.</param>
-        /// <returns>A <see cref="ModuleDto"/> representing the module.</returns>
+        /// <returns>A <see cref="ModuleDetailedDto"/> representing the module.</returns>
         /// <exception cref="ModuleNotFoundException">Thrown if the module is not found.</exception>
-        public async Task<ModuleDto> GetByIdAsync(Guid id)
+        public async Task<ModuleDetailedDto> GetByIdAsync(Guid id)
         {
             var course = await _unitOfWork.Module.GetByIdAsync(id);
 
             if (course is null)
                 throw new ModuleNotFoundException(id);
 
-            return _mapper.Map<ModuleDto>(course);
+            return _mapper.Map<ModuleDetailedDto>(course);
         }
 
         /// <summary>

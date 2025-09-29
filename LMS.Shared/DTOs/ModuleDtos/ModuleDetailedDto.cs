@@ -6,7 +6,7 @@ namespace LMS.Shared.DTOs.ModuleDtos
     /// Data Transfer Object (DTO) representing a module.
     /// This class is used to transfer module data
     /// </summary>
-    public class ModuleDto
+    public class ModuleDetailedDto
     {
         /// <summary>
         /// Gets or sets the unique identifier of the module.
@@ -37,5 +37,10 @@ namespace LMS.Shared.DTOs.ModuleDtos
         /// Gets or sets the end date of the module.
         /// </summary>
         public DateTime EndDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the collection of documents associated with the module in a preview format.
+        /// </summary>
+        public IEnumerable<DocumentPreviewDto> Documents { get; set; } = [];
     }
 }
