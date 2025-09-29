@@ -281,7 +281,15 @@ public class DataSeedHostingService : IHostedService
 
         return activities;
     }
-    
+
+    /// <summary>
+    /// Generates and adds feedbacks for LMS activities from students.
+    /// </summary>
+    /// <param name="activities">The activities to add feedback to.</param>
+    /// <param name="students">The students providing the feedback.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns></returns>
+    /// <exception cref="Exception">Thrown if no activities or students are available to add feedback to.</exception>
     private async Task<IEnumerable<LMSActivityFeedback>> AddFeedbacksAsync(IEnumerable<LMSActivity> activities, IEnumerable<ApplicationUser> students, CancellationToken cancellationToken)
     {
         if (!activities.Any() || !students.Any())
@@ -333,7 +341,6 @@ public class DataSeedHostingService : IHostedService
         randomStudent.NormalizedUserName = DefaultStudentUserName.ToUpper();
         randomStudent.Email = DefaultStudentEmail;
         randomStudent.NormalizedEmail = DefaultStudentEmail.ToUpper();
-
 
         return students;
     }
