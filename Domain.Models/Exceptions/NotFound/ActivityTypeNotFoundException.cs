@@ -6,11 +6,10 @@
     public class ActivityTypeNotFoundException : NotFoundException
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LMSActivityNotFoundException"/> class with a specified activity type name.
+        /// Initializes a new instance of the <see cref="ActivityTypeNotFoundException"/> class with a specified course ID.
         /// </summary>
-        /// <param name="activityId">The name of the activity type that was not found.</param>
-        public ActivityTypeNotFoundException(string activityName)
-            : base($"Activity with name '{activityName}' was not found.") { }
+        public ActivityTypeNotFoundException(Guid activityId)
+            : base($"Activity type with Id '{activityId}' was not found.") { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LMSActivityNotFoundException"/> class with a default message.

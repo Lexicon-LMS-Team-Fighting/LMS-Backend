@@ -1,4 +1,6 @@
-﻿namespace Service.Contracts
+﻿using LMS.Shared.DTOs.ActivityTypeDto;
+
+namespace Service.Contracts
 {
     /// <summary>
     /// Service contract for managing activity types.
@@ -9,7 +11,7 @@
         /// <summary>
         /// Retrieves all activity types.
         /// </summary>
-        /// <returns>A collection of activity type names.</returns>
-        Task<IEnumerable<string>> GetAllAsync();
+        /// <returns>A collection of activity types.</returns>
+        Task<IEnumerable<ActivityTypeDto>> GetAllAsync();
     }
 }

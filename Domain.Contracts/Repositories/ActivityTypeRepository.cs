@@ -15,9 +15,9 @@ namespace Domain.Contracts.Repositories
     public interface IActivityTypeRepository : IRepositoryBase<ActivityType>
     {
         /// <summary>
-        /// Retrieves a single <see cref="ActivityType"/> entity by its name. <br/>
+        /// Retrieves a single <see cref="ActivityType"/> entity by its ID. <br/>
         /// </summary>
-        /// <param name="activityTypeName">The name of the activity type.</param>
+        /// <param name="activityTypId">The ID of the activity type.</param>
         /// <param name="changeTracking">
         /// If <c>true</c>, Entity Framework change tracking will be enabled (suitable for updates). <br/>
         /// </param>
@@ -25,7 +25,7 @@ namespace Domain.Contracts.Repositories
         /// A task that represents the asynchronous operation. The task result contains the 
         /// matching <see cref="ActivityType"/> or <c>null</c> if not found.
         /// </returns>
-        Task<ActivityType?> GetByNameAsync(string activityTypeName, bool changeTracking = false);
+        Task<ActivityType?> GetByIdAsync(Guid activityTypId, bool changeTracking = false);
 
         /// <summary>
         /// Retrieves all <see cref="ActivityType"/> entities. <br/>

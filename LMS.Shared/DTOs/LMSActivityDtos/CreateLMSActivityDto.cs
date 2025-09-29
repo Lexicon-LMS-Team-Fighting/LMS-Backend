@@ -18,12 +18,11 @@ namespace LMS.Shared.DTOs.LMSActivityDtos
         public Guid ModuleId { get; set; }
 
         /// <summary>
-        /// Gets or sets the type of the activity.
-        /// This property is required and must not be empty.
+        /// Gets or sets the ID of the activity type.
+        /// This property is required and must be provided when creating an activity.
         /// </summary>
         [Required]
-        [MinLength(1, ErrorMessage = "LMS Activity type must not be empty.")]
-        public string ActivityType { get; set; } = string.Empty;
+        public Guid ActivityTypeId { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the activity.

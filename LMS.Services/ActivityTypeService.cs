@@ -5,7 +5,9 @@ using Domain.Models.Exceptions;
 using Domain.Models.Exceptions.BadRequest;
 using Domain.Models.Exceptions.Conflict;
 using Domain.Models.Exceptions.NotFound;
+using LMS.Shared.DTOs.ActivityTypeDto;
 using LMS.Shared.DTOs.LMSActivityDtos;
+using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.DTOs.PaginationDtos;
 using LMS.Shared.Pagination;
 using Service.Contracts;
@@ -40,13 +42,13 @@ namespace LMS.Services
 
 
         /// <summary>
-        /// Retrieves a list of all activities.
+        /// Retrieves a list of all activity types.
         /// </summary>
-        /// <returns>A <see cref="IEnumerable{LMSActivityDto}"/> containing the list of all activities.</returns>
-        public async Task<IEnumerable<string>> GetAllAsync()
+        /// <returns>A <see cref="IEnumerable{LMSActivityDto}"/> containing the list of all activity types.</returns>
+        public async Task<IEnumerable<ActivityTypeDto>> GetAllAsync()
         {
             var activityTypes = await _unitOfWork.ActivityType.GetAllAsync();
-            return activityTypes.Select(at => at.Name).ToList();
+            return _mapper.Map<IEnumerable<ActivityTypeDto>>(activityTypes);
         }
     }
 }

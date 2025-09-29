@@ -23,16 +23,16 @@ namespace LMS.Infractructure.Repositories
         /// <summary>
         /// Retrieves a single <see cref="ActivityType"/> entity by its name.
         /// </summary>
-        /// <param name="activityTypeName">The name of the activity type to retrieve.</param>
+        /// <param name="activityTypeId">The ID of the activity type to retrieve.</param>
         /// <param name="changeTracking">
         /// If <c>true</c>, Entity Framework change tracking will be enabled (useful for updates); otherwise, no tracking is applied.
         /// </param>
         /// <returns>
         /// A task representing the asynchronous operation. The task result contains the matching <see cref="ActivityType"/> 
-        /// or <c>null</c> if no entity is found with the specified name.
+        /// or <c>null</c> if no entity is found with the specified ID.
         /// </returns>
-        public async Task<ActivityType?> GetByNameAsync(string activityTypeName, bool changeTracking = false) =>
-            await FindByCondition(a => a.Name == activityTypeName, trackChanges: changeTracking)
+        public async Task<ActivityType?> GetByIdAsync(Guid activityTypeId, bool changeTracking = false) =>
+            await FindByCondition(a => a.Id == activityTypeId, trackChanges: changeTracking)
                 .FirstOrDefaultAsync();
 
         /// <summary>

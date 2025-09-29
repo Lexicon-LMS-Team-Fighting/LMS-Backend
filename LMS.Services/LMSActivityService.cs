@@ -110,9 +110,10 @@ namespace LMS.Services
             if (module is null)
                 throw new ModuleNotFoundException(activity.ModuleId);
 
-            var activityType = await _unitOfWork.ActivityType.GetByNameAsync(activity.ActivityType);
+            var activityType = await _unitOfWork.ActivityType.GetByIdAsync(activity.ActivityTypeId);
+
             if (activityType is null)
-                throw new ActivityTypeNotFoundException(activity.ActivityType);
+                throw new ActivityTypeNotFoundException(activity.ActivityTypeId);
 
             activityEntity.ActivityTypeId = activityType.Id;
 
@@ -173,18 +174,27 @@ namespace LMS.Services
             if (module is null)
                 throw new ModuleNotFoundException(moduleId);
 
-            if (updateDto.ModuleId is not null)
-                activity.ModuleId = (Guid)updateDto.ModuleId;
+            if (updateDto.ModuleId.HasValue)
+                activity.ModuleId = updateDto.ModuleId.Value;
 
-            if (updateDto.ActivityType is not null)
+            if (updateDto.ActivityTypeId.HasValue)
             {
-                var activityType = await _unitOfWork.ActivityType.GetByNameAsync(updateDto.ActivityType);
+                var activityType = await _unitOfWork.ActivityType.GetByIdAsync(updateDto.ActivityTypeId.Value);
 
                 if (activityType is null)
-                    throw new ActivityTypeNotFoundException(updateDto.ActivityType);
+                    throw new ActivityTypeNotFoundException(updateDto.ActivityTypeId.Value);
 
                 activity.ActivityTypeId = activityType.Id;
-                
+            }
+
+            if (updateDto.ActivityTypeId.HasValue)
+            {
+                var activityType = await _unitOfWork.ActivityType.GetByIdAsync(updateDto.ActivityTypeId.Value);
+
+                if (activityType is null)
+                    throw new ActivityTypeNotFoundException(updateDto.ActivityTypeId.Value);
+
+                activity.ActivityTypeId = activityType.Id;
             }
 
             if (updateDto.Name is not null)

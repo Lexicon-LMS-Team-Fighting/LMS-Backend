@@ -1,4 +1,5 @@
-﻿using LMS.Shared.DTOs.LMSActivityDtos;
+﻿using LMS.Shared.DTOs.ActivityTypeDto;
+using LMS.Shared.DTOs.LMSActivityDtos;
 using LMS.Shared.DTOs.PaginationDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -46,10 +47,10 @@ namespace LMS.Presentation.Controllers
             Summary = "Get all activity types",
             Description = "Retrieves all activity types available in the system."
         )]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<string>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ActivityTypeDto>))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<IEnumerable<string>>> GetActivityTypes() =>
+        public async Task<ActionResult<IEnumerable<ActivityTypeDto>>> GetActivityTypes() =>
             Ok(await _serviceManager.ActivityTypeService.GetAllAsync());
     }
 
