@@ -70,7 +70,7 @@ public class DataSeedHostingService : IHostedService
         roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
         // Uncomment to clear the database and apply migrations
-        await ClearDatabaseAsync(cancellationToken);
+        //await ClearDatabaseAsync(cancellationToken);
 
         if (!env.IsDevelopment()) return; // Only seed data in development environment
         if (await context.Users.AnyAsync(cancellationToken)) return;  // Only seed data if no users exist 
