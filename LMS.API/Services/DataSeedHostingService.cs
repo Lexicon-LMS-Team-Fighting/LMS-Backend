@@ -2,6 +2,7 @@
 using LMS.Infractructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace LMS.API.Services;
 
@@ -26,6 +27,7 @@ public class DataSeedHostingService : IHostedService
     private const int MinActivitiesPerModule = 1; // Minimum number of activities per module. An exact number is randomly chosen between Min and Max
     private const int MaxActivitiesPerModule = 10; // Maximum number of activities per module. An exact number is randomly chosen between Min and Max
     private const int DocumentsCount = 50; // Number of documents to generate
+    private const int ChanceToAssignFeedback = 80; // Percentage chance that a student will provide feedback on an activity (0-100)
     private const string DefaultTeacherUserName = "Teacher"; // Default username for teachers
     private const string DefaultStudentUserName = "Student"; // Default username for students
     private const string DefaultTeacherEmail = "teacher@test.com"; // Default email for teachers
@@ -68,7 +70,7 @@ public class DataSeedHostingService : IHostedService
         roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
         // Uncomment to clear the database and apply migrations
-        //await ClearDatabaseAsync(cancellationToken);
+        await ClearDatabaseAsync(cancellationToken);
 
         if (!env.IsDevelopment()) return; // Only seed data in development environment
         if (await context.Users.AnyAsync(cancellationToken)) return;  // Only seed data if no users exist 
@@ -295,19 +297,22 @@ public class DataSeedHostingService : IHostedService
         if (!activities.Any() || !students.Any())
             throw new Exception("No activities or students available to add feedback to.");
 
-        var feedbackStatuses = new[] { "Genomförd", "Försenad", "Godkänd" };
         var feedbacks = new List<LMSActivityFeedback>();
+        var feedbackStatuses = new[] { "Genomförd", "Försenad", "Godkänd" };
         var rnd = new Random();
 
-        foreach (var activity in activities)
+        foreach (var student in students)
         {
-            // Randomly decide how many feedbacks to create for this activity
-            var feedbackCount = rnd.Next(1, Math.Min(5, students.Count())); // Limit to max 5 feedbacks per activity
+            var randomStudentActivities = student.UserCourses
+                .Select(uc => uc.Course) 
+                .SelectMany(c => c.Modules) 
+                .SelectMany(m => m.LMSActivities)
+                .ToList()
+                .OrderBy(_ => rnd.Next())
+                .Take((int)(activities.Count() * (ChanceToAssignFeedback / 100f)))
+                .ToList();
 
-            // Shuffle students and take the first 'feedbackCount' students to avoid duplicates
-            var selectedStudents = students.OrderBy(x => rnd.Next()).Take(feedbackCount).ToList();
-
-            foreach (var student in selectedStudents)
+            foreach (var activity in randomStudentActivities)
             {
                 var faker = new Faker<LMSActivityFeedback>("sv").Rules((f, e) =>
                 {
