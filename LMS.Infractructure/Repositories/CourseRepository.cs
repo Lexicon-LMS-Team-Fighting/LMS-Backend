@@ -24,7 +24,8 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
 	/// <inheritdoc/>
 	public async Task<Course?> GetCourseAsync(Guid courseId, bool changeTracking = false) => 
 		await FindByCondition(c => c.Id.Equals(courseId), changeTracking)
-				.FirstOrDefaultAsync();
+				.Include(c => c.Documents)
+                .FirstOrDefaultAsync();
 	
 	/// <inheritdoc/>
 	public async Task<List<Course>> GetCoursesAsync(bool changeTracking = false) => 

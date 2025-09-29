@@ -25,6 +25,7 @@ public class MapperProfile : Profile
 
         // Course mappings
         CreateMap<Course, CourseDto>();
+        CreateMap<Course, CourseDetailedDto>();
         CreateMap<CreateCourseDto, Course>();
 
         // Module mappings
@@ -41,7 +42,7 @@ public class MapperProfile : Profile
 
         // LMSActivity mappings
         CreateMap<LMSActivity, LMSActivityDto>();
-            
+        CreateMap<LMSActivity, LMSActivityDetailedDto>();
         CreateMap<CreateLMSActivityDto, LMSActivity>()
             .ForMember(d => d.Id, o => o.MapFrom(_ => Guid.NewGuid()))
             .ForMember(d => d.ActivityType, opt => opt.Ignore());

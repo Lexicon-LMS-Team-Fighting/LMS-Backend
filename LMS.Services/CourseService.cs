@@ -30,14 +30,14 @@ public class CourseService : ICourseService
 	}
 
 	/// <inheritdoc/>
-	public async Task<CourseDto> GetCourseAsync(Guid courseId)
+	public async Task<CourseDetailedDto> GetCourseAsync(Guid courseId)
 	{
 		var course = await _unitOfWork.Course.GetCourseAsync(courseId);
 		
 		if (course is null) 
 			throw new NotFoundException($"Course with id: {courseId} was not found.");
 
-		return _mapper.Map<CourseDto>(course);
+		return _mapper.Map<CourseDetailedDto>(course);
 	}
 
 	/// <inheritdoc/>

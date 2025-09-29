@@ -48,12 +48,12 @@ public class CourseController: ControllerBase
 		Summary = "Get specified course by ID",
 		Description = "Retrieves course details by their unique GUID identifier."
 	)]
-	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CourseDto>))]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CourseDetailedDto>))]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task<ActionResult<CourseDto>> GetCourse(Guid guid) =>
+	public async Task<ActionResult<CourseDetailedDto>> GetCourse(Guid guid) =>
 		Ok(await _serviceManager.CourseService.GetCourseAsync(guid));
 
 

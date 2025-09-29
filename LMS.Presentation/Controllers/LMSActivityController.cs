@@ -44,11 +44,11 @@ namespace LMS.Presentation.Controllers
             Summary = "Get specified activity by ID",
             Description = "Retrieves activity details by their unique GUID identifier."
         )]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LMSActivityDto))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LMSActivityDetailedDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<LMSActivityDto>> GetActivity(Guid guid) =>
+        public async Task<ActionResult<LMSActivityDetailedDto>> GetActivity(Guid guid) =>
             Ok(await _serviceManager.LMSActivityService.GetByIdAsync(guid));
 
         /// <summary>
