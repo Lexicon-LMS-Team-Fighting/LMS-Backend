@@ -27,6 +27,7 @@ namespace LMS.Infractructure.Repositories
         /// <returns>The module if found, otherwise null.</returns>
         public async Task<Module?> GetByIdAsync(Guid moduleId, bool changeTracking = false) =>
             await FindByCondition(m => m.Id == moduleId, trackChanges: changeTracking)
+                .Include(m => m.Documents)
                 .FirstOrDefaultAsync();
 
         /// <summary>

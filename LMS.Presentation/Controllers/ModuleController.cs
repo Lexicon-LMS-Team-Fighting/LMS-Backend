@@ -49,7 +49,7 @@ namespace LMS.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<ModuleDto>> GetModule(Guid guid) =>
+        public async Task<ActionResult<ModuleDetailedDto>> GetModule(Guid guid) =>
             Ok(await _serviceManager.ModuleService.GetByIdAsync(guid));
 
         /// <summary>
