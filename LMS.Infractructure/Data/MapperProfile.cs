@@ -49,6 +49,9 @@ public class MapperProfile : Profile
         // ActivityType mappings
         CreateMap<ActivityType, ActivityTypeDto>();
 
+        // Document mappings
+        CreateMap<Document, DocumentDto>();
+
         // Pagination mappings
         CreateMap<PaginationMetadata, PaginationMetadataDto>();
         CreateMap(typeof(PaginatedResult<>), typeof(PaginatedResultDto<>));
