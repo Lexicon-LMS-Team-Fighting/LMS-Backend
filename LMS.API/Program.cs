@@ -13,6 +13,7 @@ public class Program
         builder.Services.ConfigureSql(builder.Configuration);
         builder.Services.ConfigureControllers();
         builder.Services.ConfigureValidationFilter(); // Register custom validation filter and suppress default model validation
+        builder.Services.AddHttpContextAccessor(); // Register IHttpContextAccessor for accessing HTTP context in services
 
         builder.Services.AddRepositories();
         builder.Services.AddServiceLayer();

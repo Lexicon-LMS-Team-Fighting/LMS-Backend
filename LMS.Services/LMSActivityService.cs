@@ -2,6 +2,7 @@
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using Domain.Models.Exceptions;
+using Domain.Models.Exceptions.Authorization;
 using Domain.Models.Exceptions.BadRequest;
 using Domain.Models.Exceptions.Conflict;
 using Domain.Models.Exceptions.NotFound;
@@ -21,16 +22,19 @@ namespace LMS.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICurrentUserService _currentUserService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LMSActivityService"/> class.
         /// </summary>
         /// <param name="unitOfWork">The unit of work for accessing repositories.</param>
         /// <param name="mapper">The AutoMapper instance for mapping entities and DTOs.</param>
-        public LMSActivityService(IUnitOfWork unitOfWork, IMapper mapper)
+        /// <param name="currentUserService">The service for accessing current user information.</param>
+        public LMSActivityService(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _currentUserService = currentUserService;
         }
 
         /// <summary>
@@ -39,9 +43,18 @@ namespace LMS.Services
         /// <param name="id">The unique identifier of the activity.</param>
         /// <returns>A <see cref="LMSActivityDetailedDto"/> representing the activity.</returns>
         /// <exception cref="LMSActivityNotFoundException">Thrown if the activity is not found.</exception>
+        /// <exception cref="UserRoleNotSupportedException">Thrown if the current user's role is not supported.</exception>
         public async Task<LMSActivityDetailedDto> GetByIdAsync(Guid id)
         {
-            var activity = await _unitOfWork.LMSActivity.GetByIdAsync(id);
+            var userId = _currentUserService.Id;
+            LMSActivity? activity = null;
+
+            if (_currentUserService.IsTeacher)
+                activity = await _unitOfWork.LMSActivity.GetByIdAsync(id, true);
+            else if (_currentUserService.IsStudent)
+                activity = await _unitOfWork.LMSActivity.GetByIdAsync(id, _currentUserService.Id, true);
+            else
+                throw new UserRoleNotSupportedException();
 
             if (activity is null)
                 throw new LMSActivityNotFoundException(id);
@@ -58,6 +71,7 @@ namespace LMS.Services
         public async Task<PaginatedResultDto<LMSActivityDto>> GetAllAsync(int pageNumber, int pageSize)
         {
             var activities = await _unitOfWork.LMSActivity.GetAllAsync();
+
 
             var paginatedActivities = activities.ToPaginatedResult(new PagingParameters
             {

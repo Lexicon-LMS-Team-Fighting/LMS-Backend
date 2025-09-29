@@ -1,4 +1,5 @@
 ﻿using LMS.Shared.DTOs.DocumentDtos;
+using LMS.Shared.DTOs.LMSActivityFeedbackDtos;
 
 namespace LMS.Shared.DTOs.LMSActivityDtos
 {
@@ -47,5 +48,10 @@ namespace LMS.Shared.DTOs.LMSActivityDtos
         /// Gets or sets the collection of documents associated with the LMSActivity in a preview format.
         /// </summary>
         public IEnumerable<DocumentPreviewDto> Documents { get; set; } = [];
+
+        /// <summary>
+        /// Gets or sets the collection of feedbacks associated with the activity.
+        /// </summary>
+        public IEnumerable<LMSActivityFeedbackDto> Feedbacks { get; set; } = [];
     }
 }

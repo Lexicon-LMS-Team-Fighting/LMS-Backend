@@ -98,6 +98,7 @@ public static class ServiceExtensions
     public static void AddServiceLayer(this IServiceCollection services)
     {
         services.AddScoped<IServiceManager, ServiceManager>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 		// ToDo: TestService injection is here for testing purposes only, should be removed when no longer needed.
 		services.AddScoped<ITestService, TestService>();
