@@ -7,6 +7,7 @@ public interface IServiceManager
     IModuleService ModuleService { get; }
     ILMSActivityService LMSActivityService { get; }
     IActivityTypeService ActivityTypeService { get; }
+    IDocumentService DocumentService { get; }
 
     ITestService TestService { get; } // ToDo: TestService is to be removed when no longer needed.
 }
