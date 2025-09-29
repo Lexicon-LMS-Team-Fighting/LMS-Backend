@@ -28,6 +28,7 @@ namespace LMS.Infractructure.Repositories
         public async Task<LMSActivity?> GetByIdAsync(Guid activityId, bool changeTracking = false) =>
             await FindByCondition(a => a.Id == activityId, trackChanges: changeTracking)
                 .Include(a => a.ActivityType)
+                .Include(a => a.Documents)
                 .FirstOrDefaultAsync();
 
         /// <summary>

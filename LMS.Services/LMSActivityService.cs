@@ -37,16 +37,16 @@ namespace LMS.Services
         /// Retrieves an activity by its unique identifier.
         /// </summary>
         /// <param name="id">The unique identifier of the activity.</param>
-        /// <returns>A <see cref="LMSActivityDto"/> representing the activity.</returns>
+        /// <returns>A <see cref="LMSActivityDetailedDto"/> representing the activity.</returns>
         /// <exception cref="LMSActivityNotFoundException">Thrown if the activity is not found.</exception>
-        public async Task<LMSActivityDto> GetByIdAsync(Guid id)
+        public async Task<LMSActivityDetailedDto> GetByIdAsync(Guid id)
         {
             var activity = await _unitOfWork.LMSActivity.GetByIdAsync(id);
 
             if (activity is null)
                 throw new LMSActivityNotFoundException(id);
 
-            return _mapper.Map<LMSActivityDto>(activity);
+            return _mapper.Map<LMSActivityDetailedDto>(activity);
         }
 
         /// <summary>
