@@ -2,6 +2,7 @@
 using LMS.Infractructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace LMS.API.Services;
 
@@ -26,6 +27,7 @@ public class DataSeedHostingService : IHostedService
     private const int MinActivitiesPerModule = 1; // Minimum number of activities per module. An exact number is randomly chosen between Min and Max
     private const int MaxActivitiesPerModule = 10; // Maximum number of activities per module. An exact number is randomly chosen between Min and Max
     private const int DocumentsCount = 50; // Number of documents to generate
+    private const int ChanceToAssignFeedback = 80; // Percentage chance that a student will be provided with a feedback on activities (0-100)
     private const string DefaultTeacherUserName = "Teacher"; // Default username for teachers
     private const string DefaultStudentUserName = "Student"; // Default username for students
     private const string DefaultTeacherEmail = "teacher@test.com"; // Default email for teachers
@@ -128,6 +130,7 @@ public class DataSeedHostingService : IHostedService
         var activityTypes = await AddActivityTypesAsync(cancellationToken);
         var activities = await AddLMSActivitiesAsync(modules, activityTypes, cancellationToken);
         await AddDocumentsAsync(students, courses, modules, activities, cancellationToken);
+        await AddFeedbacksAsync(activities, students, cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
     }
@@ -282,6 +285,53 @@ public class DataSeedHostingService : IHostedService
     }
 
     /// <summary>
+    /// Generates and adds feedbacks for LMS activities from students.
+    /// </summary>
+    /// <param name="activities">The activities to add feedback on.</param>
+    /// <param name="students">The students to add feedback for.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns></returns>
+    /// <exception cref="Exception">Thrown if no activities or students are available to add feedback to.</exception>
+    private async Task<IEnumerable<LMSActivityFeedback>> AddFeedbacksAsync(IEnumerable<LMSActivity> activities, IEnumerable<ApplicationUser> students, CancellationToken cancellationToken)
+    {
+        if (!activities.Any() || !students.Any())
+            throw new Exception("No activities or students available to add feedback to.");
+
+        var feedbacks = new List<LMSActivityFeedback>();
+        var feedbackStatuses = new[] { "Genomförd", "Försenad", "Godkänd" };
+        var rnd = new Random();
+
+        foreach (var student in students)
+        {
+            var randomStudentActivities = student.UserCourses
+                .Select(uc => uc.Course) 
+                .SelectMany(c => c.Modules) 
+                .SelectMany(m => m.LMSActivities)
+                .ToList()
+                .OrderBy(_ => rnd.Next())
+                .Take((int)(activities.Count() * (ChanceToAssignFeedback / 100f)))
+                .ToList();
+
+            foreach (var activity in randomStudentActivities)
+            {
+                var faker = new Faker<LMSActivityFeedback>("sv").Rules((f, e) =>
+                {
+                    e.LMSActivityId = activity.Id;
+                    e.UserId = student.Id;
+                    e.Feedback = f.Random.Bool(0.8f) ? f.Lorem.Sentence() : null;
+                    e.Status = f.PickRandom(feedbackStatuses);
+                });
+
+                var feedback = faker.Generate();
+                feedbacks.Add(feedback);
+            }
+        }
+
+        await context.LMSActivityFeedbacks.AddRangeAsync(feedbacks, cancellationToken);
+        return feedbacks;
+    }
+
+    /// <summary>
     /// Generates and adds students to the database.
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
@@ -296,7 +346,6 @@ public class DataSeedHostingService : IHostedService
         randomStudent.NormalizedUserName = DefaultStudentUserName.ToUpper();
         randomStudent.Email = DefaultStudentEmail;
         randomStudent.NormalizedEmail = DefaultStudentEmail.ToUpper();
-
 
         return students;
     }

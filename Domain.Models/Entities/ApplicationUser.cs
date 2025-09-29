@@ -18,4 +18,5 @@ public class ApplicationUser : IdentityUser
     // Foreign Keys / Navigation Properties
     public ICollection<UserCourse> UserCourses { get; set; } = new List<UserCourse>();
     public ICollection<Document> Documents { get; set; } = new List<Document>();
+    public ICollection<LMSActivityFeedback> LMSActivityFeedbacks { get; set; } = new List<LMSActivityFeedback>();
 }
