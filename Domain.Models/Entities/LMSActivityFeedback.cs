@@ -10,7 +10,7 @@ namespace Domain.Models.Entities
     {
         public string UserId { get; set; } = null!;
         public Guid LMSActivityId { get; set; }
-        public string Feedback { get; set; } = string.Empty;
+        public string? Feedback { get; set; }
         public string Status { get; set; } = string.Empty;
 
         // Foreign Keys / Navigation Properties

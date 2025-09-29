@@ -17,7 +17,7 @@ namespace LMS.Infractructure.Migrations
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     LMSActivityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Feedback = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Feedback = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>

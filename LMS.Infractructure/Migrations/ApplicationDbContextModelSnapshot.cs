@@ -240,7 +240,6 @@ namespace LMS.Infractructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Feedback")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")

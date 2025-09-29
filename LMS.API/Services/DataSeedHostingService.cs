@@ -318,7 +318,7 @@ public class DataSeedHostingService : IHostedService
                 {
                     e.LMSActivityId = activity.Id;
                     e.UserId = student.Id;
-                    e.Feedback = f.Lorem.Sentence();
+                    e.Feedback = f.Random.Bool(0.8f) ? f.Lorem.Sentence() : null;
                     e.Status = f.PickRandom(feedbackStatuses);
                 });
 

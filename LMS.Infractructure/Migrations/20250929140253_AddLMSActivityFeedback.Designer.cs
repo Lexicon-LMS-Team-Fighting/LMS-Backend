@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS.Infractructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250929120925_AddLMSActivityFeedback")]
+    [Migration("20250929140253_AddLMSActivityFeedback")]
     partial class AddLMSActivityFeedback
     {
         /// <inheritdoc />
@@ -243,7 +243,6 @@ namespace LMS.Infractructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Feedback")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
