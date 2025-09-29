@@ -27,7 +27,7 @@ public class DataSeedHostingService : IHostedService
     private const int MinActivitiesPerModule = 1; // Minimum number of activities per module. An exact number is randomly chosen between Min and Max
     private const int MaxActivitiesPerModule = 10; // Maximum number of activities per module. An exact number is randomly chosen between Min and Max
     private const int DocumentsCount = 50; // Number of documents to generate
-    private const int ChanceToAssignFeedback = 80; // Percentage chance that a student will provide feedback on an activity (0-100)
+    private const int ChanceToAssignFeedback = 80; // Percentage chance that a student will be provided with a feedback on activities (0-100)
     private const string DefaultTeacherUserName = "Teacher"; // Default username for teachers
     private const string DefaultStudentUserName = "Student"; // Default username for students
     private const string DefaultTeacherEmail = "teacher@test.com"; // Default email for teachers
