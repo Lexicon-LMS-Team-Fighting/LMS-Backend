@@ -11,11 +11,6 @@
         public string UserId { get; set; } = null!;
 
         /// <summary>
-        /// The unique identifier of the LMS activity associated with this feedback.
-        /// </summary>
-        public Guid LMSActivityId { get; set; }
-
-        /// <summary>
         /// The status of the feedback
         /// </summary>
         public string Status { get; set; } = string.Empty;
