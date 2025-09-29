@@ -106,15 +106,21 @@ public static class ServiceExtensions
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped(provider => new Lazy<IAuthService>(() => provider.GetRequiredService<IAuthService>()));
 
-		services.AddScoped<IUserService, UserService>();
-		services.AddScoped(provider => new Lazy<IUserService>(() => provider.GetRequiredService<IUserService>()));
+		    services.AddScoped<IUserService, UserService>();
+		    services.AddScoped(provider => new Lazy<IUserService>(() => provider.GetRequiredService<IUserService>()));
 		
         services.AddScoped<ICourseService, CourseService>();
-		services.AddScoped(provider => new Lazy<ICourseService>(() => provider.GetRequiredService<ICourseService>()));
+		    services.AddScoped(provider => new Lazy<ICourseService>(() => provider.GetRequiredService<ICourseService>()));
 
         services.AddScoped<IModuleService, ModuleService>();
         services.AddScoped(provider => new Lazy<IModuleService>(() => provider.GetRequiredService<IModuleService>()));
 
+        services.AddScoped<ILMSActivityService, LMSActivityService>();
+        services.AddScoped(provider => new Lazy<ILMSActivityService>(() => provider.GetRequiredService<ILMSActivityService>()));
+
+        services.AddScoped<IActivityTypeService, ActivityTypeService>();
+        services.AddScoped(provider => new Lazy<IActivityTypeService>(() => provider.GetRequiredService<IActivityTypeService>()));
+      
         services.AddScoped<IDocumentService, DocumentService>();
         services.AddScoped(provider => new Lazy<IDocumentService>(() => provider.GetRequiredService<IDocumentService>()));
     }

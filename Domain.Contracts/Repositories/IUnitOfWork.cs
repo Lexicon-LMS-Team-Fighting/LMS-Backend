@@ -18,6 +18,15 @@ public interface IUnitOfWork
     IModuleRepository Module { get; }
 
     /// <summary>
+    /// Gets the repository for handling <see cref="Models.Entities.LMSActivity"/> entities.
+    /// </summary>
+    ILMSActivityRepository LMSActivity { get; }
+
+    /// <summary>
+    /// Gets the repository for handling <see cref="Models.Entities.ActivityType"/> entities.
+    /// </summary>
+    IActivityTypeRepository ActivityType { get; }
+
     /// Gets the repository for handling <see cref="Models.Entities.Document"/> entities.
     /// </summary>
     IDocumentRepository Document { get; }
