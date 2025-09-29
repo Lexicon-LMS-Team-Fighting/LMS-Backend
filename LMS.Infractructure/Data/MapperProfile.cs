@@ -3,6 +3,7 @@ using Domain.Models.Entities;
 using LMS.Shared.DTOs.ActivityTypeDto;
 using LMS.Shared.DTOs.AuthDtos;
 using LMS.Shared.DTOs.CourseDtos;
+using LMS.Shared.DTOs.DocumentDtos;
 using LMS.Shared.DTOs.LMSActivityDtos;
 using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.DTOs.PaginationDtos;
@@ -41,6 +42,9 @@ public class MapperProfile : Profile
 
         // ActivityType mappings
         CreateMap<ActivityType, ActivityTypeDto>();
+
+        // Document mappings
+        CreateMap<Document, DocumentDto>();
 
         // Pagination mappings
         CreateMap<PaginationMetadata, PaginationMetadataDto>();

@@ -37,12 +37,12 @@ namespace LMS.Services
         /// <exception cref="LMSActivityNotFoundException">Thrown if the document is not found.</exception>
         public async Task<DocumentDto> GetByIdAsync(Guid id)
         {
-            var activity = await _unitOfWork.LMSActivity.GetByIdAsync(id);
+            var document = await _unitOfWork.Document.GetByIdAsync(id);
 
-            if (activity is null)
+            if (document is null)
                 throw new DocumentNotFoundException(id);
 
-            return _mapper.Map<DocumentDto>(activity);
+            return _mapper.Map<DocumentDto>(document);
         }
 
         /// <summary>
@@ -53,15 +53,15 @@ namespace LMS.Services
         /// <returns>A <see cref="PaginatedResultDto{DocumentDto}"/> containing the paginated list of documents.</returns>
         public async Task<PaginatedResultDto<DocumentDto>> GetAllAsync(int pageNumber, int pageSize)
         {
-            var activities = await _unitOfWork.LMSActivity.GetAllAsync();
+            var documents = await _unitOfWork.Document.GetAllAsync();
 
-            var paginatedActivities = activities.ToPaginatedResult(new PagingParameters
+            var paginatedDocuments = documents.ToPaginatedResult(new PagingParameters
             {
                 PageNumber = pageNumber,
                 PageSize = pageSize
             });
 
-            return _mapper.Map<PaginatedResultDto<DocumentDto>>(paginatedActivities);
+            return _mapper.Map<PaginatedResultDto<DocumentDto>>(paginatedDocuments);
         }
     }
 }
