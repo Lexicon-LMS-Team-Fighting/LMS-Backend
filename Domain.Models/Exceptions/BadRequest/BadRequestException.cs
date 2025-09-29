@@ -7,15 +7,15 @@ using Domain.Models.Exceptions;
 /// </summary>
 public class BadRequestException : AppException
 {
-    /// <summary>
-    /// Initializes a new instance of the class with a custom message.
-    /// </summary>
-    public BadRequestException(string message)
+	/// <summary>
+	/// Initializes a new instance of the class resulting in a <see cref="HttpStatusCode.BadRequest"/> with a custom message.
+	/// </summary>
+	public BadRequestException(string message)
         : base(message, HttpStatusCode.BadRequest) { }
 
-    /// <summary>
-    /// Initializes a new instance of the class with a default message.
-    /// </summary>
-    public BadRequestException()
+	/// <summary>
+	/// Initializes a new instance of the class resulting in a <see cref="HttpStatusCode.BadRequest"/> with a default message.
+	/// </summary>
+	public BadRequestException()
         : base("The request was invalid.", HttpStatusCode.BadRequest) { }
 }

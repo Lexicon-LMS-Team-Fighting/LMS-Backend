@@ -10,6 +10,13 @@ namespace Domain.Contracts.Repositories;
 public interface ICourseRepository: IRepositoryBase<Course>
 {
 	/// <summary>
+	/// Checks if any <see cref="Course"/> entity exists with the specified name. <br/>
+	/// </summary>
+	/// <param name="name">Name to search for.</param>
+	/// <returns>Boolean indicating if the name already exist.</returns>
+	Task<bool> AnyAsync(string name);
+
+	/// <summary>
 	/// Retrieves a single <see cref="Course"/> entity by its unique identifier. <br/>
 	/// </summary>
 	/// <param name="courseId">The unique identifier of the user.</param>

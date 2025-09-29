@@ -24,6 +24,7 @@ public class MapperProfile : Profile
 
         // Course mappings
         CreateMap<Course, CourseDto>();
+        CreateMap<CreateCourseDto, Course>();
 
         // Module mappings
         CreateMap<Module, ModuleDto>();

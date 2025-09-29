@@ -108,9 +108,9 @@ namespace LMS.Presentation.Controllers
         /// <response code="204">Module was successfully updated.</response>
         /// <response code="400">If the provided module data is invalid.</response>
         /// <response code="404">If no module is found with the specified GUID.</response>
-        /// <response code="409">If there is a conflict while updating the module.</response>
         /// <response code="401">Unauthorized.</response>
         /// <response code="403">Forbidden.</response>
+        /// <response code="409">If there is a conflict while updating the module.</response>
         [HttpPut("{guid}")]
         [Authorize(Roles = "Teacher")]
         [SwaggerOperation(
@@ -118,11 +118,11 @@ namespace LMS.Presentation.Controllers
             Description = "Updates the details of an existing module identified by its GUID."
         )]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> UpdateModule(Guid guid, [FromBody] UpdateModuleDto module)
         {
             await _serviceManager.ModuleService.UpdateAsync(guid, module);
