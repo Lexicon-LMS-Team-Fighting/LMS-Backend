@@ -68,7 +68,7 @@ public class DataSeedHostingService : IHostedService
         roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
         // Uncomment to clear the database and apply migrations
-        //await ClearDatabaseAsync(cancellationToken);
+        await ClearDatabaseAsync(cancellationToken);
 
         if (!env.IsDevelopment()) return; // Only seed data in development environment
         if (await context.Users.AnyAsync(cancellationToken)) return;  // Only seed data if no users exist 
@@ -128,6 +128,7 @@ public class DataSeedHostingService : IHostedService
         var activityTypes = await AddActivityTypesAsync(cancellationToken);
         var activities = await AddLMSActivitiesAsync(modules, activityTypes, cancellationToken);
         await AddDocumentsAsync(students, courses, modules, activities, cancellationToken);
+        await AddFeedbacksAsync(activities, students, cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
     }
@@ -279,6 +280,42 @@ public class DataSeedHostingService : IHostedService
         await context.LMSActivities.AddRangeAsync(activities, cancellationToken);
 
         return activities;
+    }
+    
+    private async Task<IEnumerable<LMSActivityFeedback>> AddFeedbacksAsync(IEnumerable<LMSActivity> activities, IEnumerable<ApplicationUser> students, CancellationToken cancellationToken)
+    {
+        if (!activities.Any() || !students.Any())
+            throw new Exception("No activities or students available to add feedback to.");
+
+        var feedbackStatuses = new[] { "Genomförd", "Försenad", "Godkänd" };
+        var feedbacks = new List<LMSActivityFeedback>();
+        var rnd = new Random();
+
+        foreach (var activity in activities)
+        {
+            // Randomly decide how many feedbacks to create for this activity
+            var feedbackCount = rnd.Next(1, Math.Min(5, students.Count())); // Limit to max 5 feedbacks per activity
+
+            // Shuffle students and take the first 'feedbackCount' students to avoid duplicates
+            var selectedStudents = students.OrderBy(x => rnd.Next()).Take(feedbackCount).ToList();
+
+            foreach (var student in selectedStudents)
+            {
+                var faker = new Faker<LMSActivityFeedback>("sv").Rules((f, e) =>
+                {
+                    e.LMSActivityId = activity.Id;
+                    e.UserId = student.Id;
+                    e.Feedback = f.Lorem.Sentence();
+                    e.Status = f.PickRandom(feedbackStatuses);
+                });
+
+                var feedback = faker.Generate();
+                feedbacks.Add(feedback);
+            }
+        }
+
+        await context.LMSActivityFeedbacks.AddRangeAsync(feedbacks, cancellationToken);
+        return feedbacks;
     }
 
     /// <summary>
