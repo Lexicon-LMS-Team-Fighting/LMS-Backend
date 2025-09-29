@@ -12,7 +12,7 @@ namespace LMS.Infractructure.Repositories
     public class DocumentRepository : RepositoryBase<Document>, IDocumentRepository
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LMSActivityRepository"/> class with the specified database context.
+        /// Initializes a new instance of the <see cref="DocumentRepository"/> class with the specified database context.
         /// </summary>
         /// <param name="context">The database context to be used by the repository.</param>
         public DocumentRepository(ApplicationDbContext context) : base(context)

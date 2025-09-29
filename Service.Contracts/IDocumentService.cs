@@ -11,7 +11,7 @@ namespace Service.Contracts
     public interface IDocumentService
     {
         /// <summary>
-        /// Retrieves an activity by its unique identifier.
+        /// Retrieves a document by its unique identifier.
         /// </summary>
         /// <param name="id">The unique identifier of the activity.</param>
         /// <returns>A <see cref="DocumentDto"/> representing the document.</returns>
