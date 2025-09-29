@@ -1,4 +1,6 @@
-﻿namespace LMS.Shared.DTOs.CourseDtos;
+﻿using LMS.Shared.DTOs.DocumentDtos;
+
+namespace LMS.Shared.DTOs.CourseDtos;
 
 /// <summary>
 /// Represents a data transfer object (DTO) for a <see cref="Course"/>. <br />

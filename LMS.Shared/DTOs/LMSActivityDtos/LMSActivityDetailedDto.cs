@@ -1,4 +1,6 @@
-﻿namespace LMS.Shared.DTOs.LMSActivityDtos
+﻿using LMS.Shared.DTOs.DocumentDtos;
+
+namespace LMS.Shared.DTOs.LMSActivityDtos
 {
     /// <summary>
     /// Data Transfer Object (DTO) representing an <see cref="LMSActivity"/>.

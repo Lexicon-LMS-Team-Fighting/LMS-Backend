@@ -13,8 +13,8 @@ namespace Service.Contracts
         /// Retrieves an activity by its unique identifier.
         /// </summary>
         /// <param name="id">The unique identifier of the activity.</param>
-        /// <returns>A <see cref="LMSActivityDto"/> representing the activity.</returns>
-        Task<LMSActivityDto> GetByIdAsync(Guid id);
+        /// <returns>A <see cref="LMSActivityDetailedDto"/> representing the activity.</returns>
+        Task<LMSActivityDetailedDto> GetByIdAsync(Guid id);
 
         /// <summary>
         /// Retrieves a paginated list of all activities.
