@@ -37,6 +37,16 @@ namespace Domain.Contracts.Repositories
         Task<IEnumerable<LMSActivity>> GetAllAsync(bool changeTracking = false);
 
         /// <summary>
+        /// Retrieves all <see cref="LMSActivity"/> entities from the data source from the perspective of a specific user. <br/>
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <param name="changeTracking">If <c>true</c>, Entity Framework change tracking will be enabled. <br/></param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The task result contains a collection of <see cref="LMSActivity"/> entities.
+        /// </returns>
+        Task<IEnumerable<LMSActivity>> GetAllAsync(string userId, bool changeTracking = false);
+
+        /// <summary>
         /// Retrieves all <see cref="LMSActivity"/> entities associated with a specific module. <br/>
         /// </summary>
         /// <param name="moduleId">The unique identifier of the parent module.</param>
@@ -45,5 +55,16 @@ namespace Domain.Contracts.Repositories
         /// A task representing the asynchronous operation. The task result contains a collection of <see cref="LMSActivity"/> entities.
         /// </returns>
         Task<IEnumerable<LMSActivity>> GetByModuleIdAsync(Guid moduleId, bool changeTracking = false);
+
+        /// <summary>
+        /// Retrieves all <see cref="LMSActivity"/> entities associated with a specific module from the perspective of a specific user. <br/>
+        /// </summary>
+        /// <param name="moduleId">The unique identifier of the parent module.</param>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <param name="changeTracking">If <c>true</c>, Entity Framework change tracking will be enabled. <br/></param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The task result contains a collection of <see cref="LMSActivity"/> entities.
+        /// </returns>
+        Task<IEnumerable<LMSActivity>> GetByModuleIdAsync(Guid moduleId, string userId, bool changeTracking = false);
     }
 }
