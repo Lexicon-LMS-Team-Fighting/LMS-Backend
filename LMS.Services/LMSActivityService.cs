@@ -49,9 +49,9 @@ namespace LMS.Services
             LMSActivity? activity = null;
 
             if (_currentUserService.IsTeacher)
-                activity = await _unitOfWork.LMSActivity.GetByIdAsync(id, true);
+                activity = await _unitOfWork.LMSActivity.GetByIdAsync(id);
             else if (_currentUserService.IsStudent)
-                activity = await _unitOfWork.LMSActivity.GetByIdAsync(id, _currentUserService.Id, true);
+                activity = await _unitOfWork.LMSActivity.GetByIdAsync(id, _currentUserService.Id);
             else
                 throw new UserRoleNotSupportedException();
 
@@ -69,8 +69,14 @@ namespace LMS.Services
         /// <returns>A <see cref="PaginatedResultDto{LMSActivityDto}"/> containing the paginated list of activities.</returns>
         public async Task<PaginatedResultDto<LMSActivityDto>> GetAllAsync(int pageNumber, int pageSize)
         {
-            var activities = await _unitOfWork.LMSActivity.GetAllAsync();
+            IEnumerable<LMSActivity>? activities = null;
 
+            if (_currentUserService.IsTeacher)
+                activities = await _unitOfWork.LMSActivity.GetAllAsync();
+            else if (_currentUserService.IsStudent)
+                activities = await _unitOfWork.LMSActivity.GetAllAsync(_currentUserService.Id);
+            else
+                throw new UserRoleNotSupportedException();
 
             var paginatedActivities = activities.ToPaginatedResult(new PagingParameters
             {
@@ -91,10 +97,25 @@ namespace LMS.Services
         /// <exception cref="ModuleNotFoundException">Thrown if the module is not found.</exception>
         public async Task<PaginatedResultDto<LMSActivityDto>> GetAllByModuleIdAsync(Guid moduleId, int pageNumber, int pageSize)
         {
-            if (await _unitOfWork.Module.GetByIdAsync(moduleId) is null)
-                throw new ModuleNotFoundException(moduleId);
+            IEnumerable<LMSActivity>? activities = null;
 
-            var activities = await _unitOfWork.LMSActivity.GetByModuleIdAsync(moduleId);
+            if (_currentUserService.IsTeacher)
+            {
+                if (await _unitOfWork.Module.GetByIdAsync(moduleId) is null)
+                    throw new ModuleNotFoundException(moduleId);
+
+                activities = await _unitOfWork.LMSActivity.GetByModuleIdAsync(moduleId);
+            }
+            else if (_currentUserService.IsStudent)
+            {
+                // ToDo: use user-specific method here
+                if (await _unitOfWork.Module.GetByIdAsync(moduleId) is null)
+                    throw new ModuleNotFoundException(moduleId);
+
+                activities = await _unitOfWork.LMSActivity.GetByModuleIdAsync(moduleId, _currentUserService.Id);
+            }
+            else throw new UserRoleNotSupportedException();
+
 
             var paginatedActivities = activities.ToPaginatedResult(new PagingParameters
             {
@@ -155,7 +176,7 @@ namespace LMS.Services
         /// <exception cref="LMSActivityNotFoundException">Thrown if the activity is not found.</exception>
         public async Task DeleteAsync(Guid id)
         {
-            var activity = await _unitOfWork.LMSActivity.GetByIdAsync(id, true);
+            var activity = await _unitOfWork.LMSActivity.GetByIdAsync(id);
 
             if (activity is null)
                 throw new LMSActivityNotFoundException(id);
