@@ -48,7 +48,7 @@ namespace LMS.Services
             if (_currentUserService.IsTeacher)
                 module = await _unitOfWork.Module.GetByIdAsync(id, true);
             else if (_currentUserService.IsStudent)
-                module = await _unitOfWork.Module.GetByIdAsync(id, _currentUserService.Id, true);
+                module = await _unitOfWork.Module.GetByIdAsync(id, _currentUserService.Id);
             else
                 throw new UserRoleNotSupportedException();
 
@@ -71,7 +71,7 @@ namespace LMS.Services
             if (_currentUserService.IsTeacher)
                 modules = await _unitOfWork.Module.GetAllAsync(true);
             else if (_currentUserService.IsStudent)
-                modules = await _unitOfWork.Module.GetAllAsync(_currentUserService.Id, true);
+                modules = await _unitOfWork.Module.GetAllAsync(_currentUserService.Id);
             else
                 throw new UserRoleNotSupportedException();
 
@@ -93,18 +93,24 @@ namespace LMS.Services
         /// <returns>A <see cref="PaginatedResultDto{ModuleDto}"/> containing the paginated list of modules for the specified course.</returns>
         public async Task<PaginatedResultDto<ModuleDto>> GetAllByCourseIdAsync(Guid courseId, int pageNumber, int pageSize)
         {
-            // ToDo: add user-specific search by courseId
-            if (await _unitOfWork.Course.GetCourseAsync(courseId) is null)
-                throw new CourseNotFoundException(courseId);
-
             IEnumerable<Module>? modules = null;
 
             if (_currentUserService.IsTeacher)
+            {
+                if (await _unitOfWork.Course.GetCourseAsync(courseId) is null)
+                    throw new CourseNotFoundException(courseId);
+
                 modules = await _unitOfWork.Module.GetByCourseIdAsync(courseId, true);
+            }
             else if (_currentUserService.IsStudent)
-                modules = await _unitOfWork.Module.GetByCourseIdAsync(courseId, _currentUserService.Id, true);
-            else
-                throw new UserRoleNotSupportedException();
+            {
+                // ToDo: add user-specific search by courseId
+                if (await _unitOfWork.Course.GetCourseAsync(courseId) is null)
+                    throw new CourseNotFoundException(courseId);
+
+                modules = await _unitOfWork.Module.GetByCourseIdAsync(courseId, _currentUserService.Id);
+            }
+            else throw new UserRoleNotSupportedException();
 
             var paginatedModules = modules.ToPaginatedResult(new PagingParameters
             {
@@ -155,7 +161,7 @@ namespace LMS.Services
         public async Task DeleteAsync(Guid id)
         {
             // ToDo: Check depentent entities before delete
-            var module = await _unitOfWork.Module.GetByIdAsync(id, true);
+            var module = await _unitOfWork.Module.GetByIdAsync(id);
 
             if (module is null)
                 throw new ModuleNotFoundException(id);
