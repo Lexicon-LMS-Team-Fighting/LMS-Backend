@@ -2,6 +2,7 @@
 using LMS.Infractructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace LMS.API.Services;
 
@@ -21,11 +22,12 @@ public class DataSeedHostingService : IHostedService
     private const int TeachersCount = 5; // Number of teachers to generate
     private const int StudentsCount = 30; // Number of students to generate
     private const int CoursesCount = 10; // Number of courses to generate
-    private const int MinModulesPerCourse = 1; // Minimum number of modules per course. An exact number is randomly chosen between Min and Max
-    private const int MaxModulesPerCourse = 5; // Maximum number of modules per course. An exact number is randomly chosen between Min and Max
+    private const int MinModulesPerCourse = 5; // Minimum number of modules per course. An exact number is randomly chosen between Min and Max
+    private const int MaxModulesPerCourse = 8; // Maximum number of modules per course. An exact number is randomly chosen between Min and Max
     private const int MinActivitiesPerModule = 1; // Minimum number of activities per module. An exact number is randomly chosen between Min and Max
     private const int MaxActivitiesPerModule = 10; // Maximum number of activities per module. An exact number is randomly chosen between Min and Max
     private const int DocumentsCount = 50; // Number of documents to generate
+    private const int ChanceToAssignFeedback = 80; // Percentage chance that a student will be provided with a feedback on activities (0-100)
     private const string DefaultTeacherUserName = "Teacher"; // Default username for teachers
     private const string DefaultStudentUserName = "Student"; // Default username for students
     private const string DefaultTeacherEmail = "teacher@test.com"; // Default email for teachers
@@ -67,18 +69,17 @@ public class DataSeedHostingService : IHostedService
         userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-		if (!env.IsDevelopment()) return; // Only seed data in development environment
-        if (await context.Users.AnyAsync(cancellationToken)) return;  // Only seed data if no users exist 
+        // Uncomment to clear the database and apply migrations
+        //await ClearDatabaseAsync(cancellationToken);
 
+        if (!env.IsDevelopment()) return; // Only seed data in development environment
+        if (await context.Users.AnyAsync(cancellationToken)) return;  // Only seed data if no users exist 
 
         ArgumentNullException.ThrowIfNull(roleManager, nameof(roleManager));
         ArgumentNullException.ThrowIfNull(userManager, nameof(userManager));
 
         try
         {
-            // Uncomment to clear the database and apply migrations
-            //await ClearDatabaseAsync(cancellationToken);
-
             // Populate the database with initial data
             await SeedDatabaseAsync(cancellationToken);
 
@@ -117,14 +118,19 @@ public class DataSeedHostingService : IHostedService
     private async Task SeedDatabaseAsync(CancellationToken cancellationToken)
     {
         await AddRolesAsync([TeacherRole, StudentRole]);
+        await AddTeachersAsync();
+
+        var students = await AddStudentsAsync();
         var courses = await AddCoursesAsync(cancellationToken);
+        await context.SaveChangesAsync();
+        
+        await AddEnrollmentsAsync(students, courses, cancellationToken);
+
         var modules = await AddModulesAsync(courses, cancellationToken);
         var activityTypes = await AddActivityTypesAsync(cancellationToken);
         var activities = await AddLMSActivitiesAsync(modules, activityTypes, cancellationToken);
-        await AddTeachersAsync();
-        var students = await AddStudentsAsync();
-        await AddEnrollmentsAsync(students, courses, cancellationToken);
         await AddDocumentsAsync(students, courses, modules, activities, cancellationToken);
+        await AddFeedbacksAsync(activities, students, cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
     }
@@ -279,6 +285,53 @@ public class DataSeedHostingService : IHostedService
     }
 
     /// <summary>
+    /// Generates and adds feedbacks for LMS activities from students.
+    /// </summary>
+    /// <param name="activities">The activities to add feedback on.</param>
+    /// <param name="students">The students to add feedback for.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns></returns>
+    /// <exception cref="Exception">Thrown if no activities or students are available to add feedback to.</exception>
+    private async Task<IEnumerable<LMSActivityFeedback>> AddFeedbacksAsync(IEnumerable<LMSActivity> activities, IEnumerable<ApplicationUser> students, CancellationToken cancellationToken)
+    {
+        if (!activities.Any() || !students.Any())
+            throw new Exception("No activities or students available to add feedback to.");
+
+        var feedbacks = new List<LMSActivityFeedback>();
+        var feedbackStatuses = new[] { "Genomförd", "Försenad", "Godkänd" };
+        var rnd = new Random();
+
+        foreach (var student in students)
+        {
+            var randomStudentActivities = student.UserCourses
+                .Select(uc => uc.Course) 
+                .SelectMany(c => c.Modules) 
+                .SelectMany(m => m.LMSActivities)
+                .ToList()
+                .OrderBy(_ => rnd.Next())
+                .Take((int)(activities.Count() * (ChanceToAssignFeedback / 100f)))
+                .ToList();
+
+            foreach (var activity in randomStudentActivities)
+            {
+                var faker = new Faker<LMSActivityFeedback>("sv").Rules((f, e) =>
+                {
+                    e.LMSActivityId = activity.Id;
+                    e.UserId = student.Id;
+                    e.Feedback = f.Random.Bool(0.8f) ? f.Lorem.Sentence() : null;
+                    e.Status = f.PickRandom(feedbackStatuses);
+                });
+
+                var feedback = faker.Generate();
+                feedbacks.Add(feedback);
+            }
+        }
+
+        await context.LMSActivityFeedbacks.AddRangeAsync(feedbacks, cancellationToken);
+        return feedbacks;
+    }
+
+    /// <summary>
     /// Generates and adds students to the database.
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
@@ -290,7 +343,9 @@ public class DataSeedHostingService : IHostedService
         // Set one student to have the default username and email
         var randomStudent = students.ElementAt(new Random().Next(students.Count()));
         randomStudent.UserName = DefaultStudentUserName;
+        randomStudent.NormalizedUserName = DefaultStudentUserName.ToUpper();
         randomStudent.Email = DefaultStudentEmail;
+        randomStudent.NormalizedEmail = DefaultStudentEmail.ToUpper();
 
         return students;
     }
@@ -305,12 +360,15 @@ public class DataSeedHostingService : IHostedService
         if (await context.Users.AnyAsync())
             throw new Exception("Users already exist in the database.");
 
-        var teachers = await AddUsersAsync(StudentsCount, TeacherRole);
+        var teachers = await AddUsersAsync(TeachersCount, TeacherRole);
 
         // Set one teacher to have the default username and email
         var randomTeacher = teachers.ElementAt(new Random().Next(teachers.Count()));
         randomTeacher.UserName = DefaultTeacherUserName;
+        randomTeacher.NormalizedUserName = DefaultTeacherUserName.ToUpper();
         randomTeacher.Email = DefaultTeacherEmail;
+        randomTeacher.NormalizedEmail = DefaultTeacherEmail.ToUpper();
+
 
         return teachers;
     }
@@ -364,18 +422,22 @@ public class DataSeedHostingService : IHostedService
 
         var enrollments = new List<UserCourse>();
         var coursesList = courses.ToList();
-
+        var rnd = new Random();
+        
         foreach (var student in students)
         {
+			var randomIndex = rnd.Next(coursesList.Count);
+			
             enrollments.Add(new UserCourse
             {
                 UserId = student.Id,
-                CourseId = coursesList[new Random().Next(coursesList.Count)].Id, // Use the indexed list
+                CourseId = coursesList[randomIndex].Id, // Use the indexed list
             });
         }
 
         await context.AddRangeAsync(enrollments, cancellationToken);
     }
+   
 
     /// <summary>
     /// Adds documents to the database, associating them with students, courses, modules, and activities.

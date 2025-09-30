@@ -231,6 +231,28 @@ namespace LMS.Infractructure.Migrations
                     b.ToTable("Activity", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Models.Entities.LMSActivityFeedback", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("LMSActivityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Feedback")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LMSActivityId");
+
+                    b.HasIndex("LMSActivityId");
+
+                    b.ToTable("LMSActivityFeedback", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Models.Entities.Module", b =>
                 {
                     b.Property<Guid>("Id")
@@ -460,6 +482,25 @@ namespace LMS.Infractructure.Migrations
                     b.Navigation("Module");
                 });
 
+            modelBuilder.Entity("Domain.Models.Entities.LMSActivityFeedback", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.LMSActivity", "LMSActivity")
+                        .WithMany("LMSActivityFeedbacks")
+                        .HasForeignKey("LMSActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Entities.ApplicationUser", "User")
+                        .WithMany("LMSActivityFeedbacks")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LMSActivity");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Domain.Models.Entities.Module", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Course", "Course")
@@ -550,6 +591,8 @@ namespace LMS.Infractructure.Migrations
                 {
                     b.Navigation("Documents");
 
+                    b.Navigation("LMSActivityFeedbacks");
+
                     b.Navigation("UserCourses");
                 });
 
@@ -565,6 +608,8 @@ namespace LMS.Infractructure.Migrations
             modelBuilder.Entity("Domain.Models.Entities.LMSActivity", b =>
                 {
                     b.Navigation("Documents");
+
+                    b.Navigation("LMSActivityFeedbacks");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Module", b =>

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS.Infractructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250923091431_FixDocumentForeignKeysNullability")]
-    partial class FixDocumentForeignKeysNullability
+    [Migration("20250925112236_removedRedundantRelationConfiguration")]
+    partial class removedRedundantRelationConfiguration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

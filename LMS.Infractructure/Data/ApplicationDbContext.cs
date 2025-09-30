@@ -17,6 +17,7 @@ namespace LMS.Infractructure.Data
         public DbSet<LMSActivity> LMSActivities { get; set; }
         public DbSet<ActivityType> ActivityTypes { get; set; }
         public DbSet<Document> Documents { get; set; }
+        public DbSet<LMSActivityFeedback> LMSActivityFeedbacks { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
@@ -31,6 +32,7 @@ namespace LMS.Infractructure.Data
             builder.ApplyConfiguration(new LMSActivityConfiguration());
             builder.ApplyConfiguration(new ActivityTypeConfiguration());
             builder.ApplyConfiguration(new DocumentConfiguration());
+            builder.ApplyConfiguration(new LMSActivityFeedbackConfiguration());
         }
     }
 }

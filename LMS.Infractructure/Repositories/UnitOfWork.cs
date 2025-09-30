@@ -13,19 +13,28 @@ public class UnitOfWork : IUnitOfWork
 
     private readonly Lazy<IUserRepository> _userRepository;
     private readonly Lazy<ICourseRepository> _courseRepository;
+    private readonly Lazy<IModuleRepository> _moduleRepository;
+    private readonly Lazy<ILMSActivityRepository> _lmsActivityRepository;
+    private readonly Lazy<IActivityTypeRepository> _activityTypeRepository;
+    private readonly Lazy<IDocumentRepository> _documentRepository;
 
     public UnitOfWork(ApplicationDbContext context)
     {
         this.context = context ?? throw new ArgumentNullException(nameof(context));
         _userRepository = new Lazy<IUserRepository>(() => new UserRepository(context));
         _courseRepository = new Lazy<ICourseRepository>(() => new CourseRepository(context));
+        _moduleRepository = new Lazy<IModuleRepository>(() => new ModuleRepository(context));
+        _lmsActivityRepository = new Lazy<ILMSActivityRepository>(() => new LMSActivityRepository(context));
+        _activityTypeRepository = new Lazy<IActivityTypeRepository>(() => new ActivityTypeRepository(context));
+        _documentRepository = new Lazy<IDocumentRepository>(() => new DocumentRepository(context));
     }
 
-    /// <inheritdoc/>
-	public IUserRepository User => _userRepository.Value;
-    
-    /// <inheritdoc/>
-	public ICourseRepository Course => _courseRepository.Value;
+	  public IUserRepository User => _userRepository.Value;
+	  public ICourseRepository Course => _courseRepository.Value;
+    public IModuleRepository Module => _moduleRepository.Value;
+    public ILMSActivityRepository LMSActivity => _lmsActivityRepository.Value;
+    public IActivityTypeRepository ActivityType => _activityTypeRepository.Value;
+    public IDocumentRepository Document => _documentRepository.Value;
 
-	public async Task CompleteAsync() => await context.SaveChangesAsync();
+    public async Task CompleteAsync() => await context.SaveChangesAsync();
 }
