@@ -24,11 +24,27 @@ namespace LMS.Infractructure.Repositories
         /// </summary>
         /// <param name="activityId">The unique identifier of the activity.</param>
         /// <param name="changeTracking">If true, enables change tracking.</param>
-        /// <returns>The activity entity if found; otherwise, null.</returns>
+        /// <returns>Matching <see cref="LMSActivity"/> with all feedbacks or null if not found.</returns>
         public async Task<LMSActivity?> GetByIdAsync(Guid activityId, bool changeTracking = false) =>
             await FindByCondition(a => a.Id == activityId, trackChanges: changeTracking)
                 .Include(a => a.ActivityType)
                 .Include(a => a.Documents)
+                .Include(a => a.LMSActivityFeedbacks)
+                .FirstOrDefaultAsync();
+
+        /// <summary>
+        /// Retrieves a single <see cref="LMSActivity"/> entity by its unique identifier from the perspective of a specific user.
+        /// </summary>
+        /// <param name="activityId">The unique identifier of the activity.</param>
+        /// <param name="userId">The unique identifier of the user whose feedbacks to include.</param>
+        /// <param name="changeTracking">If true, enables change tracking.</param>
+        /// <returns>Matching <see cref="LMSActivity"/> with user's feedbacks or null if not found.</returns>
+        public async Task<LMSActivity?> GetByIdAsync(Guid activityId, string userId, bool changeTracking = false) =>
+            await FindByCondition(a => a.Id == activityId, trackChanges: changeTracking)
+                .Include(a => a.ActivityType)
+                .Include(a => a.Documents)
+                .Include(a => a.LMSActivityFeedbacks)
+                .Include(a => a.LMSActivityFeedbacks.Where(f => f.UserId == userId))
                 .FirstOrDefaultAsync();
 
         /// <summary>

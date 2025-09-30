@@ -5,6 +5,7 @@ using LMS.Shared.DTOs.AuthDtos;
 using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.DocumentDtos;
 using LMS.Shared.DTOs.LMSActivityDtos;
+using LMS.Shared.DTOs.LMSActivityFeedbackDtos;
 using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.DTOs.PaginationDtos;
 using LMS.Shared.DTOs.UserDtos;
@@ -42,13 +43,16 @@ public class MapperProfile : Profile
 
         // LMSActivity mappings
         CreateMap<LMSActivity, LMSActivityDto>();
-        CreateMap<LMSActivity, LMSActivityDetailedDto>();
+        CreateMap<LMSActivity, LMSActivityDetailedDto>()
+            .ForMember(d => d.Feedbacks, opt => opt.MapFrom(s => s.LMSActivityFeedbacks));
         CreateMap<CreateLMSActivityDto, LMSActivity>()
-            .ForMember(d => d.Id, o => o.MapFrom(_ => Guid.NewGuid()))
-            .ForMember(d => d.ActivityType, opt => opt.Ignore());
+            .ForMember(d => d.Id, o => o.MapFrom(_ => Guid.NewGuid()));
 
         // ActivityType mappings
         CreateMap<ActivityType, ActivityTypeDto>();
+
+        // Feedback mappings
+        CreateMap<LMSActivityFeedback, LMSActivityFeedbackDto>();
 
         // Pagination mappings
         CreateMap<PaginationMetadata, PaginationMetadataDto>();
