@@ -25,6 +25,7 @@ public class CourseService : ICourseService
     /// </summary>
     /// <param name="unitOfWork">The unit of work for repository access.</param>
     /// <param name="mapper">The AutoMapper instance for mapping domain entities to DTOs.</param>
+	/// <param name="currentUserService">The service to get information about the current user.</param>
     public CourseService(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
 	{
 		_unitOfWork = unitOfWork;
