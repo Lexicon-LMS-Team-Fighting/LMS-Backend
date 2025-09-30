@@ -22,8 +22,8 @@ public class DataSeedHostingService : IHostedService
     private const int TeachersCount = 5; // Number of teachers to generate
     private const int StudentsCount = 30; // Number of students to generate
     private const int CoursesCount = 10; // Number of courses to generate
-    private const int MinModulesPerCourse = 1; // Minimum number of modules per course. An exact number is randomly chosen between Min and Max
-    private const int MaxModulesPerCourse = 5; // Maximum number of modules per course. An exact number is randomly chosen between Min and Max
+    private const int MinModulesPerCourse = 5; // Minimum number of modules per course. An exact number is randomly chosen between Min and Max
+    private const int MaxModulesPerCourse = 8; // Maximum number of modules per course. An exact number is randomly chosen between Min and Max
     private const int MinActivitiesPerModule = 1; // Minimum number of activities per module. An exact number is randomly chosen between Min and Max
     private const int MaxActivitiesPerModule = 10; // Maximum number of activities per module. An exact number is randomly chosen between Min and Max
     private const int DocumentsCount = 50; // Number of documents to generate
