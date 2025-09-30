@@ -2,6 +2,7 @@
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using Domain.Models.Exceptions;
+using Domain.Models.Exceptions.Authorization;
 using Domain.Models.Exceptions.BadRequest;
 using Domain.Models.Exceptions.Conflict;
 using LMS.Shared.DTOs.CourseDtos;
@@ -17,33 +18,49 @@ public class CourseService : ICourseService
 {
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly IMapper _mapper;
+	private readonly ICurrentUserService _currentUserService;
 
-	/// <summary>
-	/// Initializes a new instance of the <see cref="CourseService"/> class.
-	/// </summary>
-	/// <param name="unitOfWork">The unit of work for repository access.</param>
-	/// <param name="mapper">The AutoMapper instance for mapping domain entities to DTOs.</param>
-	public CourseService(IUnitOfWork unitOfWork, IMapper mapper)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CourseService"/> class.
+    /// </summary>
+    /// <param name="unitOfWork">The unit of work for repository access.</param>
+    /// <param name="mapper">The AutoMapper instance for mapping domain entities to DTOs.</param>
+    public CourseService(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
 	{
 		_unitOfWork = unitOfWork;
 		_mapper = mapper;
-	}
+		_currentUserService = currentUserService;
+    }
 
 	/// <inheritdoc/>
 	public async Task<CourseDetailedDto> GetCourseAsync(Guid courseId)
 	{
-		var course = await _unitOfWork.Course.GetCourseAsync(courseId);
+        Course? course = null;
+
+        if (_currentUserService.IsTeacher)
+            course = await _unitOfWork.Course.GetCourseAsync(courseId);
+        else if (_currentUserService.IsStudent)
+            course = await _unitOfWork.Course.GetCourseAsync(courseId, _currentUserService.Id);
+        else
+            throw new UserRoleNotSupportedException();
 		
 		if (course is null) 
-			throw new NotFoundException($"Course with id: {courseId} was not found.");
+			throw new CourseNotFoundException(courseId);
 
-		return _mapper.Map<CourseDetailedDto>(course);
+        return _mapper.Map<CourseDetailedDto>(course);
 	}
 
 	/// <inheritdoc/>
 	public async Task<IEnumerable<CourseDto>> GetCoursesAsync()
 	{
-		var courses = await _unitOfWork.Course.GetCoursesAsync();
+		IEnumerable<Course>? courses = null;
+
+        if (_currentUserService.IsTeacher)
+            courses = await _unitOfWork.Course.GetCoursesAsync();
+        else if (_currentUserService.IsStudent)
+            courses = await _unitOfWork.Course.GetCoursesAsync(_currentUserService.Id);
+        else
+            throw new UserRoleNotSupportedException();
 
 		return _mapper.Map<IEnumerable<CourseDto>>(courses);
 	}
