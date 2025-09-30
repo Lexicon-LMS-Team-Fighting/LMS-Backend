@@ -46,7 +46,6 @@ namespace LMS.Services
         /// <exception cref="UserRoleNotSupportedException">Thrown if the current user's role is not supported.</exception>
         public async Task<LMSActivityDetailedDto> GetByIdAsync(Guid id)
         {
-            var userId = _currentUserService.Id;
             LMSActivity? activity = null;
 
             if (_currentUserService.IsTeacher)
