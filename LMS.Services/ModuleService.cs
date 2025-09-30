@@ -2,6 +2,7 @@
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using Domain.Models.Exceptions;
+using Domain.Models.Exceptions.Authorization;
 using Domain.Models.Exceptions.BadRequest;
 using Domain.Models.Exceptions.Conflict;
 using LMS.Shared.DTOs.ModuleDtos;
@@ -20,16 +21,18 @@ namespace LMS.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICurrentUserService _currentUserService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ModuleService"/> class.
         /// </summary>
         /// <param name="unitOfWork">The unit of work for accessing repositories.</param>
         /// <param name="mapper">The AutoMapper instance for mapping entities and DTOs.</param>
-        public ModuleService(IUnitOfWork unitOfWork, IMapper mapper)
+        public ModuleService(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _currentUserService = currentUserService;
         }
 
         /// <summary>
@@ -40,12 +43,19 @@ namespace LMS.Services
         /// <exception cref="ModuleNotFoundException">Thrown if the module is not found.</exception>
         public async Task<ModuleDetailedDto> GetByIdAsync(Guid id)
         {
-            var course = await _unitOfWork.Module.GetByIdAsync(id);
+            Module? module = null;
 
-            if (course is null)
+            if (_currentUserService.IsTeacher)
+                module = await _unitOfWork.Module.GetByIdAsync(id, true);
+            else if (_currentUserService.IsStudent)
+                module = await _unitOfWork.Module.GetByIdAsync(id, _currentUserService.Id);
+            else
+                throw new UserRoleNotSupportedException();
+
+            if (module is null)
                 throw new ModuleNotFoundException(id);
 
-            return _mapper.Map<ModuleDetailedDto>(course);
+            return _mapper.Map<ModuleDetailedDto>(module);
         }
 
         /// <summary>
@@ -56,7 +66,14 @@ namespace LMS.Services
         /// <returns>A <see cref="PaginatedResultDto{ModuleDto}"/> containing the paginated list of modules.</returns>
         public async Task<PaginatedResultDto<ModuleDto>> GetAllAsync(int pageNumber, int pageSize)
         {
-            var modules = await _unitOfWork.Module.GetAllAsync();
+            IEnumerable<Module>? modules = null;
+
+            if (_currentUserService.IsTeacher)
+                modules = await _unitOfWork.Module.GetAllAsync(true);
+            else if (_currentUserService.IsStudent)
+                modules = await _unitOfWork.Module.GetAllAsync(_currentUserService.Id);
+            else
+                throw new UserRoleNotSupportedException();
 
             var paginatedModules = modules.ToPaginatedResult(new PagingParameters
             {
@@ -76,10 +93,24 @@ namespace LMS.Services
         /// <returns>A <see cref="PaginatedResultDto{ModuleDto}"/> containing the paginated list of modules for the specified course.</returns>
         public async Task<PaginatedResultDto<ModuleDto>> GetAllByCourseIdAsync(Guid courseId, int pageNumber, int pageSize)
         {
-            if (await _unitOfWork.Course.GetCourseAsync(courseId) is null)
-                throw new CourseNotFoundException(courseId);
+            IEnumerable<Module>? modules = null;
 
-            var modules = await _unitOfWork.Module.GetByCourseIdAsync(courseId);
+            if (_currentUserService.IsTeacher)
+            {
+                if (await _unitOfWork.Course.GetCourseAsync(courseId) is null)
+                    throw new CourseNotFoundException(courseId);
+
+                modules = await _unitOfWork.Module.GetByCourseIdAsync(courseId, true);
+            }
+            else if (_currentUserService.IsStudent)
+            {
+                // ToDo: add user-specific search by courseId
+                if (await _unitOfWork.Course.GetCourseAsync(courseId) is null)
+                    throw new CourseNotFoundException(courseId);
+
+                modules = await _unitOfWork.Module.GetByCourseIdAsync(courseId, _currentUserService.Id);
+            }
+            else throw new UserRoleNotSupportedException();
 
             var paginatedModules = modules.ToPaginatedResult(new PagingParameters
             {
@@ -130,7 +161,7 @@ namespace LMS.Services
         public async Task DeleteAsync(Guid id)
         {
             // ToDo: Check depentent entities before delete
-            var module = await _unitOfWork.Module.GetByIdAsync(id, true);
+            var module = await _unitOfWork.Module.GetByIdAsync(id);
 
             if (module is null)
                 throw new ModuleNotFoundException(id);

@@ -29,6 +29,20 @@ namespace Domain.Contracts.Repositories
         Task<Module?> GetByIdAsync(Guid moduleId, bool changeTracking = false);
 
         /// <summary>
+        /// Retrieves a single <see cref="Module"/> entity by its unique identifier from the perspective of a specific user. <br/>
+        /// </summary>
+        /// <param name="moduleId">The unique identifier of the module.</param>
+        /// <param name="userId">The unique identifier of the user whose perspective to consider.</param>
+        /// <param name="changeTracking">
+        /// If <c>true</c>, Entity Framework change tracking will be enabled (suitable for updates). <br/>
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the 
+        /// matching <see cref="Module"/> or <c>null</c> if not found.
+        /// </returns>
+        Task<Module?> GetByIdAsync(Guid moduleId, string userId, bool changeTracking = false);
+
+        /// <summary>
         /// Retrieves all <see cref="Module"/> entities from the data source. <br/>
         /// </summary>
         /// <param name="changeTracking">If <c>true</c>, Entity Framework change tracking will be enabled. <br/></param>
@@ -36,6 +50,16 @@ namespace Domain.Contracts.Repositories
         /// A task that represents the asynchronous operation. The task result contains a collection of <see cref="Module"/> entities.
         /// </returns>
         Task<IEnumerable<Module>> GetAllAsync(bool changeTracking = false);
+
+        /// <summary>
+        /// Retrieves all <see cref="Module"/> entities from the data source from the perspective of a specific user. <br/>
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user whose perspective to consider.</param>
+        /// <param name="changeTracking">If <c>true</c>, Entity Framework change tracking will be enabled. <br/></param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains a collection of <see cref="Module"/> entities.
+        /// </returns>
+        Task<IEnumerable<Module>> GetAllAsync(string userId, bool changeTracking = false);
 
         /// <summary>
         /// Retrieves all <see cref="Module"/> entities associated with a specific <see cref="Course"/>. <br/>
@@ -46,5 +70,16 @@ namespace Domain.Contracts.Repositories
         /// A task that represents the asynchronous operation. The task result contains a collection of <see cref="Module"/> entities.
         /// </returns>
         Task<IEnumerable<Module>> GetByCourseIdAsync(Guid courseId, bool changeTracking = false);
+
+        /// <summary>
+        /// Retrieves all <see cref="Module"/> entities associated with a specific <see cref="Course"/> from the perspective of a specific user. <br/>
+        /// </summary>
+        /// <param name="courseId">The unique identifier of the course.</param>
+        /// <param name="userId">The unique identifier of the user whose perspective to consider.</param>
+        /// <param name="changeTracking">If <c>true</c>, Entity Framework change tracking will be enabled. <br/></param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains a collection of <see cref="Module"/> entities.
+        /// </returns>
+        Task<IEnumerable<Module>> GetByCourseIdAsync(Guid courseId, string userId, bool changeTracking = false);
     }
 }
