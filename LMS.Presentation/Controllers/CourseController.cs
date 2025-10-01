@@ -155,7 +155,7 @@ public class CourseController: ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
-    public async Task<IActionResult> UpdateModule(Guid guid, [FromBody] UpdateCourseDto updateDto)
+    public async Task<IActionResult> UpdateCourse(Guid guid, [FromBody] UpdateCourseDto updateDto)
     {
         await _serviceManager.CourseService.UpdateAsync(guid, updateDto);
         return NoContent();
