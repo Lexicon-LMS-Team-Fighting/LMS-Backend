@@ -44,7 +44,7 @@ public class UserController: ControllerBase
 	/// <response code="404">If no user is found with the specified GUID.</response>
 	[HttpGet("{guid}")]
 	[Authorize(Roles = "Teacher,Student")]
-	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDto))]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserExtendedDto))]
 	[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -53,10 +53,10 @@ public class UserController: ControllerBase
 		Summary = "Get specified user by ID",
 		Description = "Retrieves user details by their unique GUID identifier."
 	)]
-	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDto))]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserExtendedDto))]
 	[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
 	[ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-	public async Task<ActionResult<UserDto>> GetUser(string guid) => 
+	public async Task<ActionResult<UserExtendedDto>> GetUser(string guid) => 
 		Ok(await _serviceManager.UserService.GetUserAsync(guid));
 
 	/// <summary>Retrieves all users.</summary>
@@ -73,10 +73,10 @@ public class UserController: ControllerBase
 		Summary = "Get all users",
 		Description = "Retrieves a list of all users in the system."
 	)]
-	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDto>))]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserPreviewDto>))]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
-	public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers() => 
+	public async Task<ActionResult<IEnumerable<UserPreviewDto>>> GetUsers() => 
 		Ok(await _serviceManager.UserService.GetUsersAsync());
 	
 }

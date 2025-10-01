@@ -41,24 +41,24 @@ namespace LMS.Services
         /// Retrieves an activity by its unique identifier.
         /// </summary>
         /// <param name="id">The unique identifier of the activity.</param>
-        /// <returns>A <see cref="LMSActivityDetailedDto"/> representing the activity.</returns>
+        /// <returns>A <see cref="LMSActivityExtendedDto"/> representing the activity.</returns>
         /// <exception cref="LMSActivityNotFoundException">Thrown if the activity is not found.</exception>
         /// <exception cref="UserRoleNotSupportedException">Thrown if the current user's role is not supported.</exception>
-        public async Task<LMSActivityDetailedDto> GetByIdAsync(Guid id)
+        public async Task<LMSActivityExtendedDto> GetByIdAsync(Guid id, string? include)
         {
             LMSActivity? activity = null;
 
             if (_currentUserService.IsTeacher)
-                activity = await _unitOfWork.LMSActivity.GetByIdAsync(id);
+                activity = await _unitOfWork.LMSActivity.GetByIdAsync(id, include);
             else if (_currentUserService.IsStudent)
-                activity = await _unitOfWork.LMSActivity.GetByIdAsync(id, _currentUserService.Id);
+                activity = await _unitOfWork.LMSActivity.GetByIdAsync(id, _currentUserService.Id, include);
             else
                 throw new UserRoleNotSupportedException();
 
             if (activity is null)
                 throw new LMSActivityNotFoundException(id);
 
-            return _mapper.Map<LMSActivityDetailedDto>(activity);
+            return _mapper.Map<LMSActivityExtendedDto>(activity);
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace LMS.Services
         /// <param name="pageNumber">The page number to retrieve.</param>
         /// <param name="pageSize">The number of items per page.</param>
         /// <returns>A <see cref="PaginatedResultDto{LMSActivityDto}"/> containing the paginated list of activities.</returns>
-        public async Task<PaginatedResultDto<LMSActivityDto>> GetAllAsync(int pageNumber, int pageSize)
+        public async Task<PaginatedResultDto<LMSActivityPreviewDto>> GetAllAsync(int pageNumber, int pageSize)
         {
             IEnumerable<LMSActivity>? activities = null;
 
@@ -84,7 +84,7 @@ namespace LMS.Services
                 PageSize = pageSize
             });
 
-            return _mapper.Map<PaginatedResultDto<LMSActivityDto>>(paginatedActivities);
+            return _mapper.Map<PaginatedResultDto<LMSActivityPreviewDto>>(paginatedActivities);
         }
 
         /// <summary>
@@ -93,23 +93,22 @@ namespace LMS.Services
         /// <param name="moduleId">The unique identifier of the parent module.</param>
         /// <param name="pageNumber">The page number to retrieve.</param>
         /// <param name="pageSize">The number of items per page.</param>
-        /// <returns>A <see cref="PaginatedResultDto{LMSActivityDto}"/> containing the paginated list of activities for the specified module.</returns>
+        /// <returns>A <see cref="PaginatedResultDto{LMSActivityPreviewDto}"/> containing the paginated list of activities for the specified module.</returns>
         /// <exception cref="ModuleNotFoundException">Thrown if the module is not found.</exception>
-        public async Task<PaginatedResultDto<LMSActivityDto>> GetAllByModuleIdAsync(Guid moduleId, int pageNumber, int pageSize)
+        public async Task<PaginatedResultDto<LMSActivityPreviewDto>> GetAllByModuleIdAsync(Guid moduleId, int pageNumber, int pageSize)
         {
             IEnumerable<LMSActivity>? activities = null;
 
             if (_currentUserService.IsTeacher)
             {
-                if (await _unitOfWork.Module.GetByIdAsync(moduleId) is null)
+                if (await _unitOfWork.Module.GetByIdAsync(moduleId, null) is null)
                     throw new ModuleNotFoundException(moduleId);
 
                 activities = await _unitOfWork.LMSActivity.GetByModuleIdAsync(moduleId);
             }
             else if (_currentUserService.IsStudent)
             {
-                // ToDo: use user-specific method here
-                if (await _unitOfWork.Module.GetByIdAsync(moduleId) is null)
+                if (await _unitOfWork.Module.GetByIdAsync(moduleId, _currentUserService.Id) is null)
                     throw new ModuleNotFoundException(moduleId);
 
                 activities = await _unitOfWork.LMSActivity.GetByModuleIdAsync(moduleId, _currentUserService.Id);
@@ -123,23 +122,23 @@ namespace LMS.Services
                 PageSize = pageSize
             });
 
-            return _mapper.Map<PaginatedResultDto<LMSActivityDto>>(paginatedActivities);
+            return _mapper.Map<PaginatedResultDto<LMSActivityPreviewDto>>(paginatedActivities);
         }
 
         /// <summary>
         /// Creates a new activity.
         /// </summary>
         /// <param name="activity">The data for the activity to create.</param>
-        /// <returns>A <see cref="LMSActivityDto"/> representing the created activity.</returns>
+        /// <returns>A <see cref="LMSActivityExtendedDto"/> representing the created activity.</returns>
         /// <exception cref="ModuleNotFoundException">Thrown if the associated module is not found.</exception>
         /// <exception cref="LMSActivityNameAlreadyExistsException">Thrown if the activity name is not unique within the module.</exception>
         /// <exception cref="InvalidDateRangeException">Thrown if the start date is greater than or equal to the end date.</exception>
         /// <exception cref="InvalidLMSActivityDateRangeException">Thrown if the activity dates are outside the module's date range.</exception>
-        public async Task<LMSActivityDto> CreateAsync(CreateLMSActivityDto activity)
+        public async Task<LMSActivityExtendedDto> CreateAsync(CreateLMSActivityDto activity)
         {
             var activityEntity = _mapper.Map<LMSActivity>(activity);
 
-            var module = await _unitOfWork.Module.GetByIdAsync(activity.ModuleId);
+            var module = await _unitOfWork.Module.GetByIdAsync(activity.ModuleId, null);
 
             if (module is null)
                 throw new ModuleNotFoundException(activity.ModuleId);
@@ -164,9 +163,9 @@ namespace LMS.Services
             await _unitOfWork.CompleteAsync();
 
             // To load Activity type entity
-            activityEntity = await _unitOfWork.LMSActivity.GetByIdAsync(activityEntity.Id);
+            activityEntity = await _unitOfWork.LMSActivity.GetByIdAsync(activityEntity.Id, null);
 
-            return _mapper.Map<LMSActivityDto>(activityEntity);
+            return _mapper.Map<LMSActivityExtendedDto>(activityEntity);
         }
 
         /// <summary>
@@ -176,7 +175,7 @@ namespace LMS.Services
         /// <exception cref="LMSActivityNotFoundException">Thrown if the activity is not found.</exception>
         public async Task DeleteAsync(Guid id)
         {
-            var activity = await _unitOfWork.LMSActivity.GetByIdAsync(id);
+            var activity = await _unitOfWork.LMSActivity.GetByIdAsync(id, null);
 
             if (activity is null)
                 throw new LMSActivityNotFoundException(id);
@@ -197,13 +196,13 @@ namespace LMS.Services
         /// <exception cref="InvalidLMSActivityDateRangeException">Thrown if the activity dates are outside the module's date range.</exception>
         public async Task UpdateAsync(Guid id, UpdateLMSActivityDto updateDto)
         {
-            var activity = await _unitOfWork.LMSActivity.GetByIdAsync(id, true);
+            var activity = await _unitOfWork.LMSActivity.GetByIdAsync(id, null, true);
 
             if (activity is null)
                 throw new LMSActivityNotFoundException(id);
 
             var moduleId = updateDto.ModuleId ?? activity.ModuleId;
-            var module = await _unitOfWork.Module.GetByIdAsync(moduleId);
+            var module = await _unitOfWork.Module.GetByIdAsync(moduleId, null);
 
             if (module is null)
                 throw new ModuleNotFoundException(moduleId);

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LMS.Shared.DTOs.DocumentDtos
+﻿namespace LMS.Shared.DTOs.DocumentDtos
 {
     /// <summary>
     /// Data Transfer Object (DTO) representing a document preview to be used to show brief information about a document.

@@ -6,6 +6,8 @@ using Domain.Models.Exceptions.Authorization;
 using Domain.Models.Exceptions.BadRequest;
 using Domain.Models.Exceptions.Conflict;
 using LMS.Shared.DTOs.CourseDtos;
+using LMS.Shared.DTOs.PaginationDtos;
+using LMS.Shared.Pagination;
 using Service.Contracts;
 
 namespace LMS.Services;
@@ -33,26 +35,39 @@ public class CourseService : ICourseService
 		_currentUserService = currentUserService;
     }
 
-	/// <inheritdoc/>
-	public async Task<CourseDetailedDto> GetCourseAsync(Guid courseId)
+    /// <summary>
+    /// Retrieves a single course by its unique identifier. <br/>
+    /// </summary>
+    /// <param name="courseId"> The unique identifier of the course.</param>
+    /// <param name="include">Related entities to include (e.g., "participants", "modules", "documents").</param>
+    /// <returns></returns>
+    /// <exception cref="UserRoleNotSupportedException">Thrown when the current user's role is neither Teacher nor Student.</exception>
+    /// <exception cref="CourseNotFoundException">Thrown when no course is found with the given <paramref name="courseId"/>.</exception>
+    public async Task<CourseExtendedDto> GetCourseAsync(Guid courseId, string? include)
 	{
         Course? course = null;
 
         if (_currentUserService.IsTeacher)
-            course = await _unitOfWork.Course.GetCourseAsync(courseId);
+            course = await _unitOfWork.Course.GetCourseAsync(courseId, include);
         else if (_currentUserService.IsStudent)
-            course = await _unitOfWork.Course.GetCourseAsync(courseId, _currentUserService.Id);
+            course = await _unitOfWork.Course.GetCourseAsync(courseId, _currentUserService.Id, include);
         else
             throw new UserRoleNotSupportedException();
 		
 		if (course is null) 
 			throw new CourseNotFoundException(courseId);
 
-        return _mapper.Map<CourseDetailedDto>(course);
+        return _mapper.Map<CourseExtendedDto>(course);
 	}
 
-	/// <inheritdoc/>
-	public async Task<IEnumerable<CourseDto>> GetCoursesAsync()
+    /// <summary>
+    /// Retrieves all courses from the data source. <br/>
+    /// </summary>
+    /// <param name="pageNumber">The page number to retrieve.</param>
+    /// <param name="pageSize">The number of items per page.</param>
+    /// <returns>A collection of <see cref="CoursePreviewDto"/> objects representing all users.</returns>
+    /// <exception cref="UserRoleNotSupportedException">Thrown when the current user's role is neither Teacher nor Student.</exception>
+    public async Task<PaginatedResultDto<CoursePreviewDto>> GetCoursesAsync(int pageNumber, int pageSize)
 	{
 		IEnumerable<Course>? courses = null;
 
@@ -63,11 +78,23 @@ public class CourseService : ICourseService
         else
             throw new UserRoleNotSupportedException();
 
-		return _mapper.Map<IEnumerable<CourseDto>>(courses);
+        var paginatedCourses = courses.ToPaginatedResult(new PagingParameters
+        {
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        });
+
+        return _mapper.Map<PaginatedResultDto<CoursePreviewDto>>(paginatedCourses);
 	}
 
-	/// <inheritdoc/>
-	public async Task<CourseDto> CreateCourseAsync(CreateCourseDto createCourseDto)
+    /// <summary>
+    /// Creates a new course based on the provided data. <br/>
+    /// </summary>
+    /// <param name="createCourseDto">The data for the course to create.</param>
+    /// <returns></returns>
+    /// <exception cref="CourseNameAlreadyExistsException">Thrown when a course with the same name already exists.</exception>
+    /// <exception cref="InvalidDateRangeException">Thrown when the start date is not earlier than the end date.</exception>
+    public async Task<CourseExtendedDto> CreateCourseAsync(CreateCourseDto createCourseDto)
 	{
 		var course = _mapper.Map<Course>(createCourseDto);
 		
@@ -81,11 +108,15 @@ public class CourseService : ICourseService
 		_unitOfWork.Course.Create(course);
 		await _unitOfWork.CompleteAsync();
 
-		return _mapper.Map<CourseDto>(course);
+		return _mapper.Map<CourseExtendedDto>(course);
 	}
 
-	/// <inheritdoc/>
-	public async Task<bool> IsNotUniqueCourseNameAsync(string name) =>	
+    /// <summary>
+    /// Checks if a course name is already in use. <br/>
+    /// </summary>
+    /// <param name="name">Name to check.</param>
+    /// <returns>Boolean indicating if the name is already in use.</returns>
+    public async Task<bool> IsNotUniqueCourseNameAsync(string name) =>	
 		await _unitOfWork.Course.AnyAsync(name);
 	
 }

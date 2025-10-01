@@ -27,7 +27,7 @@ public class UserService : IUserService
 	}
 
 	/// <inheritdoc/>
-	public async Task<UserDto> GetUserAsync(string userId)
+	public async Task<UserExtendedDto> GetUserAsync(string userId)
 	{
 		if (!Guid.TryParse(userId, out Guid guid))
 			throw new BadRequestException($"Provided id: {userId} is not a valid Guid");
@@ -36,14 +36,14 @@ public class UserService : IUserService
 
 		if (user is null) throw new UserNotFoundException(guid); 
 		
-		return _mapper.Map<UserDto>(user);
+		return _mapper.Map<UserExtendedDto>(user);
 	}
 
 	/// <inheritdoc/>
-	public async Task<IEnumerable<UserDto>> GetUsersAsync()
+	public async Task<IEnumerable<UserPreviewDto>> GetUsersAsync()
 	{
 		var user = await _unitOfWork.User.GetUsersAsync();
 
-		return _mapper.Map<IEnumerable<UserDto>>(user);
+		return _mapper.Map<IEnumerable<UserPreviewDto>>(user);
 	}
 }
