@@ -13,8 +13,9 @@ namespace Service.Contracts
         /// Retrieves an activity by its unique identifier.
         /// </summary>
         /// <param name="id">The unique identifier of the activity.</param>
-        /// <returns>A <see cref="LMSActivityDetailedDto"/> representing the activity.</returns>
-        Task<LMSActivityDetailedDto> GetByIdAsync(Guid id);
+        /// <param name="include">Related entities to include (e.g., "participants", "feedbacks", "documents").</param>
+        /// <returns>A <see cref="LMSActivityExtendedDto"/> representing the activity.</returns>
+        Task<LMSActivityExtendedDto> GetByIdAsync(Guid id, string? include);
 
         /// <summary>
         /// Retrieves a paginated list of all activities.
@@ -22,7 +23,7 @@ namespace Service.Contracts
         /// <param name="pageNumber">The page number to retrieve.</param>
         /// <param name="pageSize">The number of items per page.</param>
         /// <returns>A <see cref="PaginatedResultDto{LMSActivityDto}"/> containing the paginated list of activities.</returns>
-        Task<PaginatedResultDto<LMSActivityDto>> GetAllAsync(int pageNumber, int pageSize);
+        Task<PaginatedResultDto<LMSActivityPreviewDto>> GetAllAsync(int pageNumber, int pageSize);
 
         /// <summary>
         /// Retrieves a paginated list of activities associated with a specific module.
@@ -31,14 +32,14 @@ namespace Service.Contracts
         /// <param name="pageNumber">The page number to retrieve.</param>
         /// <param name="pageSize">The number of items per page.</param>
         /// <returns>A <see cref="PaginatedResultDto{LMSActivityDto}"/> containing the paginated list of activities for the specified module.</returns>
-        Task<PaginatedResultDto<LMSActivityDto>> GetAllByModuleIdAsync(Guid moduleId, int pageNumber, int pageSize);
+        Task<PaginatedResultDto<LMSActivityPreviewDto>> GetAllByModuleIdAsync(Guid moduleId, int pageNumber, int pageSize);
 
         /// <summary>
         /// Creates a new activity.
         /// </summary>
         /// <param name="activity">The data for the activity to create.</param>
         /// <returns>A <see cref="LMSActivityDto"/> representing the created activity.</returns>
-        Task<LMSActivityDto> CreateAsync(CreateLMSActivityDto activity);
+        Task<LMSActivityExtendedDto> CreateAsync(CreateLMSActivityDto activity);
 
         /// <summary>
         /// Updates an existing activity.

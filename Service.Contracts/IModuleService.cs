@@ -19,8 +19,9 @@ namespace Service.Contracts
         /// Retrieves a module by its unique identifier.
         /// </summary>
         /// <param name="id">The unique identifier of the module.</param>
+        /// <param name="include">Related entities to include (e.g., "lmsactivitie", "participants", "documents").</param>
         /// <returns>A <see cref="ModuleDto"/> representing the module.</returns>
-        Task<ModuleDetailedDto> GetByIdAsync(Guid id);
+        Task<ModuleExtendedDto> GetByIdAsync(Guid id, string? include);
 
         /// <summary>
         /// Retrieves a paginated list of all modules.
@@ -28,7 +29,7 @@ namespace Service.Contracts
         /// <param name="pageNumber">The page number to retrieve.</param>
         /// <param name="pageSize">The number of items per page.</param>
         /// <returns>A <see cref="PaginatedResultDto{ModuleDto}"/> containing the paginated list of modules.</returns>
-        Task<PaginatedResultDto<ModuleDto>> GetAllAsync(int pageNumber, int pageSize);
+        Task<PaginatedResultDto<ModulePreviewDto>> GetAllAsync(int pageNumber, int pageSize);
 
         /// <summary>
         /// Retrieves a paginated list of modules associated with a specific course.
@@ -37,14 +38,14 @@ namespace Service.Contracts
         /// <param name="pageNumber">The page number to retrieve.</param>
         /// <param name="pageSize">The number of items per page.</param>
         /// <returns>A <see cref="PaginatedResultDto{ModuleDto}"/> containing the paginated list of modules for the specified course.</returns>
-        Task<PaginatedResultDto<ModuleDto>> GetAllByCourseIdAsync(Guid courseId, int pageNumber, int pageSize);
+        Task<PaginatedResultDto<ModulePreviewDto>> GetAllByCourseIdAsync(Guid courseId, int pageNumber, int pageSize);
 
         /// <summary>
         /// Creates a new module.
         /// </summary>
         /// <param name="module">The data for the module to create.</param>
         /// <returns>A <see cref="ModuleDto"/> representing the created module.</returns>
-        Task<ModuleDto> CreateAsync(CreateModuleDto module);
+        Task<ModuleExtendedDto> CreateAsync(CreateModuleDto module);
 
         /// <summary>
         /// Updates an existing module.

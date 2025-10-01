@@ -33,7 +33,8 @@ namespace LMS.Presentation.Controllers
         /// Retrieves a specific activity by its unique identifier.
         /// </summary>
         /// <param name="guid">The unique identifier of the activity.</param>
-        /// <returns>A <see cref="LMSActivityDto"/> representing the activity.</returns>
+        /// <param name="include">Related entities to include (e.g., "participants", "feedbacks", "documents").</param>
+        /// <returns>A <see cref="LMSActivityExtendedDto"/> representing the activity.</returns>
         /// <response code="200">Returns the activity details.</response>
         /// <response code="404">If no activity is found with the specified GUID.</response>
         /// <response code="401">Unauthorized.</response>
@@ -44,12 +45,12 @@ namespace LMS.Presentation.Controllers
             Summary = "Get specified activity by ID",
             Description = "Retrieves activity details by their unique GUID identifier."
         )]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LMSActivityDetailedDto))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LMSActivityExtendedDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<LMSActivityDetailedDto>> GetActivity(Guid guid) =>
-            Ok(await _serviceManager.LMSActivityService.GetByIdAsync(guid));
+        public async Task<ActionResult<LMSActivityExtendedDto>> GetActivity(Guid guid, [FromQuery] string? include) =>
+            Ok(await _serviceManager.LMSActivityService.GetByIdAsync(guid, include));
 
         /// <summary>
         /// Retrieves a paginated list of all activities.
@@ -66,10 +67,10 @@ namespace LMS.Presentation.Controllers
             Summary = "Get all activities",
             Description = "Retrieves a list of all activities in the system."
         )]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<LMSActivityDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<LMSActivityPreviewDto>))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<PaginatedResultDto<LMSActivityDto>>> GetActivities([FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
+        public async Task<ActionResult<PaginatedResultDto<LMSActivityPreviewDto>>> GetActivities([FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
             Ok(await _serviceManager.LMSActivityService.GetAllAsync(page, pageSize));
 
         /// <summary>
@@ -88,12 +89,12 @@ namespace LMS.Presentation.Controllers
             Summary = "Create a new activity",
             Description = "Creates a new LMS activity with the provided details."
         )]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(LMSActivityDto))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(LMSActivityExtendedDto))]
         [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<LMSActivityDto>> CreateActivity([FromBody] CreateLMSActivityDto activity)
+        public async Task<ActionResult<LMSActivityExtendedDto>> CreateActivity([FromBody] CreateLMSActivityDto activity)
         {
             var createdActivity = await _serviceManager.LMSActivityService.CreateAsync(activity);
             return CreatedAtAction(nameof(GetActivity), new { guid = createdActivity.Id }, createdActivity);

@@ -1,12 +1,9 @@
-﻿using LMS.Shared.DTOs.DocumentDtos;
-
-namespace LMS.Shared.DTOs.ModuleDtos
+﻿namespace LMS.Shared.DTOs.ModuleDtos
 {
     /// <summary>
-    /// Data Transfer Object (DTO) representing a module.
-    /// This class is used to transfer module data
+    /// Data Transfer Object (DTO) representing an extended view of a module, including its details and associated entities.
     /// </summary>
-    public class ModuleDetailedDto
+    public class ModulePreviewDto
     {
         /// <summary>
         /// Gets or sets the unique identifier of the module.
@@ -24,11 +21,6 @@ namespace LMS.Shared.DTOs.ModuleDtos
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the description of the module.
-        /// </summary>
-        public string Description { get; set; } = string.Empty;
-
-        /// <summary>
         /// Gets or sets the start date of the module.
         /// </summary>
         public DateTime StartDate { get; set; }
@@ -37,10 +29,5 @@ namespace LMS.Shared.DTOs.ModuleDtos
         /// Gets or sets the end date of the module.
         /// </summary>
         public DateTime EndDate { get; set; }
-
-        /// <summary>
-        /// Gets or sets the collection of documents associated with the module in a preview format.
-        /// </summary>
-        public IEnumerable<DocumentPreviewDto> Documents { get; set; } = [];
     }
 }

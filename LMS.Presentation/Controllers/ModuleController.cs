@@ -34,7 +34,8 @@ namespace LMS.Presentation.Controllers
         /// Retrieves a specific module by its unique identifier.
         /// </summary>
         /// <param name="guid">The unique identifier of the module.</param>
-        /// <returns>A <see cref="ModuleDto"/> representing the module.</returns>
+        /// <param name="include">Related entities to include (e.g., "lmsactivities", "participants", "documents").</param>
+        /// <returns>A <see cref="ModuleExtendedDto"/> representing the module.</returns>
         /// <response code="200">Returns the module details.</response>
         /// <response code="404">If no module is found with the specified GUID.</response>
         /// <response code="401">Unauthorized.</response>
@@ -45,12 +46,12 @@ namespace LMS.Presentation.Controllers
             Summary = "Get specified module by ID",
             Description = "Retrieves module details by their unique GUID identifier."
         )]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModuleDto))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModuleExtendedDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<ModuleDetailedDto>> GetModule(Guid guid) =>
-            Ok(await _serviceManager.ModuleService.GetByIdAsync(guid));
+        public async Task<ActionResult<ModuleExtendedDto>> GetModule(Guid guid, [FromQuery] string? include) =>
+            Ok(await _serviceManager.ModuleService.GetByIdAsync(guid, include));
 
         /// <summary>
         /// Retrieves a paginated list of all modules.
@@ -67,10 +68,10 @@ namespace LMS.Presentation.Controllers
             Summary = "Get all modules",
             Description = "Retrieves a list of all modules in the system."
         )]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<ModuleDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<ModulePreviewDto>))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<PaginatedResultDto<ModuleDto>>> GetModules([FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
+        public async Task<ActionResult<PaginatedResultDto<ModulePreviewDto>>> GetModules([FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
             Ok(await _serviceManager.ModuleService.GetAllAsync(page, pageSize));
 
         /// <summary>
@@ -89,12 +90,12 @@ namespace LMS.Presentation.Controllers
             Summary = "Create a new module",
             Description = "Creates a new module with the provided details."
         )]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ModuleDto))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ModuleExtendedDto))]
         [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<ModuleDto>> CreateModule([FromBody] CreateModuleDto module)
+        public async Task<ActionResult<ModuleExtendedDto>> CreateModule([FromBody] CreateModuleDto module)
         {
             var createdModule = await _serviceManager.ModuleService.CreateAsync(module);
             return CreatedAtAction(nameof(GetModule), new { guid = createdModule.Id }, createdModule);
@@ -147,12 +148,12 @@ namespace LMS.Presentation.Controllers
             Summary = "Get all activities for a specific module",
             Description = "Retrieves all activities associated with the specified module ID."
         )]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<LMSActivityDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<LMSActivityPreviewDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<PaginatedResultDto<LMSActivityDto>>> GetActivitiesByModuleId(
+        public async Task<ActionResult<PaginatedResultDto<LMSActivityPreviewDto>>> GetActivitiesByModuleId(
             Guid moduleId,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10

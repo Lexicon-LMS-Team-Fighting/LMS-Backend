@@ -1,10 +1,10 @@
 ﻿using LMS.Shared.DTOs.CourseDtos;
+using LMS.Shared.DTOs.PaginationDtos;
 
 namespace Service.Contracts;
 
 /// <summary>
-/// Defines the contract for course-related business logic operations. <br/>
-/// Provides methods to retrieve user data as <see cref="CourseDto"/> objects.
+/// Defines the contract for course-related business logic operations.
 /// </summary>
 public interface ICourseService
 {
@@ -12,26 +12,26 @@ public interface ICourseService
     /// Retrieves a specific course by its unique identifier.
     /// </summary>
     /// <param name="courseId">The unique identifier of the course.</param>
-    /// <returns>A <see cref="CourseDetailedDto"/> representing the requested course.</returns>
-    /// <exception cref="NotFoundException">
-    /// Thrown when no course is found with the given <paramref name="courseId"/>.
-    /// </exception>
-    Task<CourseDetailedDto> GetCourseAsync(Guid courseId);
+    /// <param name="include">Related entities to include (e.g., "participants", "modules", "documents").</param>
+    /// <returns>A <see cref="CourseExtendedDto"/> representing the requested course.</returns>
+    Task<CourseExtendedDto> GetCourseAsync(Guid courseId, string? include);
 
-	/// <summary>
-	/// Retrieves all courses from the data source.
-	/// </summary>
-	/// <returns>
-	/// A collection of <see cref="CourseDto"/> objects representing all users.
-	/// </returns>
-	Task<IEnumerable<CourseDto>> GetCoursesAsync();
+    /// <summary>
+    /// Retrieves all courses from the data source.
+    /// </summary>
+    /// <param name="pageNumber">The page number to retrieve (1-based).</param>
+    /// <param name="pageSize">The number of items per page.</param>
+    /// <returns>
+    /// A collection of <see cref="PaginatedResultDto{CoursePreviewDto}"/> objects representing all users.
+    /// </returns>
+    Task<PaginatedResultDto<CoursePreviewDto>> GetCoursesAsync(int pageNumber, int pageSize);
 
-	/// <summary>
-	/// Creates a new course based on the provided data.
-	/// </summary>
-	/// <param name="createCourseDto">The data for the course to create.</param>
-	/// <returns>A <see cref="CourseDto"/> representing the newly created course.</returns>
-	Task<CourseDto> CreateCourseAsync(CreateCourseDto createCourseDto);
+    /// <summary>
+    /// Creates a new course based on the provided data.
+    /// </summary>
+    /// <param name="createCourseDto">The data for the course to create.</param>
+    /// <returns>A <see cref="CourseExtendedDto"/> representing the newly created course.</returns>
+    Task<CourseExtendedDto> CreateCourseAsync(CreateCourseDto createCourseDto);
 
 
 	/// <summary>

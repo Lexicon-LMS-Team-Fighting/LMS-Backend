@@ -19,7 +19,7 @@ public interface IUserService
 	/// <exception cref="UserNotFoundException">
 	/// Thrown when no user is found with the given <paramref name="userId"/>.
 	/// </exception>
-	Task<UserDto> GetUserAsync(string userId);
+	Task<UserExtendedDto> GetUserAsync(string userId);
 
 	/// <summary>
 	/// Retrieves all users from the data source.
@@ -27,5 +27,5 @@ public interface IUserService
 	/// <returns>
 	/// A collection of <see cref="UserDto"/> objects representing all users.
 	/// </returns>
-	Task<IEnumerable<UserDto>> GetUsersAsync();
+	Task<IEnumerable<UserPreviewDto>> GetUsersAsync();
 }

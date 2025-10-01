@@ -1,13 +1,13 @@
 ﻿using LMS.Shared.DTOs.DocumentDtos;
 using LMS.Shared.DTOs.LMSActivityFeedbackDtos;
+using LMS.Shared.DTOs.UserDtos;
 
 namespace LMS.Shared.DTOs.LMSActivityDtos
 {
     /// <summary>
-    /// Data Transfer Object (DTO) representing an <see cref="LMSActivity"/>.
-    /// This class is used to transfer activity data.
+    /// Data Transfer Object (DTO) representing an extended view of a Learning Management System (LMS) activity.
     /// </summary>
-    public class LMSActivityDetailedDto
+    public class LMSActivityExtendedDto
     {
         /// <summary>
         /// Gets or sets the unique identifier of the activity.
@@ -20,9 +20,19 @@ namespace LMS.Shared.DTOs.LMSActivityDtos
         public Guid ModuleId { get; set; }
 
         /// <summary>
+        /// Gets or sets the name of the parent module to which the activity belongs.
+        /// </summary>
+        public string ModuleName { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the ID of the activity type.
         /// </summary>
         public Guid ActivityTypeId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the activity type.
+        /// </summary>
+        public string ActivityTypeName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the name of the activity.
@@ -45,13 +55,18 @@ namespace LMS.Shared.DTOs.LMSActivityDtos
         public DateTime EndDate { get; set; }
 
         /// <summary>
-        /// Gets or sets the collection of documents associated with the LMSActivity in a preview format.
+        /// Gets the collection of user previews representing participants (students) in the activity.
         /// </summary>
-        public IEnumerable<DocumentPreviewDto> Documents { get; set; } = [];
+        public ICollection<UserPreviewDto> Participants { get; } = [];
 
         /// <summary>
-        /// Gets or sets the collection of feedbacks associated with the activity.
+        /// Gets the collection of feedback previews associated with the activity.
         /// </summary>
-        public IEnumerable<LMSActivityFeedbackDto> Feedbacks { get; set; } = [];
+        public ICollection<LMSActivityFeedbackPreviewDto> Feedbacks { get; } = [];
+
+        /// <summary>
+        /// Gets the collection of document previews associated with the activity.
+        /// </summary>
+        public ICollection<DocumentPreviewDto> Documents { get; } = [];
     }
 }

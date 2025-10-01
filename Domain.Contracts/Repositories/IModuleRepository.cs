@@ -19,6 +19,7 @@ namespace Domain.Contracts.Repositories
         /// Retrieves a single <see cref="Module"/> entity by its unique identifier. <br/>
         /// </summary>
         /// <param name="moduleId">The unique identifier of the module.</param>
+        /// <param name="include">Related entities to include (e.g., "lmsactivities", "participants", "documents").</param>
         /// <param name="changeTracking">
         /// If <c>true</c>, Entity Framework change tracking will be enabled (suitable for updates). <br/>
         /// </param>
@@ -26,13 +27,14 @@ namespace Domain.Contracts.Repositories
         /// A task that represents the asynchronous operation. The task result contains the 
         /// matching <see cref="Module"/> or <c>null</c> if not found.
         /// </returns>
-        Task<Module?> GetByIdAsync(Guid moduleId, bool changeTracking = false);
+        Task<Module?> GetByIdAsync(Guid moduleId, string? include, bool changeTracking = false);
 
         /// <summary>
         /// Retrieves a single <see cref="Module"/> entity by its unique identifier from the perspective of a specific user. <br/>
         /// </summary>
         /// <param name="moduleId">The unique identifier of the module.</param>
         /// <param name="userId">The unique identifier of the user whose perspective to consider.</param>
+        /// <param name="include">Related entities to include (e.g., "lmsactivities", "participants", "documents").</param>
         /// <param name="changeTracking">
         /// If <c>true</c>, Entity Framework change tracking will be enabled (suitable for updates). <br/>
         /// </param>
@@ -40,7 +42,7 @@ namespace Domain.Contracts.Repositories
         /// A task that represents the asynchronous operation. The task result contains the 
         /// matching <see cref="Module"/> or <c>null</c> if not found.
         /// </returns>
-        Task<Module?> GetByIdAsync(Guid moduleId, string userId, bool changeTracking = false);
+        Task<Module?> GetByIdAsync(Guid moduleId, string userId, string? include, bool changeTracking = false);
 
         /// <summary>
         /// Retrieves all <see cref="Module"/> entities from the data source. <br/>

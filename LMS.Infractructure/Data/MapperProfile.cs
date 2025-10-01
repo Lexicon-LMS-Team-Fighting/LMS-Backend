@@ -19,32 +19,44 @@ public class MapperProfile : Profile
     {
         // User mappings
         CreateMap<UserRegistrationDto, ApplicationUser>();
-
-        CreateMap<ApplicationUser, UserDto>()
-            .ForMember(dest => dest.CourseIds,
-                opt => opt.MapFrom(src => src.UserCourses.Select(uc => uc.CourseId)));
+        CreateMap<ApplicationUser, UserPreviewDto>();
+        CreateMap<ApplicationUser, UserExtendedDto>()
+            .ForMember(d => d.Courses, o => o.MapFrom(s => s.UserCourses.Select(uc => uc.Course)));
 
         // Course mappings
-        CreateMap<Course, CourseDto>();
-        CreateMap<Course, CourseDetailedDto>();
+        CreateMap<Course, CoursePreviewDto>();
+        CreateMap<Course, CourseExtendedDto>()
+            .ForMember(d => d.Documents, o => o.MapFrom(s => s.Documents))
+            .ForMember(d => d.Participants, o => o.MapFrom(s => s.UserCourses.Select(uc => uc.User)))
+            .ForMember(d => d.Modules, o => o.MapFrom(s => s.Modules));
+
         CreateMap<CreateCourseDto, Course>();
 
         // Module mappings
-        CreateMap<Module, ModuleDto>();
-        CreateMap<Module, ModuleDetailedDto>();
+        CreateMap<Module, ModulePreviewDto>();
+        CreateMap<Module, ModuleExtendedDto>()
+            .ForMember(d => d.Documents, o => o.MapFrom(s => s.Documents))
+            .ForMember(d => d.Activities, o => o.MapFrom(s => s.LMSActivities))
+            .ForMember(d => d.Participants, o => o.MapFrom(s => s.Course.UserCourses.Select(uc => uc.User)));
+
         CreateMap<CreateModuleDto, Module>()
             .ForMember(d => d.Id, o => o.MapFrom(_ => Guid.NewGuid()));
 
         // Document mappings
         CreateMap<Document, DocumentPreviewDto>();
-        
-        CreateMap<CreateModuleDto, Module>()
-            .ForMember(d => d.Id, o => o.MapFrom(_ => Guid.NewGuid()));
+        CreateMap<Document, DocumentExtendedDto>();
 
         // LMSActivity mappings
-        CreateMap<LMSActivity, LMSActivityDto>();
-        CreateMap<LMSActivity, LMSActivityDetailedDto>()
+        CreateMap<LMSActivity, LMSActivityPreviewDto>()
+            .ForMember(d => d.ActivityTypeName, o => o.MapFrom(s => s.ActivityType.Name));
+
+        CreateMap<LMSActivity, LMSActivityExtendedDto>()
+            .ForMember(d => d.Documents, o => o.MapFrom(s => s.Documents))
+            .ForMember(d => d.ActivityTypeName, o => o.MapFrom(s => s.ActivityType.Name))
+            .ForMember(d => d.Participants, o => o.MapFrom(s => s.Module.Course.UserCourses.Select(uc => uc.User)))
+            .ForMember(d => d.ModuleName, o => o.MapFrom(s => s.Module.Name))
             .ForMember(d => d.Feedbacks, opt => opt.MapFrom(s => s.LMSActivityFeedbacks));
+
         CreateMap<CreateLMSActivityDto, LMSActivity>()
             .ForMember(d => d.Id, o => o.MapFrom(_ => Guid.NewGuid()));
 
@@ -52,7 +64,9 @@ public class MapperProfile : Profile
         CreateMap<ActivityType, ActivityTypeDto>();
 
         // Feedback mappings
-        CreateMap<LMSActivityFeedback, LMSActivityFeedbackDto>();
+        //CreateMap<LMSActivityFeedback, LMSActivityFeedbackDto>();
+        CreateMap<LMSActivityFeedback, LMSActivityFeedbackPreviewDto>();
+        CreateMap<LMSActivityFeedback, LMSActivityFeedbackExtendedDto>();
 
         // Pagination mappings
         CreateMap<PaginationMetadata, PaginationMetadataDto>();
