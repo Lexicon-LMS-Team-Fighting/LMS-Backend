@@ -16,9 +16,6 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
 {
 	public CourseRepository(ApplicationDbContext context) : base(context)
 	{}
-	
-	public async Task<bool> AnyAsync(string name) => 
-		await FindAnyAsync(a => a.Name.ToUpper() == name.ToUpper());
 
     /// <summary>
     /// Builds a query for retrieving <see cref="Course"/> entities with optional related data and user filtering.
@@ -98,4 +95,21 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
         await FindAll(changeTracking)
             .Where(c => c.UserCourses.Any(uc => uc.UserId == userId))
             .ToListAsync();
+
+    /// <summary>
+    /// Checks if a course name is unique, excluding a specific course if provided.
+    /// </summary>
+    /// <param name="name">The name of the course to check.</param>
+    /// <param name="excludedCourseId">
+    /// The unique identifier of a course to exclude from the uniqueness check (optional).
+    /// Use this parameter when updating a course to avoid conflicts with its current name.
+    /// </param>
+    /// <returns>
+    /// <c>true</c> if the course name is unique within the course; otherwise, <c>false</c>.
+    /// </returns>
+    public async Task<bool> IsUniqueNameAsync(string name, Guid excludedCourseId = default)
+    {
+        return !await FindByCondition(m => m.Name.ToUpper().Equals(name.ToUpper()) && m.Id != excludedCourseId)
+            .AnyAsync();
+    }
 }

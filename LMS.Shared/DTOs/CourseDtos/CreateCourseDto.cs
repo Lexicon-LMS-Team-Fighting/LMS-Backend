@@ -10,17 +10,33 @@ namespace LMS.Shared.DTOs.CourseDtos;
 /// </summary>
 public class CreateCourseDto
 {
-	[Required(ErrorMessage = "Name is required.")]
+    /// <summary>
+    /// Gets or sets the ID of the course 
+    /// This property is required and must be provided when creating a module.
+    /// </summary>
+    [Required(ErrorMessage = "Name is required.")]
 	[MaxLength(100)]
 	public string Name { get; set; } = string.Empty;
-	
-	[AllowNull]
-	[MaxLength(500, ErrorMessage = "Description cant be longer than 500 characters.")]
+
+    /// <summary>
+    /// Gets or sets the description of the course. <br />
+	/// This property is optional and can be null or empty if no description is provided.
+    /// </summary>
+    [AllowNull]
+    [MinLength(10, ErrorMessage = "Course description must be at least 10 characters long.")]
+    [MaxLength(500, ErrorMessage = "Course description cant be longer than 500 characters.")]
 	public string Description { get; set; } = string.Empty;
-	
-	[Required(ErrorMessage = "Start date is required.")]
+
+    /// <summary>
+    /// Gets or sets the start date of the course. <br />
+    /// This property is required and must be provided when creating a module.
+    [Required(ErrorMessage = "Start date is required.")]
 	public DateTime StartDate { get; set; }
-	
-	[Required(ErrorMessage = "End date is required.")]
+
+    /// <summary>
+    /// Gets or sets the end date of the course. <br />
+    /// This property is required and must be provided when creating a module.
+    /// </summary>
+    [Required(ErrorMessage = "End date is required.")]
 	public DateTime EndDate { get; set; }
 }

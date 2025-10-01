@@ -128,7 +128,36 @@ public class CourseController: ControllerBase
 	[ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
 	public async Task<ActionResult<CourseExtendedDto>> CreateCourse([FromBody] CreateCourseDto createCourseDto)
 	{
-		var createdCourse = await _serviceManager.CourseService.CreateCourseAsync(createCourseDto);
+		var createdCourse = await _serviceManager.CourseService.CreateAsync(createCourseDto);
 		return CreatedAtAction(nameof(GetCourse), new { Guid = createdCourse.Id }, createdCourse);
 	}
+
+    /// <summary>
+    /// Updates an existing course.
+    /// </summary>
+    /// <param name="guid">The unique identifier of the course to update.</param>
+    /// <param name="course">The updated details of the course.</param>
+    /// <response code="204">Course was successfully updated.</response>
+    /// <response code="400">If the provided course data is invalid.</response>
+    /// <response code="404">If no course is found with the specified GUID.</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="403">Forbidden.</response>
+    /// <response code="409">If there is a conflict while updating the course.</response>
+    [HttpPut("{guid}")]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(
+        Summary = "Update an existing course",
+        Description = "Updates the details of an existing course identified by its GUID."
+    )]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
+    public async Task<IActionResult> UpdateModule(Guid guid, [FromBody] UpdateCourseDto updateDto)
+    {
+        await _serviceManager.CourseService.UpdateAsync(guid, updateDto);
+        return NoContent();
+    }
 }
