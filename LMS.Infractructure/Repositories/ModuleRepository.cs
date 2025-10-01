@@ -37,7 +37,7 @@ namespace LMS.Infractructure.Repositories
 
             if (!string.IsNullOrEmpty(include))
             {
-                if (include.Contains(nameof(ModuleExtendedDto.LMSActivities), StringComparison.OrdinalIgnoreCase))
+                if (include.Contains(nameof(ModuleExtendedDto.Activities), StringComparison.OrdinalIgnoreCase))
                 {
                     query = query
                         .Include(m => m.LMSActivities)

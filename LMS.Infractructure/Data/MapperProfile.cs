@@ -36,7 +36,7 @@ public class MapperProfile : Profile
         CreateMap<Module, ModulePreviewDto>();
         CreateMap<Module, ModuleExtendedDto>()
             .ForMember(d => d.Documents, o => o.MapFrom(s => s.Documents))
-            .ForMember(d => d.LMSActivities, o => o.MapFrom(s => s.LMSActivities))
+            .ForMember(d => d.Activities, o => o.MapFrom(s => s.LMSActivities))
             .ForMember(d => d.Participants, o => o.MapFrom(s => s.Course.UserCourses.Select(uc => uc.User)));
 
         CreateMap<CreateModuleDto, Module>()

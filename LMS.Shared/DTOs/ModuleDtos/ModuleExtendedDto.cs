@@ -47,7 +47,7 @@ namespace LMS.Shared.DTOs.ModuleDtos
         /// <summary>
         /// Gets or sets the collection of LMS activities associated with the module.
         /// </summary>
-        public ICollection<LMSActivityPreviewDto> LMSActivities { get; } = [];
+        public ICollection<LMSActivityPreviewDto> Activities { get; } = [];
 
         /// <summary>
         /// Gets or sets the collection of user previews representing the participants (students) of the module.
