@@ -39,8 +39,6 @@ public class UserRepository : RepositoryBase<ApplicationUser>, IUserRepository
 	/// <inheritdoc/>
 	public async Task<List<ApplicationUser>> GetUsersAsync(bool changeTracking) => 
 		await FindAll(changeTracking)
-		.Include(u => u.UserCourses)
-			.ThenInclude(uc => uc.Course)
         .ToListAsync();
 	
 
