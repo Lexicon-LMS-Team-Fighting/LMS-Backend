@@ -168,20 +168,20 @@ namespace LMS.Presentation.Controllers
         /// <response code="404">If no module is found with the specified GUID.</response>
         /// <response code="401">Unauthorized.</response>
         /// <response code="403">Forbidden.</response>
-        //[HttpDelete("{guid}")]
-        //[Authorize(Roles = "Teacher")]
-        //[SwaggerOperation(
-        //    Summary = "Delete a module",
-        //    Description = "Deletes the module identified by its GUID."
-        //)]
-        //[ProducesResponseType(StatusCodes.Status204NoContent)]
-        //[ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        //[ProducesResponseType(StatusCodes.Status403Forbidden)]
-        //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        //public async Task<IActionResult> DeleteModule(Guid guid)
-        //{
-        //    await _serviceManager.ModuleService.DeleteAsync(guid);
-        //    return NoContent();
-        //}
+        [HttpDelete("{guid}")]
+        [Authorize(Roles = "Teacher")]
+        [SwaggerOperation(
+            Summary = "Delete a module",
+            Description = "Deletes the module identified by its GUID."
+        )]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> DeleteModule(Guid guid)
+        {
+            await _serviceManager.ModuleService.DeleteAsync(guid);
+            return NoContent();
+        }
     }
 }
