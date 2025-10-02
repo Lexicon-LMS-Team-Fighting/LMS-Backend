@@ -1,6 +1,7 @@
 ﻿using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.DTOs.PaginationDtos;
+using LMS.Shared.DTOs.UserDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -131,4 +132,30 @@ public class CourseController: ControllerBase
 		var createdCourse = await _serviceManager.CourseService.CreateCourseAsync(createCourseDto);
 		return CreatedAtAction(nameof(GetCourse), new { Guid = createdCourse.Id }, createdCourse);
 	}
+
+    /// <summary>
+    /// Retrieves the participants of a course.
+    /// </summary>
+    /// <remarks> Must be authorized as a <c>Student</c> or <c>Teacher</c> to access this endpoint.</remarks>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    /// <param name="pageNumber">The page number to retrieve (default is 1).</param>
+    /// <param name="pageSize">The number of items per page (default is 10).</param>
+    /// <returns>A paginated list of <see cref="CourseParticipantDto{CourseParticipantDto}"/> representing the participants of the course.</returns>
+    /// <response code="200">Returns the list of participants.</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="403">Forbidden.</response>
+    /// <response code="404">Course not found.</response>
+    [HttpGet("{courseId:guid}/participants")]
+    [Authorize(Roles = "Student,Teacher")]
+    [SwaggerOperation(
+        Summary = "Get course participants",
+        Description = "Retrieves all participants of a specific course. Requires Student or Teacher role."
+    )]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<CourseParticipantDto>))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<PaginatedResultDto<CourseParticipantDto>>> GetCourseParticipants(Guid courseId, int pageNumber = 1, int pageSize = 10) =>
+        Ok(await _serviceManager.CourseService.GetParticipantsAsync(courseId, pageNumber, pageSize));
+
 }

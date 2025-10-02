@@ -2,6 +2,7 @@
 using Domain.Models.Entities;
 using LMS.Infractructure.Data;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace LMS.Infractructure.Repositories;
 
@@ -47,4 +48,16 @@ public class UserRepository : RepositoryBase<ApplicationUser>, IUserRepository
 	{
 		throw new NotImplementedException();
 	}
+
+    /// <summary>
+    /// Retrieves all participants of a specific course.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    /// <param name="changeTracking">
+    /// If <c>true</c>, Entity Framework change tracking will be enabled. <br/>
+    /// </param>
+    public async Task<IEnumerable<ApplicationUser>> GetCourseParticipantsAsync(Guid courseId, bool changeTracking = false) =>
+        await FindAll(changeTracking)
+            .Where(u => u.UserCourses.Any(uc => uc.CourseId == courseId))
+            .ToListAsync();
 }

@@ -7,6 +7,7 @@ using Domain.Models.Exceptions.BadRequest;
 using Domain.Models.Exceptions.Conflict;
 using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.PaginationDtos;
+using LMS.Shared.DTOs.UserDtos;
 using LMS.Shared.Pagination;
 using Service.Contracts;
 
@@ -118,5 +119,29 @@ public class CourseService : ICourseService
     /// <returns>Boolean indicating if the name is already in use.</returns>
     public async Task<bool> IsNotUniqueCourseNameAsync(string name) =>	
 		await _unitOfWork.Course.AnyAsync(name);
-	
+
+    /// <summary>
+    /// Retrieves participants of a specific course.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    /// <param name="pageNumber">The page number to retrieve (1-based).</param>
+    /// <param name="pageSize">The number of items per page.</param>
+    /// <returns>A paginated list of participants enrolled in the specified course.</returns>
+    public async Task<PaginatedResultDto<CourseParticipantDto>> GetParticipantsAsync(Guid courseId, int pageNumber, int pageSize)
+    {
+        IEnumerable<ApplicationUser>? participants = null;
+
+        if (await _unitOfWork.Course.GetCourseAsync(courseId, _currentUserService.Id, null) is null)
+            throw new CourseNotFoundException(courseId);
+
+        participants = await _unitOfWork.User.GetCourseParticipantsAsync(courseId);
+
+        var paginatedParticipants = participants.ToPaginatedResult(new PagingParameters
+        {
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        });
+
+        return _mapper.Map<PaginatedResultDto<CourseParticipantDto>>(paginatedParticipants);
+    }
 }

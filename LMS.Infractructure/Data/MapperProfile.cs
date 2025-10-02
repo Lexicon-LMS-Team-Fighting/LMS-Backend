@@ -20,6 +20,7 @@ public class MapperProfile : Profile
         // User mappings
         CreateMap<UserRegistrationDto, ApplicationUser>();
         CreateMap<ApplicationUser, UserPreviewDto>();
+        CreateMap<ApplicationUser, CourseParticipantDto>();
         CreateMap<ApplicationUser, UserExtendedDto>()
             .ForMember(d => d.Courses, o => o.MapFrom(s => s.UserCourses.Select(uc => uc.Course)));
 
@@ -64,7 +65,6 @@ public class MapperProfile : Profile
         CreateMap<ActivityType, ActivityTypeDto>();
 
         // Feedback mappings
-        //CreateMap<LMSActivityFeedback, LMSActivityFeedbackDto>();
         CreateMap<LMSActivityFeedback, LMSActivityFeedbackPreviewDto>();
         CreateMap<LMSActivityFeedback, LMSActivityFeedbackExtendedDto>();
 
