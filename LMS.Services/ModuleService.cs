@@ -141,7 +141,7 @@ namespace LMS.Services
             if (!await IsUniqueNameAsync(module.Name, module.CourseId))
                 throw new ModuleNameAlreadyExistsException(module.Name, module.CourseId);
 
-            if (module.StartDate > module.EndDate)
+            if (module.StartDate >= module.EndDate)
                 throw new InvalidDateRangeException(module.StartDate, module.EndDate);
 
             if (module.StartDate < course.StartDate || module.EndDate > course.EndDate)
@@ -211,7 +211,7 @@ namespace LMS.Services
             if (updateDto.EndDate.HasValue)
                 module.EndDate = updateDto.EndDate.Value;
 
-            if (module.StartDate > module.EndDate)
+            if (module.StartDate >= module.EndDate)
                 throw new InvalidDateRangeException(module.StartDate, module.EndDate);
 
             if (module.StartDate < course.StartDate || module.EndDate > course.EndDate)

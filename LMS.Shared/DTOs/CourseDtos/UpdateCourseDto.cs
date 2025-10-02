@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LMS.Shared.DTOs.CourseDtos
 {
@@ -19,6 +14,7 @@ namespace LMS.Shared.DTOs.CourseDtos
         /// </summary>
         [AllowNull]
         [MinLength(3, ErrorMessage = "Course name must be at least 3 characters long.")]
+        [MaxLength(100, ErrorMessage = "Course name cant be longer than 100 characters.")]
         public string? Name { get; set; }
 
         /// <summary>
@@ -27,6 +23,7 @@ namespace LMS.Shared.DTOs.CourseDtos
         /// </summary>
         [AllowNull]
         [MinLength(10, ErrorMessage = "Course description must be at least 10 characters long.")]
+        [MaxLength(500, ErrorMessage = "Course description cant be longer than 500 characters.")]
         public string Description { get; set; }
 
         /// <summary>
