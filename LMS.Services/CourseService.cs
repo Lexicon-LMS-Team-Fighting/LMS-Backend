@@ -118,5 +118,49 @@ public class CourseService : ICourseService
     /// <returns>Boolean indicating if the name is already in use.</returns>
     public async Task<bool> IsNotUniqueCourseNameAsync(string name) =>	
 		await _unitOfWork.Course.AnyAsync(name);
-	
+
+    /// <summary>
+    /// Enrolls a student into the specified course.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    /// <param name="studentId">The unique identifier of the student to enroll.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task EnrollStudentAsync(Guid courseId, string studentId)
+    {
+        var course = await _unitOfWork.Course.GetCourseAsync(courseId, include: nameof(CourseExtendedDto.Participants));
+
+        if (course is null)
+            throw new CourseNotFoundException(courseId);
+
+        if (!await _unitOfWork.User.IsUserStudentAsync(studentId))
+            throw new UserNotFoundException(studentId);
+
+        if (course.UserCourses.Any(uc => uc.UserId == studentId))
+            return;
+
+        _unitOfWork.UserCourse.Create(new UserCourse { UserId = studentId, CourseId = courseId });
+        await _unitOfWork.CompleteAsync();
+    }
+
+    /// <summary>
+    /// Unenrolls a student from the specified course and removes all their related feedback.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    /// <param name="studentId">The unique identifier of the student to unenroll.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task UnenrollStudentAsync(Guid courseId, string studentId)
+    {
+        var course = await _unitOfWork.Course.GetCourseAsync(courseId, null);
+
+        if (course is null)
+            throw new CourseNotFoundException(courseId);
+
+        if (!await _unitOfWork.User.IsUserStudentAsync(studentId))
+            throw new UserNotFoundException(studentId);
+
+        await _unitOfWork.UserCourse.DeleteAllByUserId(studentId);
+        await _unitOfWork.LMSActivityFeedback.DeleteAllInCourseByUserId(studentId, courseId);
+
+        await _unitOfWork.CompleteAsync();
+    }
 }

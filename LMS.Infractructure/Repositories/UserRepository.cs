@@ -1,6 +1,7 @@
 ﻿using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Infractructure.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Infractructure.Repositories;
@@ -14,11 +15,47 @@ namespace LMS.Infractructure.Repositories;
 /// </summary>
 public class UserRepository : RepositoryBase<ApplicationUser>, IUserRepository
 {
-	public UserRepository(ApplicationDbContext context): base(context)
-	{}
+    private readonly UserManager<ApplicationUser> _userManager;
 
-	// Not used yet. Parameters set to change.
-	void IRepositoryBase<ApplicationUser>.Create(ApplicationUser entity)
+    public UserRepository(ApplicationDbContext context, UserManager<ApplicationUser> userManager) : base(context)
+    {
+        _userManager = userManager;
+    }
+
+    /// <summary>
+    /// Checks if a user belongs to the "Teacher" role. <br/>
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains <c>true</c> if the user is a student; otherwise, <c>false</c>.</returns>
+    public async Task<bool> IsUserStudentAsync(string userId) =>
+        await IsUserInRoleAsync(userId, "Student");
+
+    /// <summary>
+    /// Checks if a user belongs to the "Teacher" role. <br/>
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains <c>true</c> if the user is a teacher; otherwise, <c>false</c>.</returns>
+    public async Task<bool> IsUserTeacherAsync(string userId) => 
+        await IsUserInRoleAsync(userId, "Teacher");
+
+    /// <summary>
+    /// Checks if a user belongs to a specific role. <br/>
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user.</param>
+    /// <param name="roleName">The name of the role to check.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains <c>true</c> if the user is in the specified role; otherwise, <c>false</c>.</returns>
+    private async Task<bool> IsUserInRoleAsync(string userId, string roleName)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+            return false;
+
+        return await _userManager.IsInRoleAsync(user, roleName);
+    }
+
+    // Not used yet. Parameters set to change.
+    void IRepositoryBase<ApplicationUser>.Create(ApplicationUser entity)
 	{
 		throw new NotImplementedException();
 	}
