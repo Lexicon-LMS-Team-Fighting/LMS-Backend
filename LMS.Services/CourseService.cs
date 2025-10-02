@@ -128,7 +128,7 @@ public class CourseService : ICourseService
             throw new UserNotFoundException(studentId);
 
         if (!await _unitOfWork.User.IsUserStudentAsync(studentId))
-          throw new RoleMismatchException("User role must be a Student to perform enrollment in a course.");
+          throw new RoleMismatchException("User with provided ID is not a Student.");
 
         if (course.UserCourses.Any(uc => uc.UserId == studentId))
           return;
@@ -154,7 +154,7 @@ public class CourseService : ICourseService
             throw new UserNotFoundException(studentId);
 
         if (!await _unitOfWork.User.IsUserStudentAsync(studentId))
-            throw new RoleMismatchException("User role must be a Student to perform unenrollment from a course.");
+            throw new RoleMismatchException("User with provided ID is not a Student.");
 
         await _unitOfWork.UserCourse.DeleteAllByUserId(studentId);
       await _unitOfWork.LMSActivityFeedback.DeleteAllInCourseByUserId(studentId, courseId);
