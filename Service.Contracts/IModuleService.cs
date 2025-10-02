@@ -44,7 +44,7 @@ namespace Service.Contracts
         /// Creates a new module.
         /// </summary>
         /// <param name="module">The data for the module to create.</param>
-        /// <returns>A <see cref="ModuleDto"/> representing the created module.</returns>
+        /// <returns>A <see cref="ModuleExtendedDto"/> representing the created module.</returns>
         Task<ModuleExtendedDto> CreateAsync(CreateModuleDto module);
 
         /// <summary>

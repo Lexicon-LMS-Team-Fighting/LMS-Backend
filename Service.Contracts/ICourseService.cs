@@ -29,15 +29,14 @@ public interface ICourseService
     /// <summary>
     /// Creates a new course based on the provided data.
     /// </summary>
-    /// <param name="createCourseDto">The data for the course to create.</param>
+    /// <param name="createDto">The data for the course to create.</param>
     /// <returns>A <see cref="CourseExtendedDto"/> representing the newly created course.</returns>
-    Task<CourseExtendedDto> CreateCourseAsync(CreateCourseDto createCourseDto);
+    Task<CourseExtendedDto> CreateAsync(CreateCourseDto createDto);
 
-
-	/// <summary>
-	/// Checks if a course name is unique (i.e., not already in use).
-	/// </summary>
-	/// <param name="name">Name to check.</param>
-	/// <returns>Boolean indicating if the name is already in use.</returns>
-	Task<bool> IsNotUniqueCourseNameAsync(string name);
+    /// <summary>
+    /// Updates an existing course.
+    /// </summary>
+    /// <param name="id">The unique identifier of the course to update.</param>
+    /// <param name="updateDto">The updated data for the course.</param>
+    Task UpdateAsync(Guid id, UpdateCourseDto updateDto);
 }
