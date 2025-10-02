@@ -140,7 +140,7 @@ public class CourseController: ControllerBase
     /// <param name="courseId">The unique identifier of the course.</param>
     /// <param name="pageNumber">The page number to retrieve (default is 1).</param>
     /// <param name="pageSize">The number of items per page (default is 10).</param>
-    /// <returns>A paginated list of <see cref="CourseParticipantDto{CourseParticipantDto}"/> representing the participants of the course.</returns>
+    /// <returns>A paginated list of <see cref="PaginatedResultDto{CourseParticipantDto}"/> representing the participants of the course.</returns>
     /// <response code="200">Returns the list of participants.</response>
     /// <response code="401">Unauthorized.</response>
     /// <response code="403">Forbidden.</response>
