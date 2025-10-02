@@ -130,8 +130,16 @@ public class CourseService : ICourseService
     public async Task<PaginatedResultDto<CourseParticipantDto>> GetParticipantsAsync(Guid courseId, int pageNumber, int pageSize)
     {
         IEnumerable<ApplicationUser>? participants = null;
+        Course? course = null;
 
-        if (await _unitOfWork.Course.GetCourseAsync(courseId, _currentUserService.Id, null) is null)
+        if (_currentUserService.IsTeacher)
+            course = await _unitOfWork.Course.GetCourseAsync(courseId, null);
+        else if (_currentUserService.IsStudent)
+            course = await _unitOfWork.Course.GetCourseAsync(courseId, _currentUserService.Id, null);
+        else
+            throw new UserRoleNotSupportedException();
+
+        if (course is null)
             throw new CourseNotFoundException(courseId);
 
         participants = await _unitOfWork.User.GetCourseParticipantsAsync(courseId);
