@@ -6,6 +6,7 @@ using Domain.Models.Exceptions.Authorization;
 using Domain.Models.Exceptions.BadRequest;
 using Domain.Models.Exceptions.Conflict;
 using LMS.Shared.DTOs.CourseDtos;
+using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.DTOs.PaginationDtos;
 using LMS.Shared.Pagination;
 using Service.Contracts;
@@ -90,19 +91,18 @@ public class CourseService : ICourseService
     /// <summary>
     /// Creates a new course based on the provided data. <br/>
     /// </summary>
-    /// <param name="createCourseDto">The data for the course to create.</param>
+    /// <param name="createDto">The data for the course to create.</param>
     /// <returns></returns>
     /// <exception cref="CourseNameAlreadyExistsException">Thrown when a course with the same name already exists.</exception>
     /// <exception cref="InvalidDateRangeException">Thrown when the start date is not earlier than the end date.</exception>
-    public async Task<CourseExtendedDto> CreateCourseAsync(CreateCourseDto createCourseDto)
+    public async Task<CourseExtendedDto> CreateAsync(CreateCourseDto createDto)
 	{
-		var course = _mapper.Map<Course>(createCourseDto);
+		var course = _mapper.Map<Course>(createDto);
 		
-		var nameExists = await IsNotUniqueCourseNameAsync(course.Name);
+        if (!await _unitOfWork.Course.IsUniqueNameAsync(createDto.Name))
+            throw new CourseNameAlreadyExistsException(createDto.Name);
 
-		if (nameExists) throw new CourseNameAlreadyExistsException(course.Name);
-		
-		if (course.StartDate >= course.EndDate)
+        if (course.StartDate >= course.EndDate)
 			throw new InvalidDateRangeException(course.StartDate, course.EndDate);
 
 		_unitOfWork.Course.Create(course);
@@ -111,56 +111,87 @@ public class CourseService : ICourseService
 		return _mapper.Map<CourseExtendedDto>(course);
 	}
 
-    /// <summary>
-    /// Checks if a course name is already in use. <br/>
-    /// </summary>
-    /// <param name="name">Name to check.</param>
-    /// <returns>Boolean indicating if the name is already in use.</returns>
-    public async Task<bool> IsNotUniqueCourseNameAsync(string name) =>	
-		await _unitOfWork.Course.AnyAsync(name);
+  /// <summary>
+  /// Enrolls a student into the specified course.
+  /// </summary>
+  /// <param name="courseId">The unique identifier of the course.</param>
+  /// <param name="studentId">The unique identifier of the student to enroll.</param>
+  /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+  public async Task EnrollStudentAsync(Guid courseId, string studentId)
+  {
+      var course = await _unitOfWork.Course.GetCourseAsync(courseId, include: nameof(CourseExtendedDto.Participants));
 
-    /// <summary>
-    /// Enrolls a student into the specified course.
-    /// </summary>
-    /// <param name="courseId">The unique identifier of the course.</param>
-    /// <param name="studentId">The unique identifier of the student to enroll.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task EnrollStudentAsync(Guid courseId, string studentId)
-    {
-        var course = await _unitOfWork.Course.GetCourseAsync(courseId, include: nameof(CourseExtendedDto.Participants));
+      if (course is null)
+          throw new CourseNotFoundException(courseId);
 
-        if (course is null)
-            throw new CourseNotFoundException(courseId);
+      if (!await _unitOfWork.User.IsUserStudentAsync(studentId))
+          throw new UserNotFoundException(studentId);
 
-        if (!await _unitOfWork.User.IsUserStudentAsync(studentId))
-            throw new UserNotFoundException(studentId);
+      if (course.UserCourses.Any(uc => uc.UserId == studentId))
+          return;
 
-        if (course.UserCourses.Any(uc => uc.UserId == studentId))
-            return;
+      _unitOfWork.UserCourse.Create(new UserCourse { UserId = studentId, CourseId = courseId });
+      await _unitOfWork.CompleteAsync();
+  }
 
-        _unitOfWork.UserCourse.Create(new UserCourse { UserId = studentId, CourseId = courseId });
-        await _unitOfWork.CompleteAsync();
-    }
+  /// <summary>
+  /// Unenrolls a student from the specified course and removes all their related feedback.
+  /// </summary>
+  /// <param name="courseId">The unique identifier of the course.</param>
+  /// <param name="studentId">The unique identifier of the student to unenroll.</param>
+  /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+  public async Task UnenrollStudentAsync(Guid courseId, string studentId)
+  {
+      var course = await _unitOfWork.Course.GetCourseAsync(courseId, null);
 
-    /// <summary>
-    /// Unenrolls a student from the specified course and removes all their related feedback.
-    /// </summary>
-    /// <param name="courseId">The unique identifier of the course.</param>
-    /// <param name="studentId">The unique identifier of the student to unenroll.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task UnenrollStudentAsync(Guid courseId, string studentId)
-    {
-        var course = await _unitOfWork.Course.GetCourseAsync(courseId, null);
+      if (course is null)
+          throw new CourseNotFoundException(courseId);
 
-        if (course is null)
-            throw new CourseNotFoundException(courseId);
+      if (!await _unitOfWork.User.IsUserStudentAsync(studentId))
+          throw new UserNotFoundException(studentId);
 
-        if (!await _unitOfWork.User.IsUserStudentAsync(studentId))
-            throw new UserNotFoundException(studentId);
+      await _unitOfWork.UserCourse.DeleteAllByUserId(studentId);
+      await _unitOfWork.LMSActivityFeedback.DeleteAllInCourseByUserId(studentId, courseId);
 
-        await _unitOfWork.UserCourse.DeleteAllByUserId(studentId);
-        await _unitOfWork.LMSActivityFeedback.DeleteAllInCourseByUserId(studentId, courseId);
+      await _unitOfWork.CompleteAsync();
+  }
 
-        await _unitOfWork.CompleteAsync();
-    }
+  /// <summary>
+  /// Updates an existing course.
+  /// </summary>
+  /// <param name="id">The unique identifier of the course to update.</param>
+  /// <param name="updateDto">The updated data for the course.</param>
+  /// <exception cref="CourseNotFoundException">Thrown if the course is not found.</exception>
+  /// <exception cref="CourseNameAlreadyExistsException">Thrown if the updated course name is not unique.</exception>
+  /// <exception cref="InvalidDateRangeException">Thrown if the updated start date is greater than or equal to the end date.</exception>
+  public async Task UpdateAsync(Guid id, UpdateCourseDto updateDto)
+  {
+      var course = await _unitOfWork.Course.GetCourseAsync(id, null, true);
+
+      if (course is null)
+          throw new CourseNotFoundException(id);
+
+      if (updateDto.Name is not null)
+      {
+          if (!await _unitOfWork.Course.IsUniqueNameAsync(updateDto.Name, id))
+              throw new CourseNameAlreadyExistsException(updateDto.Name);
+
+          course.Name = updateDto.Name;
+      }
+
+      if (updateDto.Description is not null)
+          course.Description = updateDto.Description;
+
+      if (updateDto.StartDate.HasValue)
+          course.StartDate = updateDto.StartDate.Value;
+
+      if (updateDto.EndDate.HasValue)
+          course.EndDate = updateDto.EndDate.Value;
+
+      if (course.StartDate >= course.EndDate)
+          throw new InvalidDateRangeException(course.StartDate, course.EndDate);
+
+      _unitOfWork.Course.Update(course);
+      await _unitOfWork.CompleteAsync();
+  }
 }
