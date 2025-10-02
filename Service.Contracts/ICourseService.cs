@@ -39,4 +39,10 @@ public interface ICourseService
     /// <param name="id">The unique identifier of the course to update.</param>
     /// <param name="updateDto">The updated data for the course.</param>
     Task UpdateAsync(Guid id, UpdateCourseDto updateDto);
+
+    /// <summary>
+    /// Deletes a course by its unique identifier.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course to delete.</param>
+    Task DeleteAsync(Guid courseId);
 }

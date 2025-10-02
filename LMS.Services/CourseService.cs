@@ -6,7 +6,6 @@ using Domain.Models.Exceptions.Authorization;
 using Domain.Models.Exceptions.BadRequest;
 using Domain.Models.Exceptions.Conflict;
 using LMS.Shared.DTOs.CourseDtos;
-using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.DTOs.PaginationDtos;
 using LMS.Shared.Pagination;
 using Service.Contracts;
@@ -147,6 +146,22 @@ public class CourseService : ICourseService
             throw new InvalidDateRangeException(course.StartDate, course.EndDate);
 
         _unitOfWork.Course.Update(course);
+        await _unitOfWork.CompleteAsync();
+    }
+
+    /// <summary>
+    /// Deletes a course by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the course to delete.</param>
+    /// 
+    public async Task DeleteAsync(Guid courseId)
+    {
+        var course = await _unitOfWork.Course.GetCourseAsync(courseId, null);
+
+        if (course is null)
+            throw new CourseNotFoundException(courseId);
+
+        _unitOfWork.Course.Delete(course);
         await _unitOfWork.CompleteAsync();
     }
 }
