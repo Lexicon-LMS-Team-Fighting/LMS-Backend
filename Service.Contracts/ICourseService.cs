@@ -42,6 +42,20 @@ public interface ICourseService
     /// <param name="pageSize">The number of items per page.</param>
     /// <returns>A paginated list of participants enrolled in the specified course.</returns>
     Task<PaginatedResultDto<CourseParticipantDto>> GetParticipantsAsync(Guid courseId, int pageNumber, int pageSize);
+    /// Enrolls a student into the specified course.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    /// <param name="studentId">The unique identifier of the student to enroll.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    Task EnrollStudentAsync(Guid courseId, string studentId);
+
+    /// <summary>
+    /// Unenrolls a student from the specified course and removes all their related feedback.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    /// <param name="studentId">The unique identifier of the student to unenroll.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    Task UnenrollStudentAsync(Guid courseId, string studentId);
 
     /// <summary>
     /// Updates an existing course.

@@ -10,6 +10,20 @@ namespace Domain.Contracts.Repositories;
 public interface IUserRepository: IRepositoryBase<ApplicationUser>
 {
     /// <summary>
+    /// Checks if a user belongs to the "Teacher" role. <br/>
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains <c>true</c> if the user is a student; otherwise, <c>false</c>.</returns>
+    Task<bool> IsUserStudentAsync(string userId);
+
+    /// <summary>
+    /// Checks if a user belongs to the "Teacher" role. <br/>
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains <c>true</c> if the user is a teacher; otherwise, <c>false</c>.</returns>
+    Task<bool> IsUserTeacherAsync(string userId);
+
+    /// <summary>
     /// Retrieves a single <see cref="ApplicationUser"/> entity by its unique identifier. <br/>
     /// </summary>
     /// <param name="userId">The unique identifier of the user.</param>
