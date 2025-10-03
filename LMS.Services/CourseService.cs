@@ -121,20 +121,25 @@ public class CourseService : ICourseService
     /// <returns>A paginated list of participants enrolled in the specified course.</returns>
     public async Task<PaginatedResultDto<CourseParticipantDto>> GetParticipantsAsync(Guid courseId, int pageNumber, int pageSize)
     {
-        IEnumerable<ApplicationUser>? participants = null;
-        Course? course = null;
-
-        if (_currentUserService.IsTeacher)
-            course = await _unitOfWork.Course.GetCourseAsync(courseId, null);
-        else if (_currentUserService.IsStudent)
-            course = await _unitOfWork.Course.GetCourseAsync(courseId, _currentUserService.Id, null);
-        else
-            throw new UserRoleNotSupportedException();
+        var course = await _unitOfWork.Course.GetCourseAsync(courseId, nameof(CourseExtendedDto.Participants));
 
         if (course is null)
             throw new CourseNotFoundException(courseId);
 
-        participants = await _unitOfWork.User.GetCourseParticipantsAsync(courseId);
+        if (_currentUserService.IsTeacher)
+        {
+            // teachers can view participants of their courses 
+        }
+        else if (_currentUserService.IsStudent)
+        {
+            var isEnrolled = course.UserCourses.Any(uc => uc.UserId == _currentUserService.Id);
+
+            if (!isEnrolled)
+                throw new UserRoleNotSupportedException("You are not enrolled in this course.");
+        }
+        else throw new UserRoleNotSupportedException();
+
+        var participants = await _unitOfWork.User.GetCourseParticipantsAsync(courseId);
 
         var paginatedParticipants = participants.ToPaginatedResult(new PagingParameters
         {
