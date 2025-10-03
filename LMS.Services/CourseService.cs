@@ -8,6 +8,7 @@ using Domain.Models.Exceptions.Conflict;
 using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.DTOs.PaginationDtos;
+using LMS.Shared.DTOs.UserDtos;
 using LMS.Shared.Pagination;
 using Service.Contracts;
 
@@ -111,93 +112,131 @@ public class CourseService : ICourseService
 		return _mapper.Map<CourseExtendedDto>(course);
 	}
 
-  /// <summary>
-  /// Enrolls a student into the specified course.
-  /// </summary>
-  /// <param name="courseId">The unique identifier of the course.</param>
-  /// <param name="studentId">The unique identifier of the student to enroll.</param>
-  /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-  public async Task EnrollStudentAsync(Guid courseId, string studentId)
-  {
-      var course = await _unitOfWork.Course.GetCourseAsync(courseId, include: nameof(CourseExtendedDto.Participants));
+    /// <summary>
+    /// Retrieves participants of a specific course.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    /// <param name="pageNumber">The page number to retrieve (1-based).</param>
+    /// <param name="pageSize">The number of items per page.</param>
+    /// <returns>A paginated list of participants enrolled in the specified course.</returns>
+    public async Task<PaginatedResultDto<CourseParticipantDto>> GetParticipantsAsync(Guid courseId, int pageNumber, int pageSize)
+    {
+        var course = await _unitOfWork.Course.GetCourseAsync(courseId, nameof(CourseExtendedDto.Participants));
 
-      if (course is null)
-          throw new CourseNotFoundException(courseId);
+        if (course is null)
+            throw new CourseNotFoundException(courseId);
 
-      if (await _unitOfWork.User.GetUserAsync(studentId) is null)
-            throw new UserNotFoundException(studentId);
+        if (_currentUserService.IsTeacher)
+        {
+            // teachers can view participants of their courses 
+        }
+        else if (_currentUserService.IsStudent)
+        {
+            var isEnrolled = course.UserCourses.Any(uc => uc.UserId == _currentUserService.Id);
 
-        if (!await _unitOfWork.User.IsUserStudentAsync(studentId))
-          throw new RoleMismatchException("User with provided ID is not a Student.");
+            if (!isEnrolled)
+                throw new UserRoleNotSupportedException("You are not enrolled in this course.");
+        }
+        else throw new UserRoleNotSupportedException();
 
-        if (course.UserCourses.Any(uc => uc.UserId == studentId))
-          return;
+        var participants = await _unitOfWork.User.GetCourseParticipantsAsync(courseId);
 
-      _unitOfWork.UserCourse.Create(new UserCourse { UserId = studentId, CourseId = courseId });
-      await _unitOfWork.CompleteAsync();
-  }
+        var paginatedParticipants = participants.ToPaginatedResult(new PagingParameters
+        {
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        });
 
-  /// <summary>
-  /// Unenrolls a student from the specified course and removes all their related feedback.
-  /// </summary>
-  /// <param name="courseId">The unique identifier of the course.</param>
-  /// <param name="studentId">The unique identifier of the student to unenroll.</param>
-  /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-  public async Task UnenrollStudentAsync(Guid courseId, string studentId)
-  {
-      var course = await _unitOfWork.Course.GetCourseAsync(courseId, null);
+        return _mapper.Map<PaginatedResultDto<CourseParticipantDto>>(paginatedParticipants);
+    }
 
-      if (course is null)
-          throw new CourseNotFoundException(courseId);
-
-        if (await _unitOfWork.User.GetUserAsync(studentId) is null)
-            throw new UserNotFoundException(studentId);
-
-        if (!await _unitOfWork.User.IsUserStudentAsync(studentId))
-            throw new RoleMismatchException("User with provided ID is not a Student.");
-
-        await _unitOfWork.UserCourse.DeleteAllByUserId(studentId);
-      await _unitOfWork.LMSActivityFeedback.DeleteAllInCourseByUserId(studentId, courseId);
-
-      await _unitOfWork.CompleteAsync();
-  }
-
-  /// <summary>
-  /// Updates an existing course.
-  /// </summary>
-  /// <param name="id">The unique identifier of the course to update.</param>
-  /// <param name="updateDto">The updated data for the course.</param>
-  /// <exception cref="CourseNotFoundException">Thrown if the course is not found.</exception>
-  /// <exception cref="CourseNameAlreadyExistsException">Thrown if the updated course name is not unique.</exception>
-  /// <exception cref="InvalidDateRangeException">Thrown if the updated start date is greater than or equal to the end date.</exception>
-  public async Task UpdateAsync(Guid id, UpdateCourseDto updateDto)
-  {
-      var course = await _unitOfWork.Course.GetCourseAsync(id, null, true);
-
-      if (course is null)
-          throw new CourseNotFoundException(id);
-
-      if (updateDto.Name is not null)
+      /// <summary>
+      /// Enrolls a student into the specified course.
+      /// </summary>
+      /// <param name="courseId">The unique identifier of the course.</param>
+      /// <param name="studentId">The unique identifier of the student to enroll.</param>
+      /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+      public async Task EnrollStudentAsync(Guid courseId, string studentId)
       {
-          if (!await _unitOfWork.Course.IsUniqueNameAsync(updateDto.Name, id))
-              throw new CourseNameAlreadyExistsException(updateDto.Name);
+          var course = await _unitOfWork.Course.GetCourseAsync(courseId, include: nameof(CourseExtendedDto.Participants));
 
-          course.Name = updateDto.Name;
+          if (course is null)
+              throw new CourseNotFoundException(courseId);
+
+          if (await _unitOfWork.User.GetUserAsync(studentId) is null)
+                throw new UserNotFoundException(studentId);
+
+            if (!await _unitOfWork.User.IsUserStudentAsync(studentId))
+              throw new RoleMismatchException("User with provided ID is not a Student.");
+
+            if (course.UserCourses.Any(uc => uc.UserId == studentId))
+              return;
+
+          _unitOfWork.UserCourse.Create(new UserCourse { UserId = studentId, CourseId = courseId });
+          await _unitOfWork.CompleteAsync();
       }
 
-      if (updateDto.Description is not null)
-          course.Description = updateDto.Description;
+      /// <summary>
+      /// Unenrolls a student from the specified course and removes all their related feedback.
+      /// </summary>
+      /// <param name="courseId">The unique identifier of the course.</param>
+      /// <param name="studentId">The unique identifier of the student to unenroll.</param>
+      /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+      public async Task UnenrollStudentAsync(Guid courseId, string studentId)
+      {
+          var course = await _unitOfWork.Course.GetCourseAsync(courseId, null);
 
-      if (updateDto.StartDate.HasValue)
-          course.StartDate = updateDto.StartDate.Value;
+          if (course is null)
+              throw new CourseNotFoundException(courseId);
 
-      if (updateDto.EndDate.HasValue)
-          course.EndDate = updateDto.EndDate.Value;
+            if (await _unitOfWork.User.GetUserAsync(studentId) is null)
+                throw new UserNotFoundException(studentId);
 
-      if (course.StartDate >= course.EndDate)
-          throw new InvalidDateRangeException(course.StartDate, course.EndDate);
+            if (!await _unitOfWork.User.IsUserStudentAsync(studentId))
+                throw new RoleMismatchException("User with provided ID is not a Student.");
 
-      _unitOfWork.Course.Update(course);
-      await _unitOfWork.CompleteAsync();
-  }
+            await _unitOfWork.UserCourse.DeleteAllByUserId(studentId);
+          await _unitOfWork.LMSActivityFeedback.DeleteAllInCourseByUserId(studentId, courseId);
+
+          await _unitOfWork.CompleteAsync();
+      }
+
+      /// <summary>
+      /// Updates an existing course.
+      /// </summary>
+      /// <param name="id">The unique identifier of the course to update.</param>
+      /// <param name="updateDto">The updated data for the course.</param>
+      /// <exception cref="CourseNotFoundException">Thrown if the course is not found.</exception>
+      /// <exception cref="CourseNameAlreadyExistsException">Thrown if the updated course name is not unique.</exception>
+      /// <exception cref="InvalidDateRangeException">Thrown if the updated start date is greater than or equal to the end date.</exception>
+      public async Task UpdateAsync(Guid id, UpdateCourseDto updateDto)
+      {
+          var course = await _unitOfWork.Course.GetCourseAsync(id, null, true);
+
+          if (course is null)
+              throw new CourseNotFoundException(id);
+
+          if (updateDto.Name is not null)
+          {
+              if (!await _unitOfWork.Course.IsUniqueNameAsync(updateDto.Name, id))
+                  throw new CourseNameAlreadyExistsException(updateDto.Name);
+
+              course.Name = updateDto.Name;
+          }
+
+          if (updateDto.Description is not null)
+              course.Description = updateDto.Description;
+
+          if (updateDto.StartDate.HasValue)
+              course.StartDate = updateDto.StartDate.Value;
+
+          if (updateDto.EndDate.HasValue)
+              course.EndDate = updateDto.EndDate.Value;
+
+          if (course.StartDate >= course.EndDate)
+              throw new InvalidDateRangeException(course.StartDate, course.EndDate);
+
+          _unitOfWork.Course.Update(course);
+          await _unitOfWork.CompleteAsync();
+      }
 }
