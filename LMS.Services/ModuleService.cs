@@ -43,18 +43,34 @@ namespace LMS.Services
         public async Task<ModuleExtendedDto> GetByIdAsync(Guid id, string? include)
         {
             Module? module = null;
+            bool includeProgress = !string.IsNullOrEmpty(include) && include.Contains(nameof(ModuleExtendedDto.Progress), StringComparison.OrdinalIgnoreCase);
+            decimal progress = 0;
 
             if (_currentUserService.IsTeacher)
+            {
                 module = await _unitOfWork.Module.GetByIdAsync(id, include, true);
+
+                if (includeProgress)
+                    progress = await _unitOfWork.Module.CalculateProgress(id);
+            }
             else if (_currentUserService.IsStudent)
+            {
                 module = await _unitOfWork.Module.GetByIdAsync(id, _currentUserService.Id, include);
-            else
-                throw new UserRoleNotSupportedException();
+
+                if (includeProgress)
+                    progress = await _unitOfWork.Module.CalculateProgress(id, _currentUserService.Id);
+            }
+            else throw new UserRoleNotSupportedException();
 
             if (module is null)
                 throw new ModuleNotFoundException(id);
 
-            return _mapper.Map<ModuleExtendedDto>(module);
+            var moduleDto = _mapper.Map<ModuleExtendedDto>(module);
+
+            if (includeProgress)
+                moduleDto.Progress = progress;
+
+            return moduleDto;
         }
 
         /// <inheritdoc />

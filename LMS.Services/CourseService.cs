@@ -41,18 +41,34 @@ public class CourseService : ICourseService
     public async Task<CourseExtendedDto> GetCourseAsync(Guid courseId, string? include)
 	{
         Course? course = null;
+        bool includeProgress = !string.IsNullOrEmpty(include) && include.Contains(nameof(CourseExtendedDto.Progress), StringComparison.OrdinalIgnoreCase);
+        decimal progress = 0;
 
         if (_currentUserService.IsTeacher)
+        {
             course = await _unitOfWork.Course.GetCourseAsync(courseId, include);
+
+            if (includeProgress)
+                progress = await _unitOfWork.Course.CalculateProgress(courseId);
+        }
         else if (_currentUserService.IsStudent)
+        {
             course = await _unitOfWork.Course.GetCourseAsync(courseId, _currentUserService.Id, include);
-        else
-            throw new UserRoleNotSupportedException();
+
+            if (includeProgress)
+                progress = await _unitOfWork.Course.CalculateProgress(courseId, _currentUserService.Id);
+        }
+        else throw new UserRoleNotSupportedException();
 		
 		if (course is null) 
 			throw new CourseNotFoundException(courseId);
 
-        return _mapper.Map<CourseExtendedDto>(course);
+        var courseDto = _mapper.Map<CourseExtendedDto>(course);
+
+        if (includeProgress)
+            courseDto.Progress = progress;
+
+        return courseDto;
 	}
 
     /// <inheritdoc />
