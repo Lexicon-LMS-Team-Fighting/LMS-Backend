@@ -1,4 +1,4 @@
-﻿namespace LMS.API.Extensions
+﻿namespace LMS.Shared.Extensions
 {
     public static class FeedbackStatusExtensions
     {

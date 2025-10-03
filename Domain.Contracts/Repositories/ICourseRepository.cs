@@ -42,23 +42,21 @@ public interface ICourseRepository: IRepositoryBase<Course>
     /// <summary>
     /// Retrieves all <see cref="Course"/> entities from the data source. <br/>
     /// </summary>
-    /// param name="include">Related parameters to include (e.g. "progress")</param>
     /// <param name="changeTracking">If <c>true</c>, Entity Framework change tracking will be enabled. <br/></param>
     /// <returns>
     /// A task that represents the asynchronous operation. The task result contains a list of <see cref="Course"/> entities.
     /// </returns>
-    public Task<IEnumerable<Course>> GetCoursesAsync(string include, bool changeTracking = false);
+    public Task<IEnumerable<Course>> GetCoursesAsync(bool changeTracking = false);
 
     /// <summary>
     /// Retrieves all <see cref="Course"/> entities from the data source for a specific user. <br/>
     /// </summary>
 	/// param name="userId">The unique identifier of the user.</param>
     /// <param name="changeTracking">If <c>true</c>, Entity Framework change tracking will be enabled. <br/></param>
-    /// param name="include">Related parameters to include (e.g. "progress")</param>
     /// <returns>
     /// A task that represents the asynchronous operation. The task result contains a list of <see cref="Course"/> entities.
     /// </returns>
-    public Task<IEnumerable<Course>> GetCoursesAsync(string userId, string include, bool changeTracking = false);
+    public Task<IEnumerable<Course>> GetCoursesAsync(string userId, bool changeTracking = false);
 
     /// <summary>
     /// Checks if a course name is unique, excluding a specific course if provided.
@@ -73,4 +71,15 @@ public interface ICourseRepository: IRepositoryBase<Course>
     /// </returns>
     Task<bool> IsUniqueNameAsync(string name, Guid excludedCourseId = default);
 
+    /// <summary>
+    /// Calculates the normalized progress for a course.
+    /// </summary>
+    /// <param name="courseId">The course ID.</param>
+    /// <param name="userId">
+    /// Optional user ID. 
+    /// If provided, calculates progress only for that user (student view). 
+    /// If null, can be used for teacher view (aggregate or max per student logic can be added later).
+    /// </param>
+    /// <returns>A decimal value between 0 and 1 representing course progress.</returns>
+    Task<decimal> CalculateProgress(Guid courseId, string? userId = null);
 }

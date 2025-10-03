@@ -1,7 +1,9 @@
 ﻿using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Infractructure.Data;
+using LMS.Shared;
 using LMS.Shared.DTOs.CourseDtos;
+using LMS.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Infractructure.Repositories;
@@ -69,12 +71,12 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<Course>> GetCoursesAsync(string include, bool changeTracking = false) => 
+    public async Task<IEnumerable<Course>> GetCoursesAsync(bool changeTracking = false) => 
 		await FindAll(changeTracking)
             .ToListAsync();
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<Course>> GetCoursesAsync(string include, string userId, bool changeTracking = false) =>
+    public async Task<IEnumerable<Course>> GetCoursesAsync(string userId, bool changeTracking = false) =>
         await FindAll(changeTracking)
             .Where(c => c.UserCourses.Any(uc => uc.UserId == userId))
             .ToListAsync();
@@ -86,27 +88,25 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
             .AnyAsync();
     }
 
-    /// <summary>
-    /// Calculates the normalized progress for a course.
-    /// </summary>
-    /// <param name="course">The course entity to calculate progress for.</param>
-    /// <param name="userId">
-    /// Optional user ID. 
-    /// If provided, calculates progress only for that user (student view). 
-    /// If null, can be used for teacher view (aggregate or max per student logic can be added later).
-    /// </param>
-    /// <returns>A decimal value between 0 and 1 representing course progress.</returns>
-    private decimal CalculateProgress(Course course)
+    /// <inheritdoc/>
+    public async Task<decimal> CalculateProgress(Guid courseId, string? userId = null)
     {
-        var activities = course.Modules
+        var activities = await FindByCondition(c => c.Id == courseId)
+            .Include(c => c.Modules)
+                .ThenInclude(m => m.LMSActivities)
+                    .ThenInclude(a => a.LMSActivityFeedbacks)
+            .SelectMany(c => c.Modules)
             .SelectMany(m => m.LMSActivities)
-            .ToList();
+            .Where(a => string.IsNullOrEmpty(userId)
+                        || a.Module.Course.UserCourses.Any(uc => uc.UserId == userId))
+            .ToListAsync();
 
         if (!activities.Any())
             return 0m;
 
         var completedCount = activities.Count(a =>
-            a.LMSActivityFeedbacks.Any(f => f.Status == LMSActivityFeedback || f.Status == "Genomförd")
+            a.LMSActivityFeedbacks.Any(f => f.Status == LMSActivityFeedbackStatus.Approved.ToDbString() ||
+                                            f.Status == LMSActivityFeedbackStatus.Completed.ToDbString())
         );
 
         return (decimal)completedCount / activities.Count;

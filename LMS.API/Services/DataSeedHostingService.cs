@@ -1,9 +1,9 @@
 ﻿using Bogus;
-using LMS.API.Extensions;
 using LMS.Infractructure.Data;
+using LMS.Shared;
+using LMS.Shared.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 
 namespace LMS.API.Services;
 

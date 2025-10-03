@@ -60,6 +60,7 @@ public class CourseController: ControllerBase
     /// <remarks>Requires authentication as either <c>Teacher</c> or <c>Student</c>.</remarks>
     /// <param name="pageNumber">The page number to retrieve (default is 1).</param>
 	/// <param name="pageSize">The number of items per page (default is 10).</param>
+    /// <param name="include">Optional fields to include (e.g., "progress").</param>
     /// <returns>An <see cref="ActionResult{T}"/> containing a collection of <see cref="CourseDto"/> objects.</returns>
     /// <response code="200">Returns the list of users (empty if none exist).</response>
     /// <response code="401">The request is unauthorized (missing or invalid token).</response>
@@ -73,13 +74,17 @@ public class CourseController: ControllerBase
 	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<CoursePreviewDto>))]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
-	public async Task<ActionResult<PaginatedResultDto<CoursePreviewDto>>> GetCourses(int pageNumber = 1, int pageSize = 10) =>
-		Ok(await _serviceManager.CourseService.GetCoursesAsync(pageNumber, pageSize));
+	public async Task<ActionResult<PaginatedResultDto<CoursePreviewDto>>> GetCourses(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? include = null) =>
+		Ok(await _serviceManager.CourseService.GetCoursesAsync(pageNumber, pageSize, include));
 
     /// <summary>Retrieves a paginated list of modules for a specific course.</summary>
     /// <param name="courseId">The unique identifier of the course.</param>
     /// <param name="page">The page number to retrieve (default is 1).</param>
     /// <param name="pageSize">The number of items per page (default is 10).</param>
+    /// <param name="include">Optional fields to include.</param>
     /// <returns>A paginated list of modules for the specified course.</returns>
     /// <response code="200">Returns the paginated list of modules.</response>
     /// <response code="400">If the provided GUID is not valid.</response>
@@ -100,9 +105,10 @@ public class CourseController: ControllerBase
     public async Task<ActionResult<PaginatedResultDto<ModulePreviewDto>>> GetModulesByCourseId(
         Guid courseId,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? include = null
     ) =>
-        Ok(await _serviceManager.ModuleService.GetAllByCourseIdAsync(courseId, page, pageSize));
+        Ok(await _serviceManager.ModuleService.GetAllByCourseIdAsync(courseId, page, pageSize, include));
 
 	/// <summary>
 	/// Creates a course.
