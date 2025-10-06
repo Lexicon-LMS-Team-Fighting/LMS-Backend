@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -110,11 +111,11 @@ namespace LMS.Infractructure.Repositories
                 return 0m;
 
             var completedCount = activities.Count(a =>
-                a.LMSActivityFeedbacks.Any(f => f.Status == LMSActivityFeedbackStatus.Approved.ToDbString() ||
+                a.LMSActivityFeedbacks.All(f => f.Status == LMSActivityFeedbackStatus.Approved.ToDbString() ||
                                                 f.Status == LMSActivityFeedbackStatus.Completed.ToDbString())
             );
 
-            return (decimal)completedCount / activities.Count;
+            return Math.Round((decimal)completedCount / activities.Count, 4);
         }
     }
 }

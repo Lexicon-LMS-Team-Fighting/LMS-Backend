@@ -105,10 +105,10 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
             return 0m;
 
         var completedCount = activities.Count(a =>
-            a.LMSActivityFeedbacks.Any(f => f.Status == LMSActivityFeedbackStatus.Approved.ToDbString() ||
+            a.LMSActivityFeedbacks.All(f => f.Status == LMSActivityFeedbackStatus.Approved.ToDbString() ||
                                             f.Status == LMSActivityFeedbackStatus.Completed.ToDbString())
         );
 
-        return (decimal)completedCount / activities.Count;
+        return Math.Round((decimal)completedCount / activities.Count, 4); ;
     }
 }
