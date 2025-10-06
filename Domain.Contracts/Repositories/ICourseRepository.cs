@@ -71,4 +71,15 @@ public interface ICourseRepository: IRepositoryBase<Course>
     /// </returns>
     Task<bool> IsUniqueNameAsync(string name, Guid excludedCourseId = default);
 
+    /// <summary>
+    /// Calculates the normalized progress for a course.
+    /// </summary>
+    /// <param name="courseId">The course ID.</param>
+    /// <param name="userId">
+    /// Optional user ID. 
+    /// If provided, calculates progress only for that user (student view). 
+    /// If null, can be used for teacher view (aggregate or max per student logic can be added later).
+    /// </param>
+    /// <returns>A decimal value between 0 and 1 representing course progress.</returns>
+    Task<decimal> CalculateProgress(Guid courseId, string? userId = null);
 }

@@ -1,8 +1,9 @@
 ﻿using Bogus;
 using LMS.Infractructure.Data;
+using LMS.Shared;
+using LMS.Shared.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 
 namespace LMS.API.Services;
 
@@ -298,7 +299,6 @@ public class DataSeedHostingService : IHostedService
             throw new Exception("No activities or students available to add feedback to.");
 
         var feedbacks = new List<LMSActivityFeedback>();
-        var feedbackStatuses = new[] { "Genomförd", "Försenad", "Godkänd" };
         var rnd = new Random();
 
         foreach (var student in students)
@@ -319,7 +319,7 @@ public class DataSeedHostingService : IHostedService
                     e.LMSActivityId = activity.Id;
                     e.UserId = student.Id;
                     e.Feedback = f.Random.Bool(0.8f) ? f.Lorem.Sentence() : null;
-                    e.Status = f.PickRandom(feedbackStatuses);
+                    e.Status = f.PickRandom<LMSActivityFeedbackStatus>().ToDbString();
                 });
 
                 var feedback = faker.Generate();

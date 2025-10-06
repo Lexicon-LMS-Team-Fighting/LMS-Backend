@@ -52,11 +52,13 @@ public class MapperProfile : Profile
             .ForMember(d => d.ActivityTypeName, o => o.MapFrom(s => s.ActivityType.Name));
 
         CreateMap<LMSActivity, LMSActivityExtendedDto>()
-            .ForMember(d => d.Documents, o => o.MapFrom(s => s.Documents))
-            .ForMember(d => d.ActivityTypeName, o => o.MapFrom(s => s.ActivityType.Name))
-            .ForMember(d => d.Participants, o => o.MapFrom(s => s.Module.Course.UserCourses.Select(uc => uc.User)))
+            .ForMember(d => d.CourseId, o => o.MapFrom(s => s.Module.Course.Id))
+            .ForMember(d => d.CourseName, o => o.MapFrom(s => s.Module.Course.Name))
             .ForMember(d => d.ModuleName, o => o.MapFrom(s => s.Module.Name))
-            .ForMember(d => d.Feedbacks, opt => opt.MapFrom(s => s.LMSActivityFeedbacks));
+            .ForMember(d => d.ActivityTypeName, o => o.MapFrom(s => s.ActivityType.Name))
+            .ForMember(d => d.Feedbacks, opt => opt.MapFrom(s => s.LMSActivityFeedbacks))
+            .ForMember(d => d.Documents, o => o.MapFrom(s => s.Documents))
+            .ForMember(d => d.Participants, o => o.MapFrom(s => s.Module.Course.UserCourses.Select(uc => uc.User)));
 
         CreateMap<CreateLMSActivityDto, LMSActivity>()
             .ForMember(d => d.Id, o => o.MapFrom(_ => Guid.NewGuid()));
