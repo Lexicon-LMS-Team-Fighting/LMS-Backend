@@ -1,7 +1,5 @@
-﻿using LMS.Shared.DTOs.LMSActivityDtos;
-using LMS.Shared.DTOs.LMSActivityFeedbackDtos;
+﻿using LMS.Shared.DTOs.LMSActivityFeedbackDtos;
 using LMS.Shared.DTOs.ModuleDtos;
-using LMS.Shared.DTOs.PaginationDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +22,7 @@ namespace LMS.Presentation.Controllers
         /// <summary>
         /// Initializes a new instance of the <see cref="FeedbackController"/> class.
         /// </summary>
-        /// <param name="serviceManager">The service manager for accessing module-related services.</param>
+        /// <param name="serviceManager">The service manager for accessing feedback-related services.</param>
         public FeedbackController(IServiceManager serviceManager)
         {
             _serviceManager = serviceManager;
@@ -34,7 +32,6 @@ namespace LMS.Presentation.Controllers
         /// Retrieves a specific feedback by its unique identifier.
         /// </summary>
         /// <param name="guid">The unique identifier of the feedback.</param>
-        /// <param name="include">Related entities to include (e.g., "lmsactivities", "participants", "documents").</param>
         /// <returns>A <see cref="LMSActivityFeedbackExtendedDto"/> representing the feedback.</returns>
         /// <response code="200">Returns the feedback details.</response>
         /// <response code="404">If no feedback is found with the specified GUID.</response>
@@ -50,13 +47,13 @@ namespace LMS.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<LMSActivityFeedbackExtendedDto>> GetFeedback(Guid guid, [FromQuery] string? include) =>
-            Ok(await _serviceManager.FeedbackService.GetByIdAsync(guid, include));
+        public async Task<ActionResult<LMSActivityFeedbackExtendedDto>> GetFeedback(Guid guid) =>
+            Ok(await _serviceManager.FeedbackService.GetByIdAsync(guid));
 
         /// <summary>
         /// Creates a new feedback.
         /// </summary>
-        /// <param name="module">The details of the feedback to create.</param>
+        /// <param name="createDto">The details of the feedback to create.</param>
         /// <returns>The created feedback.</returns>
         /// <response code="201">Returns the created feedback.</response>
         /// <response code="400">If the provided feedback data is invalid.</response>
@@ -74,17 +71,17 @@ namespace LMS.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<LMSActivityFeedbackExtendedDto>> CreateFeedback([FromBody] CreateModuleDto module)
+        public async Task<ActionResult<LMSActivityFeedbackExtendedDto>> CreateFeedback([FromBody] CreateLMSActivityFeedbackDto createDto)
         {
-            var createdModule = await _serviceManager.FeedbackService.CreateAsync(module);
-            return CreatedAtAction(nameof(GetFeedback), new { guid = createdModule.Id }, createdModule);
+            var createdFeedback = await _serviceManager.FeedbackService.CreateAsync(createDto);
+            return CreatedAtAction(nameof(GetFeedback), new { guid = createdFeedback.Id }, createdFeedback);
         }
 
         /// <summary>
         /// Updates an existing feedback.
         /// </summary>
         /// <param name="guid">The unique identifier of the feedback to update.</param>
-        /// <param name="module">The updated details of the feedback.</param>
+        /// <param name="updateDto">The updated details of the feedback.</param>
         /// <response code="204">Feedback was successfully updated.</response>
         /// <response code="400">If the provided feedback data is invalid.</response>
         /// <response code="404">If no feedback is found with the specified GUID.</response>
@@ -103,9 +100,9 @@ namespace LMS.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
-        public async Task<IActionResult> UpdateFeedback(Guid guid, [FromBody] UpdateModuleDto module)
+        public async Task<IActionResult> UpdateFeedback(Guid guid, [FromBody] UpdateLMSActivityFeedbackDto updateDto)
         {
-            await _serviceManager.FeedbackService.UpdateAsync(guid, module);
+            await _serviceManager.FeedbackService.UpdateAsync(guid, updateDto);
             return NoContent();
         }
 

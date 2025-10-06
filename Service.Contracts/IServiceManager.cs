@@ -6,6 +6,7 @@ public interface IServiceManager
     ICourseService CourseService { get; }
     IModuleService ModuleService { get; }
     ILMSActivityService LMSActivityService { get; }
+    ILMSActivityFeedbackService LMSActivityFeedbackService { get; }
     IActivityTypeService ActivityTypeService { get; }
     IDocumentService DocumentService { get; }
 

@@ -18,12 +18,7 @@ namespace LMS.Infractructure.Repositories
         {
         }
 
-        /// <summary>
-        /// Deletes all <see cref="LMSActivityFeedback"/> entries associated with a specific user in a specific course.
-        /// </summary>
-        /// <param name="userId">The unique identifier of the user whose feedbacks are being deleted.</param>
-        /// <param name="courseId">The unique identifier of the course whose feedbacks are being deleted.</param>
-        /// <returns>A task that represents the asynchronous delete operation.</returns>
+        /// <inheritdoc />
         public async Task DeleteAllInCourseByUserId(string userId, Guid courseId)
         {
             var feedbacks = await FindAll()
@@ -34,6 +29,12 @@ namespace LMS.Infractructure.Repositories
                 return;
             
             DeleteRange(feedbacks);
+        }
+
+        public async Task<LMSActivityFeedback?> GetByIdAsync(Guid feedbackId, bool changeTracking = false)
+        {
+            return await FindByCondition(f => f.Id == feedbackId, trackChanges: changeTracking)
+                .FirstOrDefaultAsync();
         }
     }
 }

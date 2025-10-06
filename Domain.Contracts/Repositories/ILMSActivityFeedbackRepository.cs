@@ -16,5 +16,13 @@ namespace Domain.Contracts.Repositories
         /// <param name="courseId">The unique identifier of the course whose feedbacks are being deleted.</param>
         /// <returns>A task that represents the asynchronous delete operation.</returns>
         Task DeleteAllInCourseByUserId(string userId, Guid courseId);
+
+        /// <summary>
+        /// Retrieves a single <see cref="LMSActivityFeedback"/> entity by its unique identifier
+        /// </summary>
+        /// <param name="feedbackId">The uniqueidentifier of the activity.</param>
+        /// <param name="changeTracking">If <c>true</c>, Entity Framework change tracking will be enabled (suitable for updates). <br/></param>
+        /// <returns>Matching <see cref="LMSActivityFeedback"/> with all feedbacks or <c>null</c> if not found.</returns>
+        Task<LMSActivityFeedback?> GetByIdAsync(Guid feedbackId, bool changeTracking = false);
     }
 }
