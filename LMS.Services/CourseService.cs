@@ -55,7 +55,13 @@ public class CourseService : ICourseService
 
         var courseDto = _mapper.Map<CourseExtendedDto>(course);
         if (includeProgress)
+        {
             courseDto.Progress = progress;
+            foreach (var module in courseDto.Modules)
+            {
+                module.Progress = await _unitOfWork.Module.CalculateProgress(module.Id, _currentUserService.IsStudent ? _currentUserService.Id : null);
+            }
+        }
 
         return courseDto;
     }
