@@ -23,19 +23,11 @@ public class UserRepository : RepositoryBase<ApplicationUser>, IUserRepository
         _userManager = userManager;
     }
 
-    /// <summary>
-    /// Checks if a user belongs to the "Teacher" role. <br/>
-    /// </summary>
-    /// <param name="userId">The unique identifier of the user.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains <c>true</c> if the user is a student; otherwise, <c>false</c>.</returns>
+    /// <inheritdoc />
     public async Task<bool> IsUserStudentAsync(string userId) =>
         await IsUserInRoleAsync(userId, "Student");
 
-    /// <summary>
-    /// Checks if a user belongs to the "Teacher" role. <br/>
-    /// </summary>
-    /// <param name="userId">The unique identifier of the user.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains <c>true</c> if the user is a teacher; otherwise, <c>false</c>.</returns>
+    /// <inheritdoc />
     public async Task<bool> IsUserTeacherAsync(string userId) => 
         await IsUserInRoleAsync(userId, "Teacher");
 
@@ -79,22 +71,20 @@ public class UserRepository : RepositoryBase<ApplicationUser>, IUserRepository
 		await FindAll(changeTracking)
         .ToListAsync();
 	
-
-	// Not used yet. Parameters set to change.
-	void IRepositoryBase<ApplicationUser>.Update(ApplicationUser entity)
-	{
-		throw new NotImplementedException();
-	}
-
-    /// <summary>
-    /// Retrieves all participants of a specific course.
-    /// </summary>
-    /// <param name="courseId">The unique identifier of the course.</param>
-    /// <param name="changeTracking">
-    /// If <c>true</c>, Entity Framework change tracking will be enabled. <br/>
-    /// </param>
+    /// <inheritdoc />
     public async Task<IEnumerable<ApplicationUser>> GetCourseParticipantsAsync(Guid courseId, bool changeTracking = false) =>
         await FindAll(changeTracking)
             .Where(u => u.UserCourses.Any(uc => uc.CourseId == courseId))
             .ToListAsync();
+
+    /// <inheritdoc />
+    public async Task<bool> IsUniqueEmailAsync(string email, string? excludingUserId = null) =>
+        await FindByCondition(u => u.Email == email && (excludingUserId == null || u.Id != excludingUserId), trackChanges: false)
+            .FirstOrDefaultAsync() == null;
+
+
+    /// <inheritdoc />
+    public async Task<bool> IsUniqueUsernameAsync(string username, string? excludingUserId = null) =>
+        await FindByCondition(u => u.UserName == username && (excludingUserId == null || u.Id != excludingUserId), trackChanges: false)
+            .FirstOrDefaultAsync() == null;
 }

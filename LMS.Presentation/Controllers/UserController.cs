@@ -1,4 +1,5 @@
-﻿using LMS.Shared.DTOs.UserDtos;
+﻿using LMS.Shared.DTOs.ModuleDtos;
+using LMS.Shared.DTOs.UserDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -78,5 +79,4 @@ public class UserController: ControllerBase
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	public async Task<ActionResult<IEnumerable<UserPreviewDto>>> GetUsers() => 
 		Ok(await _serviceManager.UserService.GetUsersAsync());
-	
 }
