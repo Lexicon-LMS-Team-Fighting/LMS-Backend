@@ -10,18 +10,10 @@ namespace Domain.Exceptions
     public class UserOperationException : AuthorizationException
     {
         /// <summary>
-        /// Gets the list of errors that caused the exception.
-        /// </summary>
-        public IEnumerable<string> Errors { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserOperationException"/> class with the specified errors.
+        /// Initializes a new instance of the <see cref="UserCreationException"/> class with the specified errors.
         /// </summary>
         /// <param name="errors">The errors that caused the exception.</param>
         public UserOperationException(IEnumerable<string> errors)
-            : base("User creation failed due to one or more errors.", HttpStatusCode.InternalServerError)
-        {
-            Errors = errors;
-        }
+            : base($"An error occured while creating or updating the user: {string.Join(", ", errors)}", HttpStatusCode.BadRequest) { }
     }
 }

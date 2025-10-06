@@ -53,20 +53,4 @@ public interface IUserRepository: IRepositoryBase<ApplicationUser>
     /// If <c>true</c>, Entity Framework change tracking will be enabled. <br/>
     /// </param>
     public Task<IEnumerable<ApplicationUser>> GetCourseParticipantsAsync(Guid courseId, bool changeTracking = false);
-
-    /// <summary>
-    /// Checks if the provided email is unique across all users, optionally excluding a specific user by their ID. <br/>
-    /// </summary>
-    /// <param name="email">The email address to check for uniqueness.</param>
-    /// <param name="excludingUserId">Optional user ID to exclude from the uniqueness check (useful when updating a user's own email).</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains <c>true</c> if the email is unique; otherwise, <c>false</c>.</returns>
-    public Task<bool> IsUniqueEmailAsync(string email, string? excludingUserId = null);
-
-    /// <summary>
-    /// Checks if the combination of first name and last name is unique across all users, optionally excluding a specific user by their ID. <br/>
-    /// </summary>
-    /// <param name="username">The username to check for uniqueness.</param>
-    /// <param name="excludingUserId">Optional user ID to exclude from the uniqueness check (useful when updating a user's own name).</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains <c>true</c> if the name combination is unique; otherwise, <c>false</c>.</returns>
-    public Task<bool> IsUniqueUsernameAsync(string username, string? excludingUserId = null);
 }

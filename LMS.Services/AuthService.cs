@@ -19,7 +19,6 @@ using System.Text;
 namespace LMS.Services;
 public class AuthService : IAuthService
 {
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
@@ -27,14 +26,12 @@ public class AuthService : IAuthService
     private ApplicationUser? _user;
 
     public AuthService(
-        IUnitOfWork unitOfWork,
         IMapper mapper,
         UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole> roleManager,
         IOptions<JwtSettings> jwtSettings
         )
     {
-        _unitOfWork = unitOfWork;
         _mapper = mapper;
         _userManager = userManager;
         _roleManager = roleManager;
@@ -166,12 +163,14 @@ public class AuthService : IAuthService
 
 
     /// <inheritdoc />
+    /// <exception cref="UserAlreadyExistsException">Thrown when a user with the same email or username already exists.</exception>
+    /// <exception cref="UserOperationException">Thrown when there is an error during the user creation or role assignment process.</exception>
     public async Task<UserExtendedDto> CreateUserAsync(CreateUserDto createDto)
     {
-        if (!await _unitOfWork.User.IsUniqueEmailAsync(createDto.Email))
+        if (await _userManager.FindByEmailAsync(createDto.Email) is not null)
             throw new UserAlreadyExistsException(createDto.Email, true);
 
-        if (!await _unitOfWork.User.IsUniqueUsernameAsync(createDto.UserName))
+        if (await _userManager.FindByNameAsync(createDto.UserName) is not null)
             throw new UserAlreadyExistsException(createDto.UserName);
 
         if (!await _roleManager.RoleExistsAsync("Student"))
@@ -195,6 +194,9 @@ public class AuthService : IAuthService
     }
 
     /// <inheritdoc />
+    /// <exception cref="UserNotFoundException">Thrown when the user with the specified ID does not exist.</exception>
+    /// <exception cref="UserAlreadyExistsException">Thrown when the new email or username is already taken by another user.</exception>
+    /// <exception cref="UserOperationException">Thrown when there is an error during the update operation.</exception>
     public async Task UpdateUserAsync(string userId, UpdateUserDto updateDto)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -204,7 +206,9 @@ public class AuthService : IAuthService
 
         if (updateDto.Email is not null)
         {
-            if (!await _unitOfWork.User.IsUniqueEmailAsync(updateDto.Email, userId))
+            var emailUser = await _userManager.FindByEmailAsync(updateDto.Email);
+
+            if (emailUser is not null && emailUser.Id != userId)
                 throw new UserAlreadyExistsException(updateDto.Email, true);
 
             user.Email = updateDto.Email;
@@ -212,7 +216,9 @@ public class AuthService : IAuthService
 
         if (updateDto.UserName is not null)
         {
-            if (!await _unitOfWork.User.IsUniqueUsernameAsync(updateDto.UserName, userId))
+            var usernameUser = await _userManager.FindByNameAsync(updateDto.UserName);
+
+            if (usernameUser is not null && usernameUser.Id != userId)
                 throw new UserAlreadyExistsException(updateDto.UserName);
 
             user.UserName = updateDto.UserName;

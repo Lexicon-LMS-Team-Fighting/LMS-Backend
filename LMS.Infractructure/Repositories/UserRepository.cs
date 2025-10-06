@@ -76,15 +76,4 @@ public class UserRepository : RepositoryBase<ApplicationUser>, IUserRepository
         await FindAll(changeTracking)
             .Where(u => u.UserCourses.Any(uc => uc.CourseId == courseId))
             .ToListAsync();
-
-    /// <inheritdoc />
-    public async Task<bool> IsUniqueEmailAsync(string email, string? excludingUserId = null) =>
-        await FindByCondition(u => u.Email == email && (excludingUserId == null || u.Id != excludingUserId), trackChanges: false)
-            .FirstOrDefaultAsync() == null;
-
-
-    /// <inheritdoc />
-    public async Task<bool> IsUniqueUsernameAsync(string username, string? excludingUserId = null) =>
-        await FindByCondition(u => u.UserName == username && (excludingUserId == null || u.Id != excludingUserId), trackChanges: false)
-            .FirstOrDefaultAsync() == null;
 }
