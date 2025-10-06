@@ -83,5 +83,17 @@ namespace Domain.Contracts.Repositories
         /// A task that represents the asynchronous operation. The task result contains a collection of <see cref="Module"/> entities.
         /// </returns>
         Task<IEnumerable<Module>> GetByCourseIdAsync(Guid courseId, string userId, bool changeTracking = false);
+
+        /// <summary>
+        /// Calculates the normalized progress for a module.
+        /// </summary>
+        /// <param name="moduleId">The module ID.</param>
+        /// <param name="userId">
+        /// Optional user ID. 
+        /// If provided, calculates progress only for that user (student view). 
+        /// If null, can be used for teacher view (aggregate or max per student logic can be added later).
+        /// </param>
+        /// <returns>A decimal value between 0 and 1 representing module progress.</returns>
+        Task<decimal> CalculateProgress(Guid moduleId, string? userId = null);
     }
 }

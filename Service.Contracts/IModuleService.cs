@@ -28,8 +28,9 @@ namespace Service.Contracts
         /// </summary>
         /// <param name="pageNumber">The page number to retrieve.</param>
         /// <param name="pageSize">The number of items per page.</param>
+        /// <param name="include">Optional fields to include (e.g., "progress").</param>
         /// <returns>A <see cref="PaginatedResultDto{ModuleDto}"/> containing the paginated list of modules.</returns>
-        Task<PaginatedResultDto<ModulePreviewDto>> GetAllAsync(int pageNumber, int pageSize);
+        Task<PaginatedResultDto<ModulePreviewDto>> GetAllAsync(int pageNumber, int pageSize, string? include = null);
 
         /// <summary>
         /// Retrieves a paginated list of modules associated with a specific course.
@@ -37,8 +38,9 @@ namespace Service.Contracts
         /// <param name="courseId">The unique identifier of the course.</param>
         /// <param name="pageNumber">The page number to retrieve.</param>
         /// <param name="pageSize">The number of items per page.</param>
+        /// <param name="include">Optional fields to include (e.g., "progress").</param>
         /// <returns>A <see cref="PaginatedResultDto{ModuleDto}"/> containing the paginated list of modules for the specified course.</returns>
-        Task<PaginatedResultDto<ModulePreviewDto>> GetAllByCourseIdAsync(Guid courseId, int pageNumber, int pageSize);
+        Task<PaginatedResultDto<ModulePreviewDto>> GetAllByCourseIdAsync(Guid courseId, int pageNumber, int pageSize, string? include = null);
 
         /// <summary>
         /// Creates a new module.

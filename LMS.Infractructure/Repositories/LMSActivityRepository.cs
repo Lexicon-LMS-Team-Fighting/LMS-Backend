@@ -60,6 +60,7 @@ namespace LMS.Infractructure.Repositories
 
             return query
                 .Include(a => a.Module)
+                    .ThenInclude(m => m.Course)
                 .Include(a => a.ActivityType);
         }
 

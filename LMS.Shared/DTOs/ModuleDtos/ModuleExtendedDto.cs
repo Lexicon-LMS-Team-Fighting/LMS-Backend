@@ -45,6 +45,11 @@ namespace LMS.Shared.DTOs.ModuleDtos
         public DateTime EndDate { get; set; }
 
         /// <summary>
+        /// Gets or sets the normalized progress of the module, represented as a decimal value between 0 and 1.
+        /// </summary>
+        public decimal? Progress { get; set; }
+
+        /// <summary>
         /// Gets or sets the collection of LMS activities associated with the module.
         /// </summary>
         public ICollection<LMSActivityPreviewDto> Activities { get; } = [];

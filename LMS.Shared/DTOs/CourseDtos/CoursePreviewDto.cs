@@ -24,5 +24,10 @@
         /// Gets or sets the end date of the course.
         /// </summary>
         public DateTime EndDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the normilized progress of the module (0 to 1).
+        /// </summary>
+        public decimal? Progress { get; set; }
     }
 }
