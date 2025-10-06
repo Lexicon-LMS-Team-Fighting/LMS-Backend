@@ -5,10 +5,12 @@ using Domain.Models.Exceptions;
 using Domain.Models.Exceptions.Authorization;
 using Domain.Models.Exceptions.BadRequest;
 using Domain.Models.Exceptions.Conflict;
+using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.DTOs.PaginationDtos;
 using LMS.Shared.Pagination;
 using Service.Contracts;
+using System.Reflection.Metadata.Ecma335;
 
 namespace LMS.Services
 {
@@ -35,37 +37,45 @@ namespace LMS.Services
             _currentUserService = currentUserService;
         }
 
-        /// <summary>
-        /// Retrieves a module by its unique identifier.
-        /// </summary>
-        /// <param name="id">The unique identifier of the module.</param>
-        /// <param name="include">Related entities to include (e.g., "lmsactivities", "participants", "documents").</param>
-        /// <returns>A <see cref="ModuleDetailedDto"/> representing the module.</returns>
+        /// <inheritdoc />
         /// <exception cref="ModuleNotFoundException">Thrown if the module is not found.</exception>
+        /// <exception cref="UserRoleNotSupportedException">Thrown when the current user's role is neither Teacher nor Student.</exception>
         public async Task<ModuleExtendedDto> GetByIdAsync(Guid id, string? include)
         {
             Module? module = null;
+            bool includeProgress = !string.IsNullOrEmpty(include) && include.Contains(nameof(ModuleExtendedDto.Progress), StringComparison.OrdinalIgnoreCase);
+            decimal progress = 0;
 
             if (_currentUserService.IsTeacher)
+            {
                 module = await _unitOfWork.Module.GetByIdAsync(id, include, true);
+
+                if (includeProgress)
+                    progress = await _unitOfWork.Module.CalculateProgress(id);
+            }
             else if (_currentUserService.IsStudent)
+            {
                 module = await _unitOfWork.Module.GetByIdAsync(id, _currentUserService.Id, include);
-            else
-                throw new UserRoleNotSupportedException();
+
+                if (includeProgress)
+                    progress = await _unitOfWork.Module.CalculateProgress(id, _currentUserService.Id);
+            }
+            else throw new UserRoleNotSupportedException();
 
             if (module is null)
                 throw new ModuleNotFoundException(id);
 
-            return _mapper.Map<ModuleExtendedDto>(module);
+            var moduleDto = _mapper.Map<ModuleExtendedDto>(module);
+
+            if (includeProgress)
+                moduleDto.Progress = progress;
+
+            return moduleDto;
         }
 
-        /// <summary>
-        /// Retrieves a paginated list of all modules.
-        /// </summary>
-        /// <param name="pageNumber">The page number to retrieve.</param>
-        /// <param name="pageSize">The number of items per page.</param>
-        /// <returns>A <see cref="PaginatedResultDto{ModulePreviewDto}"/> containing the paginated list of modules.</returns>
-        public async Task<PaginatedResultDto<ModulePreviewDto>> GetAllAsync(int pageNumber, int pageSize)
+        /// <inheritdoc />
+        /// <exception cref="UserRoleNotSupportedException">Thrown when the current user's role is neither Teacher nor Student.</exception>
+        public async Task<PaginatedResultDto<ModulePreviewDto>> GetAllAsync(int pageNumber, int pageSize, string? include = null)
         {
             IEnumerable<Module>? modules = null;
 
@@ -82,17 +92,20 @@ namespace LMS.Services
                 PageSize = pageSize
             });
 
-            return _mapper.Map<PaginatedResultDto<ModulePreviewDto>>(paginatedModules);
+            var modulesDto = _mapper.Map<PaginatedResultDto<ModulePreviewDto>>(paginatedModules);
+
+            if (!string.IsNullOrEmpty(include) && include.Contains(nameof(ModulePreviewDto.Progress), StringComparison.OrdinalIgnoreCase))
+            {
+                await AddProgress(modulesDto);
+            }
+
+            return modulesDto;
         }
 
-        /// <summary>
-        /// Retrieves a paginated list of modules associated with a specific course.
-        /// </summary>
-        /// <param name="courseId">The unique identifier of the course.</param>
-        /// <param name="pageNumber">The page number to retrieve.</param>
-        /// <param name="pageSize">The number of items per page.</param>
-        /// <returns>A <see cref="PaginatedResultDto{ModulePreviewDto}"/> containing the paginated list of modules for the specified course.</returns>
-        public async Task<PaginatedResultDto<ModulePreviewDto>> GetAllByCourseIdAsync(Guid courseId, int pageNumber, int pageSize)
+        /// <inheritdoc />
+        /// <exception cref="UserRoleNotSupportedException">Thrown when the current user's role is neither Teacher nor Student.</exception>
+        /// <exception cref="CourseNotFoundException">Thrown if the course is not found or the user does not have access to it.</exception>
+        public async Task<PaginatedResultDto<ModulePreviewDto>> GetAllByCourseIdAsync(Guid courseId, int pageNumber, int pageSize, string? include = null)
         {
             IEnumerable<Module>? modules = null;
 
@@ -118,17 +131,41 @@ namespace LMS.Services
                 PageSize = pageSize
             });
 
-            return _mapper.Map<PaginatedResultDto<ModulePreviewDto>>(paginatedModules);
+            var modulesDto = _mapper.Map<PaginatedResultDto<ModulePreviewDto>>(paginatedModules);
+
+            if (!string.IsNullOrEmpty(include) && include.Contains(nameof(ModulePreviewDto.Progress), StringComparison.OrdinalIgnoreCase))
+            {
+                await AddProgress(modulesDto);
+            }
+
+            return modulesDto;
         }
 
         /// <summary>
-        /// Creates a new module.
+        /// Calculates and adds progress information to each module in the provided paginated result.
         /// </summary>
-        /// <param name="module">The data for the module to create.</param>
+        /// <param name="modulesDto">The paginated result of module previews to which progress will be added.</param>
+        /// <exception cref="UserRoleNotSupportedException"></exception>
+        private async Task AddProgress(PaginatedResultDto<ModulePreviewDto> modulesDto)
+        {
+            Func<Guid, Task<decimal>> calculateProgressFunc = _currentUserService.IsTeacher
+                ? (async (moduleId) => await _unitOfWork.Module.CalculateProgress(moduleId))
+                : _currentUserService.IsStudent
+                    ? (async (moduleId) => await _unitOfWork.Module.CalculateProgress(moduleId, _currentUserService.Id))
+                    : throw new UserRoleNotSupportedException();
+
+            foreach (var module in modulesDto.Items)
+            {
+                module.Progress = await calculateProgressFunc(module.Id);
+            }
+        }
+
+        /// <inheritdoc />
         /// <returns>A <see cref="ModuleExtendedDto"/> representing the created module.</returns>
         /// <exception cref="CourseNotFoundException">Thrown if the associated course is not found.</exception>
         /// <exception cref="ModuleNameAlreadyExistsException">Thrown if the module name is not unique within the course.</exception>
         /// <exception cref="InvalidDateRangeException">Thrown if the start date is greater than or equal to the end date.</exception>
+        /// <exception cref="InvalidModuleDateRangeException">Thrown if the module dates are outside the associated course date range.</exception>
         public async Task<ModuleExtendedDto> CreateAsync(CreateModuleDto module)
         {
             var moduleEntity = _mapper.Map<Module>(module);
@@ -153,10 +190,7 @@ namespace LMS.Services
             return _mapper.Map<ModuleExtendedDto>(moduleEntity);
         }
 
-        /// <summary>
-        /// Deletes a module by its unique identifier.
-        /// </summary>
-        /// <param name="id">The unique identifier of the module to delete.</param>
+        /// <inheritdoc />
         /// <exception cref="ModuleNotFoundException">Thrown if the module is not found.</exception>
         public async Task DeleteAsync(Guid id)
         {
@@ -169,14 +203,11 @@ namespace LMS.Services
             await _unitOfWork.CompleteAsync();
         }
 
-        /// <summary>
-        /// Updates an existing module.
-        /// </summary>
-        /// <param name="id">The unique identifier of the module to update.</param>
-        /// <param name="updateDto">The updated data for the module.</param>
+        /// <inheritdoc />
         /// <exception cref="ModuleNotFoundException">Thrown if the module is not found.</exception>
         /// <exception cref="ModuleNameAlreadyExistsException">Thrown if the updated module name is not unique within the course.</exception>
         /// <exception cref="InvalidDateRangeException">Thrown if the updated start date is greater than or equal to the end date.</exception>
+        /// <exception cref="InvalidModuleDateRangeException">Thrown if the updated module dates are outside the associated course date range.</exception>
         public async Task UpdateAsync(Guid id, UpdateModuleDto updateDto)
         {
             var module = await _unitOfWork.Module.GetByIdAsync(id, null, true);
@@ -220,18 +251,7 @@ namespace LMS.Services
             await _unitOfWork.CompleteAsync();
         }
 
-        /// <summary>
-        /// Checks if a module name is unique within a specific course, excluding a specific module if provided.
-        /// </summary>
-        /// <param name="name">The name of the module to check.</param>
-        /// <param name="courseId">The unique identifier of the course.</param>
-        /// <param name="excludedModuleId">
-        /// The unique identifier of a module to exclude from the uniqueness check (optional).
-        /// Use this parameter when updating a module to avoid conflicts with its current name.
-        /// </param>
-        /// <returns>
-        /// <c>true</c> if the module name is unique within the course; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc />
         public async Task<bool> IsUniqueNameAsync(string name, Guid courseId, Guid excludedModuleId = default)
         {
             var modules = await _unitOfWork.Module.GetByCourseIdAsync(courseId);

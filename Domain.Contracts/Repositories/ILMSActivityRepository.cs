@@ -68,5 +68,13 @@ namespace Domain.Contracts.Repositories
         /// A task representing the asynchronous operation. The task result contains a collection of <see cref="LMSActivity"/> entities.
         /// </returns>
         Task<IEnumerable<LMSActivity>> GetByModuleIdAsync(Guid moduleId, string userId, bool changeTracking = false);
+
+        /// <summary>
+        /// Checks if a user is enrolled in a specific activity. <br/>
+        /// </summary>
+        /// <param name="activityId">The unique identifier of the activity.</param>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <returns>A task representing the asynchronous operation. The task result contains <c>true</c> if the user is enrolled, otherwise <c>false</c>.</returns>
+        Task<bool> IsUserEnrolledInActivityAsync(Guid activityId, string userId);
     }
 }

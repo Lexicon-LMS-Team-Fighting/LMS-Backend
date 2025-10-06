@@ -1,4 +1,5 @@
 ﻿using LMS.Shared.DTOs.LMSActivityDtos;
+using LMS.Shared.DTOs.LMSActivityFeedbackDtos;
 using LMS.Shared.DTOs.PaginationDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -137,6 +138,124 @@ namespace LMS.Presentation.Controllers
         /// <response code="404">If no activity is found with the specified GUID.</response>
         /// <response code="401">Unauthorized.</response>
         /// <response code="403">Forbidden.</response>
+        //[HttpDelete("{guid}")]
+        //[Authorize(Roles = "Teacher")]
+        //[SwaggerOperation(
+        //    Summary = "Delete an activity",
+        //    Description = "Deletes the LMS activity identified by its GUID."
+        //)]
+        //[ProducesResponseType(StatusCodes.Status204NoContent)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        //[ProducesResponseType(StatusCodes.Status403Forbidden)]
+        //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        //public async Task<IActionResult> DeleteActivity(Guid guid)
+        //{
+        //    await _serviceManager.LMSActivityService.DeleteAsync(guid);
+        //    return NoContent();
+        //}
+
+        /// <summary>
+        /// Retrieves a specific feedback for a given activity and user.
+        /// </summary>
+        /// <param name="activityId">The unique identifier of the activity.</param>
+        /// <param name="userId">The unique identifier of the user to whom the feedback is provided.</param>
+        /// <returns>A <see cref="LMSActivityFeedbackExtendedDto"/> representing the feedback.</returns>
+        /// <response code="200">Returns the feedback details.</response>
+        /// <response code="404">If no feedback is found for the specified activity and user.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
+        [HttpGet("activities/{activityId}/participants/{userId}/feedback")]
+        [Authorize(Roles = "Teacher,Student")]
+        [SwaggerOperation(
+            Summary = "Get feedback by activity ID and user ID",
+            Description = "Retrieves feedback details for a specific activity and user by their unique identifiers."
+        )]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LMSActivityFeedbackExtendedDto))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<LMSActivityFeedbackExtendedDto>> GetFeedback(
+            [FromRoute] Guid activityId,
+            [FromRoute] string userId)
+        {
+            var feedback = await _serviceManager.LMSActivityFeedbackService.GetByActivityAndUserIdAsync(activityId, userId);
+            if (feedback is null)
+                return NotFound();
+
+            return Ok(feedback);
+        }
+
+        /// <summary>
+        /// Creates a new feedback.
+        /// </summary>
+        [HttpPost("{activityId}/participants/{userId}/feedback")]
+        [Authorize(Roles = "Teacher")]
+        [SwaggerOperation(
+            Summary = "Create a new feedback",
+            Description = "Creates a new feedback with the provided details."
+        )]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(LMSActivityFeedbackExtendedDto))]
+        [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<LMSActivityFeedbackExtendedDto>> CreateFeedback(
+            [FromRoute] Guid activityId,
+            [FromRoute] string userId,
+            [FromBody] CreateLMSActivityFeedbackDto createDto)
+        {
+            var createdFeedback = await _serviceManager.LMSActivityFeedbackService.CreateAsync(activityId, userId, createDto);
+            return CreatedAtAction(
+                nameof(GetFeedback),
+                new { activityId = createdFeedback.LMSActivityId, userId = createdFeedback.UserId },
+                createdFeedback);
+        }
+
+        /// <summary>
+        /// Updates an existing feedback.
+        /// </summary>
+        [HttpPut("{activityId}/participants/{userId}/feedback")]
+        [Authorize(Roles = "Teacher")]
+        [SwaggerOperation(
+            Summary = "Update an existing feedback",
+            Description = "Updates the details of an existing feedback identified by activity ID and user ID."
+        )]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
+        public async Task<IActionResult> UpdateFeedback(
+            [FromRoute] Guid activityId,
+            [FromRoute] string userId,
+            [FromBody] UpdateLMSActivityFeedbackDto updateDto)
+        {
+            await _serviceManager.LMSActivityFeedbackService.UpdateAsync(activityId, userId, updateDto);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Deletes a feedback by activity ID and user ID.
+        /// </summary>
+        [HttpDelete("{activityId}/participants/{userId}/feedback")]
+        [Authorize(Roles = "Teacher")]
+        [SwaggerOperation(
+            Summary = "Delete a feedback",
+            Description = "Deletes the feedback identified by activity ID and user ID."
+        )]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> DeleteFeedback(
+            [FromRoute] Guid activityId,
+            [FromRoute] string userId)
+        {
+            await _serviceManager.LMSActivityFeedbackService.DeleteAsync(activityId, userId);
+            return NoContent();
+        }
+
         [HttpDelete("{guid}")]
         [Authorize(Roles = "Teacher")]
         [SwaggerOperation(

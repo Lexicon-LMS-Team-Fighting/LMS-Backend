@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using Domain.Models.Exceptions;
@@ -7,69 +7,69 @@ using Domain.Models.Exceptions.BadRequest;
 using Domain.Models.Exceptions.Conflict;
 using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.PaginationDtos;
+using LMS.Shared.DTOs.UserDtos;
 using LMS.Shared.Pagination;
 using Service.Contracts;
 
 namespace LMS.Services;
 
 /// <summary>
-/// Provides operations related to courses, including retrieval of single or multiple courses.
-/// Implements the <see cref="ICourseService"/> interface.
+/// Provides operations related to courses, including retrieval, enrollment, and updates.
 /// </summary>
 public class CourseService : ICourseService
 {
-	private readonly IUnitOfWork _unitOfWork;
-	private readonly IMapper _mapper;
-	private readonly ICurrentUserService _currentUserService;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+    private readonly ICurrentUserService _currentUserService;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CourseService"/> class.
-    /// </summary>
-    /// <param name="unitOfWork">The unit of work for repository access.</param>
-    /// <param name="mapper">The AutoMapper instance for mapping domain entities to DTOs.</param>
-	/// <param name="currentUserService">The service to get information about the current user.</param>
     public CourseService(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
-	{
-		_unitOfWork = unitOfWork;
-		_mapper = mapper;
-		_currentUserService = currentUserService;
+    {
+        _unitOfWork = unitOfWork;
+        _mapper = mapper;
+        _currentUserService = currentUserService;
     }
 
-    /// <summary>
-    /// Retrieves a single course by its unique identifier. <br/>
-    /// </summary>
-    /// <param name="courseId"> The unique identifier of the course.</param>
-    /// <param name="include">Related entities to include (e.g., "participants", "modules", "documents").</param>
-    /// <returns></returns>
-    /// <exception cref="UserRoleNotSupportedException">Thrown when the current user's role is neither Teacher nor Student.</exception>
-    /// <exception cref="CourseNotFoundException">Thrown when no course is found with the given <paramref name="courseId"/>.</exception>
+    /// <inheritdoc />
     public async Task<CourseExtendedDto> GetCourseAsync(Guid courseId, string? include)
-	{
+    {
         Course? course = null;
+        bool includeProgress = !string.IsNullOrEmpty(include) && include.Contains(nameof(CourseExtendedDto.Progress), StringComparison.OrdinalIgnoreCase);
+        decimal progress = 0;
 
         if (_currentUserService.IsTeacher)
+        {
             course = await _unitOfWork.Course.GetCourseAsync(courseId, include);
+            if (includeProgress)
+                progress = await _unitOfWork.Course.CalculateProgress(courseId);
+        }
         else if (_currentUserService.IsStudent)
+        {
             course = await _unitOfWork.Course.GetCourseAsync(courseId, _currentUserService.Id, include);
-        else
-            throw new UserRoleNotSupportedException();
-		
-		if (course is null) 
-			throw new CourseNotFoundException(courseId);
+            if (includeProgress)
+                progress = await _unitOfWork.Course.CalculateProgress(courseId, _currentUserService.Id);
+        }
+        else throw new UserRoleNotSupportedException();
 
-        return _mapper.Map<CourseExtendedDto>(course);
-	}
+        if (course is null)
+            throw new CourseNotFoundException(courseId);
 
-    /// <summary>
-    /// Retrieves all courses from the data source. <br/>
-    /// </summary>
-    /// <param name="pageNumber">The page number to retrieve.</param>
-    /// <param name="pageSize">The number of items per page.</param>
-    /// <returns>A collection of <see cref="CoursePreviewDto"/> objects representing all users.</returns>
-    /// <exception cref="UserRoleNotSupportedException">Thrown when the current user's role is neither Teacher nor Student.</exception>
-    public async Task<PaginatedResultDto<CoursePreviewDto>> GetCoursesAsync(int pageNumber, int pageSize)
-	{
-		IEnumerable<Course>? courses = null;
+        var courseDto = _mapper.Map<CourseExtendedDto>(course);
+        if (includeProgress)
+        {
+            courseDto.Progress = progress;
+            foreach (var module in courseDto.Modules)
+            {
+                module.Progress = await _unitOfWork.Module.CalculateProgress(module.Id, _currentUserService.IsStudent ? _currentUserService.Id : null);
+            }
+        }
+
+        return courseDto;
+    }
+
+    /// <inheritdoc />
+    public async Task<PaginatedResultDto<CoursePreviewDto>> GetCoursesAsync(int pageNumber, int pageSize, string? include = null)
+    {
+        IEnumerable<Course>? courses = null;
 
         if (_currentUserService.IsTeacher)
             courses = await _unitOfWork.Course.GetCoursesAsync();
@@ -78,46 +78,104 @@ public class CourseService : ICourseService
         else
             throw new UserRoleNotSupportedException();
 
-        var paginatedCourses = courses.ToPaginatedResult(new PagingParameters
+        var paginatedCourses = courses.ToPaginatedResult(new PagingParameters { PageNumber = pageNumber, PageSize = pageSize });
+        var coursesDto = _mapper.Map<PaginatedResultDto<CoursePreviewDto>>(paginatedCourses);
+
+        if (!string.IsNullOrEmpty(include) && include.Contains(nameof(CoursePreviewDto.Progress), StringComparison.OrdinalIgnoreCase))
+        {
+            Func<Guid, Task<decimal>> calculateProgressFunc = _currentUserService.IsTeacher
+                ? (async (courseId) => await _unitOfWork.Course.CalculateProgress(courseId))
+                : _currentUserService.IsStudent
+                    ? (async (courseId) => await _unitOfWork.Course.CalculateProgress(courseId, _currentUserService.Id))
+                    : throw new UserRoleNotSupportedException();
+
+            foreach (var c in coursesDto.Items)
+                c.Progress = await calculateProgressFunc(c.Id);
+        }
+
+        return coursesDto;
+    }
+
+    /// <inheritdoc />
+    public async Task<CourseExtendedDto> CreateAsync(CreateCourseDto createDto)
+    {
+        var course = _mapper.Map<Course>(createDto);
+
+        if (!await _unitOfWork.Course.IsUniqueNameAsync(createDto.Name))
+            throw new CourseNameAlreadyExistsException(createDto.Name);
+
+        if (course.StartDate >= course.EndDate)
+            throw new InvalidDateRangeException(course.StartDate, course.EndDate);
+
+        _unitOfWork.Course.Create(course);
+        await _unitOfWork.CompleteAsync();
+
+        return _mapper.Map<CourseExtendedDto>(course);
+    }
+
+    /// <inheritdoc />
+    public async Task<PaginatedResultDto<CourseParticipantDto>> GetParticipantsAsync(Guid courseId, int pageNumber, int pageSize)
+    {
+        var course = await _unitOfWork.Course.GetCourseAsync(courseId, nameof(CourseExtendedDto.Participants));
+        if (course is null)
+            throw new CourseNotFoundException(courseId);
+
+        if (_currentUserService.IsStudent && !course.UserCourses.Any(uc => uc.UserId == _currentUserService.Id))
+            throw new UserRoleNotSupportedException("You are not enrolled in this course.");
+
+        var participants = await _unitOfWork.User.GetCourseParticipantsAsync(courseId);
+
+        var paginatedParticipants = participants.ToPaginatedResult(new PagingParameters
         {
             PageNumber = pageNumber,
             PageSize = pageSize
         });
 
-        return _mapper.Map<PaginatedResultDto<CoursePreviewDto>>(paginatedCourses);
-	}
+        return _mapper.Map<PaginatedResultDto<CourseParticipantDto>>(paginatedParticipants);
+    }
 
-    /// <summary>
-    /// Creates a new course based on the provided data. <br/>
-    /// </summary>
-    /// <param name="createDto">The data for the course to create.</param>
-    /// <returns></returns>
-    /// <exception cref="CourseNameAlreadyExistsException">Thrown when a course with the same name already exists.</exception>
-    /// <exception cref="InvalidDateRangeException">Thrown when the start date is not earlier than the end date.</exception>
-    public async Task<CourseExtendedDto> CreateAsync(CreateCourseDto createDto)
-	{
-		var course = _mapper.Map<Course>(createDto);
-		
-        if (!await _unitOfWork.Course.IsUniqueNameAsync(createDto.Name))
-            throw new CourseNameAlreadyExistsException(createDto.Name);
+    /// <inheritdoc />
+    public async Task EnrollStudentAsync(Guid courseId, string studentId)
+    {
+        var course = await _unitOfWork.Course.GetCourseAsync(courseId, include: nameof(CourseExtendedDto.Participants));
 
-        if (course.StartDate >= course.EndDate)
-			throw new InvalidDateRangeException(course.StartDate, course.EndDate);
+        if (course is null)
+            throw new CourseNotFoundException(courseId);
 
-		_unitOfWork.Course.Create(course);
-		await _unitOfWork.CompleteAsync();
+        if (await _unitOfWork.User.GetUserAsync(studentId) is null)
+            throw new UserNotFoundException(studentId);
 
-		return _mapper.Map<CourseExtendedDto>(course);
-	}
+        if (!await _unitOfWork.User.IsUserStudentAsync(studentId))
+            throw new RoleMismatchException("User with provided ID is not a Student.");
 
-    /// <summary>
-    /// Updates an existing course.
-    /// </summary>
-    /// <param name="id">The unique identifier of the course to update.</param>
-    /// <param name="updateDto">The updated data for the course.</param>
-    /// <exception cref="CourseNotFoundException">Thrown if the course is not found.</exception>
-    /// <exception cref="ModuleNameAlreadyExistsException">Thrown if the updated course name is not unique within the course.</exception>
-    /// <exception cref="InvalidDateRangeException">Thrown if the updated start date is greater than or equal to the end date.</exception>
+        if (course.UserCourses.Any(uc => uc.UserId == studentId))
+            return;
+
+        _unitOfWork.UserCourse.Create(new UserCourse { UserId = studentId, CourseId = courseId });
+        await _unitOfWork.CompleteAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task UnenrollStudentAsync(Guid courseId, string studentId)
+    {
+        var course = await _unitOfWork.Course.GetCourseAsync(courseId, null);
+
+        if (course is null)
+            throw new CourseNotFoundException(courseId);
+
+        if (await _unitOfWork.User.GetUserAsync(studentId) is null)
+            throw new UserNotFoundException(studentId);
+
+        if (!await _unitOfWork.User.IsUserStudentAsync(studentId))
+            throw new RoleMismatchException("User with provided ID is not a Student.");
+
+        await _unitOfWork.UserCourse.DeleteAllByUserId(studentId);
+        await _unitOfWork.LMSActivityFeedback.DeleteAllInCourseByUserId(studentId, courseId);
+
+        await _unitOfWork.CompleteAsync();
+    }
+
+    /// <inheritdoc />
     public async Task UpdateAsync(Guid id, UpdateCourseDto updateDto)
     {
         var course = await _unitOfWork.Course.GetCourseAsync(id, null, true);
@@ -148,6 +206,7 @@ public class CourseService : ICourseService
         _unitOfWork.Course.Update(course);
         await _unitOfWork.CompleteAsync();
     }
+}
 
     /// <summary>
     /// Deletes a course by its unique identifier.

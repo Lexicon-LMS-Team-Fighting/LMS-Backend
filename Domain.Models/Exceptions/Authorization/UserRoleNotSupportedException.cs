@@ -1,4 +1,6 @@
-﻿namespace Domain.Models.Exceptions.Authorization
+﻿using System.Net;
+
+namespace Domain.Models.Exceptions.Authorization
 {
     /// <summary>
     /// Exception type for cases where a user's role is not supported for a specific operation.
@@ -9,12 +11,12 @@
         /// Initializes a new instance of the <see cref="UserRoleNotSupportedException"/> class with a custom message.
         /// </summary>
         public UserRoleNotSupportedException(string message)
-            : base(message) { }
+            : base(message, HttpStatusCode.Forbidden) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserRoleNotSupportedException"/> class with a default message.
         /// </summary>
         public UserRoleNotSupportedException()
-            : base("The user role is not supported for this operation.") { }
+            : base("The user role is not supported for this operation.", HttpStatusCode.Forbidden) { }
     }
 }

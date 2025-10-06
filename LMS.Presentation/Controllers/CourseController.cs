@@ -1,6 +1,7 @@
 ﻿using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.DTOs.PaginationDtos;
+using LMS.Shared.DTOs.UserDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -60,6 +61,7 @@ public class CourseController: ControllerBase
     /// <remarks>Requires authentication as either <c>Teacher</c> or <c>Student</c>.</remarks>
     /// <param name="pageNumber">The page number to retrieve (default is 1).</param>
 	/// <param name="pageSize">The number of items per page (default is 10).</param>
+    /// <param name="include">Optional fields to include (e.g., "progress").</param>
     /// <returns>An <see cref="ActionResult{T}"/> containing a collection of <see cref="CourseDto"/> objects.</returns>
     /// <response code="200">Returns the list of users (empty if none exist).</response>
     /// <response code="401">The request is unauthorized (missing or invalid token).</response>
@@ -73,13 +75,17 @@ public class CourseController: ControllerBase
 	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<CoursePreviewDto>))]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
-	public async Task<ActionResult<PaginatedResultDto<CoursePreviewDto>>> GetCourses(int pageNumber = 1, int pageSize = 10) =>
-		Ok(await _serviceManager.CourseService.GetCoursesAsync(pageNumber, pageSize));
+	public async Task<ActionResult<PaginatedResultDto<CoursePreviewDto>>> GetCourses(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? include = null) =>
+		Ok(await _serviceManager.CourseService.GetCoursesAsync(pageNumber, pageSize, include));
 
     /// <summary>Retrieves a paginated list of modules for a specific course.</summary>
     /// <param name="courseId">The unique identifier of the course.</param>
     /// <param name="page">The page number to retrieve (default is 1).</param>
     /// <param name="pageSize">The number of items per page (default is 10).</param>
+    /// <param name="include">Optional fields to include.</param>
     /// <returns>A paginated list of modules for the specified course.</returns>
     /// <response code="200">Returns the paginated list of modules.</response>
     /// <response code="400">If the provided GUID is not valid.</response>
@@ -100,9 +106,10 @@ public class CourseController: ControllerBase
     public async Task<ActionResult<PaginatedResultDto<ModulePreviewDto>>> GetModulesByCourseId(
         Guid courseId,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? include = null
     ) =>
-        Ok(await _serviceManager.ModuleService.GetAllByCourseIdAsync(courseId, page, pageSize));
+        Ok(await _serviceManager.ModuleService.GetAllByCourseIdAsync(courseId, page, pageSize, include));
 
 	/// <summary>
 	/// Creates a course.
@@ -133,10 +140,91 @@ public class CourseController: ControllerBase
 	}
 
     /// <summary>
+    /// Retrieves the participants of a course.
+    /// </summary>
+    /// <remarks> Must be authorized as a <c>Student</c> or <c>Teacher</c> to access this endpoint.</remarks>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    /// <param name="pageNumber">The page number to retrieve (default is 1).</param>
+    /// <param name="pageSize">The number of items per page (default is 10).</param>
+    /// <returns>A paginated list of <see cref="PaginatedResultDto{CourseParticipantDto}"/> representing the participants of the course.</returns>
+    /// <response code="200">Returns the list of participants.</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="403">Forbidden.</response>
+    /// <response code="404">Course not found.</response>
+    [HttpGet("{courseId:guid}/participants")]
+    [Authorize(Roles = "Student,Teacher")]
+    [SwaggerOperation(
+        Summary = "Get course participants",
+        Description = "Retrieves all participants of a specific course. Requires Student or Teacher role."
+    )]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<CourseParticipantDto>))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<PaginatedResultDto<CourseParticipantDto>>> GetCourseParticipants(Guid courseId, int pageNumber = 1, int pageSize = 10) =>
+        Ok(await _serviceManager.CourseService.GetParticipantsAsync(courseId, pageNumber, pageSize));
+
+    /// Enrolls a student into a specific course.
+    /// </summary>
+    /// <remarks>Must be authorized as a <c>Teacher</c> to access this endpoint.</remarks>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    /// <param name="studentId">The unique identifier of the student to enroll.</param>
+    /// <response code="204">Student was successfully enrolled in the course.</response>
+    /// <response code="400">Invalid request (e.g., student already enrolled).</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="403">Forbidden.</response>
+    /// <response code="404">Course or student not found.</response>
+    [HttpPost("{courseId:guid}/participants/{studentId:guid}")]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(
+        Summary = "Enroll a student into a course",
+        Description = "Adds the specified student to the participants list of the course. Requires Teacher role."
+    )]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    public async Task<IActionResult> EnrollStudent(Guid courseId, Guid studentId)
+    {
+        await _serviceManager.CourseService.EnrollStudentAsync(courseId, studentId.ToString());
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Unenrolls a student from a specific course.
+    /// </summary>
+    /// <remarks>Must be authorized as a <c>Teacher</c> to access this endpoint. 
+    /// When a student is removed, all their submitted feedback for this course will also be deleted.</remarks>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    /// <param name="studentId">The unique identifier of the student to unenroll.</param>
+    /// <response code="204">Student was successfully unenrolled from the course.</response>
+    /// <response code="400">Invalid request (e.g., student not enrolled).</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="403">Forbidden.</response>
+    /// <response code="404">Course or student not found.</response>
+    [HttpDelete("{courseId:guid}/participants/{studentId:guid}")]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(
+        Summary = "Unenroll a student from a course",
+        Description = "Removes the specified student from the participants list of the course and deletes all their feedback related to the course. Requires Teacher role."
+    )]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    public async Task<IActionResult> UnenrollStudent(Guid courseId, Guid studentId)
+    {
+        await _serviceManager.CourseService.UnenrollStudentAsync(courseId, studentId.ToString());
+        return NoContent();
+    }
+
+    /// <summary>
     /// Updates an existing course.
     /// </summary>
     /// <param name="guid">The unique identifier of the course to update.</param>
-    /// <param name="course">The updated details of the course.</param>
+    /// <param name="updateDto">The updated details of the course.</param>
     /// <response code="204">Course was successfully updated.</response>
     /// <response code="400">If the provided course data is invalid.</response>
     /// <response code="404">If no course is found with the specified GUID.</response>

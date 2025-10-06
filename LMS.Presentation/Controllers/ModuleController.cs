@@ -58,6 +58,7 @@ namespace LMS.Presentation.Controllers
         /// </summary>
         /// <param name="page">The page number to retrieve (default is 1).</param>
         /// <param name="pageSize">The number of items per page (default is 10).</param>
+        /// <param name="include">Optional fileds to include (e.g., "progress").</param>
         /// <returns>A paginated list of modules.</returns>
         /// <response code="200">Returns a paginated list of modules.</response>
         /// <response code="401">Unauthorized.</response>
@@ -71,8 +72,11 @@ namespace LMS.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<ModulePreviewDto>))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<PaginatedResultDto<ModulePreviewDto>>> GetModules([FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
-            Ok(await _serviceManager.ModuleService.GetAllAsync(page, pageSize));
+        public async Task<ActionResult<PaginatedResultDto<ModulePreviewDto>>> GetModules(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? include = null) =>
+            Ok(await _serviceManager.ModuleService.GetAllAsync(page, pageSize, include));
 
         /// <summary>
         /// Creates a new module.
