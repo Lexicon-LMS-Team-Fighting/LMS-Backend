@@ -62,49 +62,28 @@ namespace LMS.Infractructure.Repositories
                 .Include(a => a.Module)
                 .Include(a => a.ActivityType);
         }
-        /// <summary>
-        /// Retrieves a single <see cref="LMSActivity"/> entity by its unique identifier.
-        /// </summary>
-        /// <param name="activityId">The unique identifier of the activity.</param>
-        /// <param name="include">Related entities to include (e.g., "participants", "feedbacks", "documents").</param>
-        /// <param name="changeTracking">If true, enables change tracking.</param>
-        /// <returns>Matching <see cref="LMSActivity"/> with all feedbacks or null if not found.</returns>
+
+        /// <inheritdoc />
         public async Task<LMSActivity?> GetByIdAsync(Guid activityId, string? include, bool changeTracking = false)
         {
             var query = FindByCondition(a => a.Id == activityId, trackChanges: changeTracking);
             return await BuildActivityQuery(query, include).FirstOrDefaultAsync();
         }
 
-        /// <summary>
-        /// Retrieves a single <see cref="LMSActivity"/> entity by its unique identifier from the perspective of a specific user.
-        /// </summary>
-        /// <param name="activityId">The unique identifier of the activity.</param>
-        /// <param name="userId">The unique identifier of the user whose feedbacks to include.</param>
-        /// <param name="include">Related entities to include (e.g., "participants", "feedbacks", "documents").</param>
-        /// <param name="changeTracking">If true, enables change tracking.</param>
-        /// <returns>Matching <see cref="LMSActivity"/> with user's feedbacks or null if not found.</returns>
+        /// <inheritdoc />
         public async Task<LMSActivity?> GetByIdAsync(Guid activityId, string userId, string? include, bool changeTracking = false)
         {
             var query = FindByCondition(a => a.Id == activityId, trackChanges: changeTracking);
             return await BuildActivityQuery(query, include, userId).FirstOrDefaultAsync();
         }
 
-        /// <summary>
-        /// Retrieves all <see cref="LMSActivity"/> entities.
-        /// </summary>
-        /// <param name="changeTracking">If true, enables change tracking.</param>
-        /// <returns>A collection of all activities.</returns>
+        /// <inheritdoc />
         public async Task<IEnumerable<LMSActivity>> GetAllAsync(bool changeTracking = false) =>
             await FindAll(trackChanges: changeTracking)
                 .Include(a => a.ActivityType)
                 .ToListAsync();
 
-        /// <summary>
-        /// Retrieves all <see cref="LMSActivity"/> entities from the perspective of a specific user.
-        /// </summary>
-        /// <param name="userId">The unique identifier of the user.</param>
-        /// <param name="changeTracking">If true, enables change tracking.</param>
-        /// <returns>A collection of all activities.</returns>
+        /// <inheritdoc />
         public async Task<IEnumerable<LMSActivity>> GetAllAsync(string userId, bool changeTracking = false) =>
             await FindAll(trackChanges: changeTracking)
                 .Where(a => a.Module.Course.UserCourses.Any(uc => uc.UserId == userId))
@@ -112,28 +91,22 @@ namespace LMS.Infractructure.Repositories
                 .ToListAsync();
 
 
-        /// <summary>
-        /// Retrieves all <see cref="LMSActivity"/> entities associated with a specific module.
-        /// </summary>
-        /// <param name="moduleId">The unique identifier of the module.</param>
-        /// <param name="changeTracking">If true, enables change tracking.</param>
-        /// <returns>A collection of activities for the specified module.</returns>
+        /// <inheritdoc />
         public async Task<IEnumerable<LMSActivity>> GetByModuleIdAsync(Guid moduleId, bool changeTracking = false) =>
             await FindByCondition(a => a.ModuleId == moduleId, trackChanges: changeTracking)
                 .Include(a => a.ActivityType)
                 .ToListAsync();
 
-        /// <summary>
-        /// Retrieves all <see cref="LMSActivity"/> entities associated with a specific module from the perspective of a specific user.
-        /// </summary>
-        /// <param name="moduleId">The unique identifier of the module.</param>
-        /// <param name="userId">The unique identifier of the user.</param>
-        /// <param name="changeTracking">If true, enables change tracking.</param>
-        /// <returns>A collection of activities for the specified module.</returns>
+        /// <inheritdoc />
         public async Task<IEnumerable<LMSActivity>> GetByModuleIdAsync(Guid moduleId, string userId, bool changeTracking = false) =>
             await FindByCondition(a => a.ModuleId == moduleId, trackChanges: changeTracking)
                 .Where(a => a.Module.Course.UserCourses.Any(uc => uc.UserId == userId))
                 .Include(a => a.ActivityType)
                 .ToListAsync();
+
+        /// <inheritdoc />
+        public async Task<bool> IsUserEnrolledInActivityAsync(Guid activityId, string userId) =>
+            await FindByCondition(a => a.Id == activityId && a.Module.Course.UserCourses.Any(uc => uc.UserId == userId), trackChanges: false)
+                .AnyAsync();
     }
 }

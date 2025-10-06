@@ -70,5 +70,4 @@ public interface ICourseRepository: IRepositoryBase<Course>
     /// <c>true</c> if the course name is unique within the course; otherwise, <c>false</c>.
     /// </returns>
     Task<bool> IsUniqueNameAsync(string name, Guid excludedCourseId = default);
-
 }

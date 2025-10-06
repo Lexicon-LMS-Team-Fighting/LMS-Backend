@@ -31,10 +31,18 @@ namespace LMS.Infractructure.Repositories
             DeleteRange(feedbacks);
         }
 
+        /// <inheritdoc />
         public async Task<LMSActivityFeedback?> GetByIdAsync(Guid feedbackId, bool changeTracking = false)
         {
             return await FindByCondition(f => f.Id == feedbackId, trackChanges: changeTracking)
                 .FirstOrDefaultAsync();
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> ExistsAsync(Guid activityId, string userId)
+        {
+            return await FindByCondition(f => f.LMSActivityId == activityId && f.UserId == userId, trackChanges: false)
+                .AnyAsync();
         }
     }
 }

@@ -67,6 +67,8 @@ public class MapperProfile : Profile
         // Feedback mappings
         CreateMap<LMSActivityFeedback, LMSActivityFeedbackPreviewDto>();
         CreateMap<LMSActivityFeedback, LMSActivityFeedbackExtendedDto>();
+        CreateMap<CreateLMSActivityFeedbackDto, LMSActivityFeedback>()
+            .ForMember(d => d.LMSActivityId, o => o.MapFrom(s => s.ActivityId));
 
         // Pagination mappings
         CreateMap<PaginationMetadata, PaginationMetadataDto>();

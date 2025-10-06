@@ -6,7 +6,19 @@ using System.Threading.Tasks;
 
 namespace LMS.Shared.DTOs.LMSActivityFeedbackDtos
 {
+    /// <summary>
+    /// Data Transfer Object (DTO) for creating feedback for a Learning Management System (LMS) activity.
+    /// </summary>
     public class UpdateLMSActivityFeedbackDto
     {
+        /// <summary>
+        /// Gets or sets the feedback text provided by the user.
+        /// </summary>
+        public string? Feedback { get; set; }
+
+        /// <summary>
+        /// Gets or sets the status of the feedback (e.g., "Pending", "Reviewed", "Resolved").
+        /// </summary>
+        public string Status { get; set; } = string.Empty;
     }
 }

@@ -1,11 +1,15 @@
 ﻿using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using Domain.Models.Exceptions.Authorization;
+using Domain.Models.Exceptions.BadRequest;
+using Domain.Models.Exceptions.Conflict;
 using Domain.Models.Exceptions.NotFound;
 using LMS.Shared.DTOs.LMSActivityDtos;
 using LMS.Shared.DTOs.LMSActivityFeedbackDtos;
 using Service.Contracts;
+using System.Diagnostics;
 
 namespace LMS.Services
 {
@@ -49,9 +53,30 @@ namespace LMS.Services
             return _mapper.Map<LMSActivityExtendedDto>(activity);
         }
 
-        public Task<LMSActivityFeedbackExtendedDto> CreateAsync(CreateLMSActivityFeedbackDto createDto)
+        /// <inheritdoc />
+        /// <exception cref="LMSActivityFeedbackAlreadyExistsException">Thrown when feedback already exists for the given activity and user.</exception>
+        /// <exception cref="LMSActivityNotFoundException">Thrown when the specified activity does not exist.</exception>
+        /// <exception cref="UserRoleNotSupportedException">Thrown when the user role is not supported for this operation.</exception>
+        public async Task<LMSActivityFeedbackExtendedDto> CreateAsync(CreateLMSActivityFeedbackDto createDto)
         {
-            throw new NotImplementedException();
+            if (await _unitOfWork.LMSActivityFeedback.ExistsAsync(createDto.ActivityId, createDto.UserId))
+                throw new LMSActivityFeedbackAlreadyExistsException(createDto.ActivityId, createDto.UserId);
+
+            var activity = await _unitOfWork.LMSActivity.GetByIdAsync(createDto.ActivityId, null);
+            if (activity is null)
+                throw new LMSActivityNotFoundException(createDto.ActivityId);
+
+            if (!await _unitOfWork.User.IsUserStudentAsync(createDto.UserId))
+                throw new UserRoleNotSupportedException("Provided user Id does not belong to a student.");
+
+            if (!await _unitOfWork.LMSActivity.IsUserEnrolledInActivityAsync(createDto.ActivityId, createDto.UserId))
+                throw new UserNotEnrolledInActivityException(createDto.UserId, createDto.ActivityId);
+
+            var feedbackEntity = _mapper.Map<LMSActivityFeedback>(createDto);
+            _unitOfWork.LMSActivityFeedback.Create(feedbackEntity);
+            await _unitOfWork.CompleteAsync();
+
+            return _mapper.Map<LMSActivityFeedbackExtendedDto>(feedbackEntity);
         }
 
         public Task DeleteAsync(Guid id)
@@ -60,9 +85,26 @@ namespace LMS.Services
         }
 
 
-        public Task UpdateAsync(Guid id, UpdateLMSActivityFeedbackDto updateDto)
+        public async Task UpdateAsync(Guid activityId, string userId, UpdateLMSActivityFeedbackDto updateDto)
         {
-            throw new NotImplementedException();
+            if (await _unitOfWork.LMSActivityFeedback.ExistsAsync(createDto.ActivityId, createDto.UserId))
+                throw new LMSActivityFeedbackAlreadyExistsException(createDto.ActivityId, createDto.UserId);
+
+            var activity = await _unitOfWork.LMSActivity.GetByIdAsync(createDto.ActivityId, null);
+            if (activity is null)
+                throw new LMSActivityNotFoundException(createDto.ActivityId);
+
+            if (!await _unitOfWork.User.IsUserStudentAsync(createDto.UserId))
+                throw new UserRoleNotSupportedException("Provided user Id does not belong to a student.");
+
+            if (!await _unitOfWork.LMSActivity.IsUserEnrolledInActivityAsync(createDto.ActivityId, createDto.UserId))
+                throw new UserNotEnrolledInActivityException(createDto.UserId, createDto.ActivityId);
+
+            var feedbackEntity = _mapper.Map<LMSActivityFeedback>(createDto);
+            _unitOfWork.LMSActivityFeedback.Create(feedbackEntity);
+            await _unitOfWork.CompleteAsync();
+
+            return _mapper.Map<LMSActivityFeedbackExtendedDto>(feedbackEntity);
         }
     }
 }

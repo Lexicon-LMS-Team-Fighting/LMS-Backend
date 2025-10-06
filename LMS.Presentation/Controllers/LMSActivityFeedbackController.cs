@@ -15,15 +15,15 @@ namespace LMS.Presentation.Controllers
     [Route("api/feedbacks")]
     [ApiController]
     [Authorize]
-    public class FeedbackController : ControllerBase
+    public class LMSActivityFeedbackController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FeedbackController"/> class.
+        /// Initializes a new instance of the <see cref="LMSActivityFeedbackController"/> class.
         /// </summary>
         /// <param name="serviceManager">The service manager for accessing feedback-related services.</param>
-        public FeedbackController(IServiceManager serviceManager)
+        public LMSActivityFeedbackController(IServiceManager serviceManager)
         {
             _serviceManager = serviceManager;
         }
@@ -48,7 +48,7 @@ namespace LMS.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<LMSActivityFeedbackExtendedDto>> GetFeedback(Guid guid) =>
-            Ok(await _serviceManager.FeedbackService.GetByIdAsync(guid));
+            Ok(await _serviceManager.LMSActivityFeedbackService.GetByIdAsync(guid));
 
         /// <summary>
         /// Creates a new feedback.
@@ -73,7 +73,7 @@ namespace LMS.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<LMSActivityFeedbackExtendedDto>> CreateFeedback([FromBody] CreateLMSActivityFeedbackDto createDto)
         {
-            var createdFeedback = await _serviceManager.FeedbackService.CreateAsync(createDto);
+            var createdFeedback = await _serviceManager.LMSActivityFeedbackService.CreateAsync(createDto);
             return CreatedAtAction(nameof(GetFeedback), new { guid = createdFeedback.Id }, createdFeedback);
         }
 
@@ -102,7 +102,7 @@ namespace LMS.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> UpdateFeedback(Guid guid, [FromBody] UpdateLMSActivityFeedbackDto updateDto)
         {
-            await _serviceManager.FeedbackService.UpdateAsync(guid, updateDto);
+            await _serviceManager.LMSActivityFeedbackService.UpdateAsync(guid, updateDto);
             return NoContent();
         }
 
@@ -126,7 +126,7 @@ namespace LMS.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> DeleteFeedback(Guid guid)
         {
-            await _serviceManager.FeedbackService.DeleteAsync(guid);
+            await _serviceManager.LMSActivityFeedbackService.DeleteAsync(guid);
             return NoContent();
         }
     }
