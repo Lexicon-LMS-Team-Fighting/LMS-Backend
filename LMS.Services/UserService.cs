@@ -18,20 +18,16 @@ public class UserService : IUserService
 {
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly IMapper _mapper;
-	UserManager<ApplicationUser> _userManager;
-	RoleManager<IdentityRole> _roleManager;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="UserService"/> class.
 	/// </summary>
 	/// <param name="unitOfWork">The unit of work for repository access.</param>
 	/// <param name="mapper">The AutoMapper instance for mapping domain entities to DTOs.</param>
-	public UserService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+	public UserService(IUnitOfWork unitOfWork, IMapper mapper)
 	{
 		_unitOfWork = unitOfWork;
 		_mapper = mapper;
-		_userManager = userManager;
-		_roleManager = roleManager;
     }
 
 	/// <inheritdoc/>
