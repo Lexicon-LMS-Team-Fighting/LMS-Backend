@@ -16,6 +16,16 @@
         public Guid ModuleId { get; set; }
 
         /// <summary>
+        /// Gets or sets the name of the parent module.
+        /// </summary>
+        public Guid CourseId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the course.
+        /// </summary>
+        public string CourseName { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the name of the activity type.
         /// </summary>
         public string ActivityTypeName { get; set; } = string.Empty;
