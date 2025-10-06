@@ -167,24 +167,24 @@ namespace LMS.Presentation.Controllers
         /// <summary>
         /// Deletes a module by its unique identifier.
         /// </summary>
-        /// <param name="guid">The unique identifier of the module to delete.</param>
+        /// <param name="moduleId">The unique identifier of the module to delete.</param>
         /// <response code="204">Module was successfully deleted.</response>
         /// <response code="404">If no module is found with the specified GUID.</response>
         /// <response code="401">Unauthorized.</response>
         /// <response code="403">Forbidden.</response>
-        [HttpDelete("{guid}")]
+        [HttpDelete("{moduleId}")]
         [Authorize(Roles = "Teacher")]
         [SwaggerOperation(
             Summary = "Delete a module",
-            Description = "Deletes the module identified by its GUID."
+            Description = "Deletes the module identified by its Id."
         )]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> DeleteModule(Guid guid)
+        public async Task<IActionResult> DeleteModule(Guid moduleId)
         {
-            await _serviceManager.ModuleService.DeleteAsync(guid);
+            await _serviceManager.ModuleService.DeleteAsync(moduleId);
             return NoContent();
         }
     }
