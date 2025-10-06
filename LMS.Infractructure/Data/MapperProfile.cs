@@ -49,7 +49,9 @@ public class MapperProfile : Profile
 
         // LMSActivity mappings
         CreateMap<LMSActivity, LMSActivityPreviewDto>()
-            .ForMember(d => d.ActivityTypeName, o => o.MapFrom(s => s.ActivityType.Name));
+            .ForMember(d => d.ActivityTypeName, o => o.MapFrom(s => s.ActivityType.Name))
+            .ForMember(d => d.CourseId, o => o.MapFrom(s => s.Module.Course.Id))
+            .ForMember(d => d.CourseName, o => o.MapFrom(s => s.Module.Course.Name));
 
         CreateMap<LMSActivity, LMSActivityExtendedDto>()
             .ForMember(d => d.CourseId, o => o.MapFrom(s => s.Module.Course.Id))

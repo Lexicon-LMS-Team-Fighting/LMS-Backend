@@ -82,6 +82,8 @@ namespace LMS.Infractructure.Repositories
         public async Task<IEnumerable<LMSActivity>> GetAllAsync(bool changeTracking = false) =>
             await FindAll(trackChanges: changeTracking)
                 .Include(a => a.ActivityType)
+                .Include(a => a.Module)
+                    .ThenInclude(m => m.Course)
                 .ToListAsync();
 
         /// <inheritdoc />
@@ -89,6 +91,8 @@ namespace LMS.Infractructure.Repositories
             await FindAll(trackChanges: changeTracking)
                 .Where(a => a.Module.Course.UserCourses.Any(uc => uc.UserId == userId))
                 .Include(a => a.ActivityType)
+                .Include(a => a.Module)
+                    .ThenInclude(m => m.Course)
                 .ToListAsync();
 
 
