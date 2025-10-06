@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Models.Entities;
+﻿using Domain.Models.Entities;
 
 namespace Domain.Contracts.Repositories
 {
@@ -94,6 +89,12 @@ namespace Domain.Contracts.Repositories
         /// If null, can be used for teacher view (aggregate or max per student logic can be added later).
         /// </param>
         /// <returns>A decimal value between 0 and 1 representing module progress.</returns>
-        Task<decimal> CalculateProgress(Guid moduleId, string? userId = null);
+        Task<decimal> CalculateProgressAsync(Guid moduleId, string? userId = null);
+
+        /// <summary>
+        /// Retrieves all documents associated with a module and its activities.
+        /// </summary>
+        /// <param name="moduleId">The unique identifier of the module.</param>
+        Task ClearDocumentRelationsAsync(Guid moduleId);
     }
 }

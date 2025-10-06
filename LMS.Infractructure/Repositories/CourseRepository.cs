@@ -89,7 +89,7 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
     }
 
     /// <inheritdoc/>
-    public async Task<decimal> CalculateProgress(Guid courseId, string? userId = null)
+    public async Task<decimal> CalculateProgressAsync(Guid courseId, string? userId = null)
     {
         var activities = await FindByCondition(c => c.Id == courseId)
             .Include(c => c.Modules)
@@ -110,5 +110,29 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
         );
 
         return Math.Round((decimal)completedCount / activities.Count, 4); ;
+    }
+
+    /// <inheritdoc />
+    public async Task ClearDocumentRelationsAsync(Guid courseId)
+    {
+        var course = await FindByCondition(c => c.Id == courseId, true)
+            .Include(c => c.Documents)
+            .Include(c => c.Modules)
+                .ThenInclude(m => m.Documents)
+            .Include(c => c.Modules)
+                .ThenInclude(m => m.LMSActivities)
+                    .ThenInclude(a => a.Documents)
+            .FirstOrDefaultAsync();
+
+        if (course is null)
+            return;
+
+        var courseDocuments = course.Documents.ToList();
+        var moduleDocuments = course.Modules.SelectMany(m => m.Documents).ToList();
+        var activityDocuments = course.Modules.SelectMany(m => m.LMSActivities.SelectMany(a => a.Documents)).ToList();
+
+        courseDocuments.ForEach(d => d.CourseId = null);
+        moduleDocuments.ForEach(d => d.ModuleId = null);
+        activityDocuments.ForEach(d => d.ActivityId = null);
     }
 }

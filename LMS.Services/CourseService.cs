@@ -40,13 +40,13 @@ public class CourseService : ICourseService
         {
             course = await _unitOfWork.Course.GetCourseAsync(courseId, include);
             if (includeProgress)
-                progress = await _unitOfWork.Course.CalculateProgress(courseId);
+                progress = await _unitOfWork.Course.CalculateProgressAsync(courseId);
         }
         else if (_currentUserService.IsStudent)
         {
             course = await _unitOfWork.Course.GetCourseAsync(courseId, _currentUserService.Id, include);
             if (includeProgress)
-                progress = await _unitOfWork.Course.CalculateProgress(courseId, _currentUserService.Id);
+                progress = await _unitOfWork.Course.CalculateProgressAsync(courseId, _currentUserService.Id);
         }
         else throw new UserRoleNotSupportedException();
 
@@ -59,7 +59,7 @@ public class CourseService : ICourseService
             courseDto.Progress = progress;
             foreach (var module in courseDto.Modules)
             {
-                module.Progress = await _unitOfWork.Module.CalculateProgress(module.Id, _currentUserService.IsStudent ? _currentUserService.Id : null);
+                module.Progress = await _unitOfWork.Module.CalculateProgressAsync(module.Id, _currentUserService.IsStudent ? _currentUserService.Id : null);
             }
         }
 
@@ -84,9 +84,9 @@ public class CourseService : ICourseService
         if (!string.IsNullOrEmpty(include) && include.Contains(nameof(CoursePreviewDto.Progress), StringComparison.OrdinalIgnoreCase))
         {
             Func<Guid, Task<decimal>> calculateProgressFunc = _currentUserService.IsTeacher
-                ? (async (courseId) => await _unitOfWork.Course.CalculateProgress(courseId))
+                ? (async (courseId) => await _unitOfWork.Course.CalculateProgressAsync(courseId))
                 : _currentUserService.IsStudent
-                    ? (async (courseId) => await _unitOfWork.Course.CalculateProgress(courseId, _currentUserService.Id))
+                    ? (async (courseId) => await _unitOfWork.Course.CalculateProgressAsync(courseId, _currentUserService.Id))
                     : throw new UserRoleNotSupportedException();
 
             foreach (var c in coursesDto.Items)
@@ -206,19 +206,19 @@ public class CourseService : ICourseService
         _unitOfWork.Course.Update(course);
         await _unitOfWork.CompleteAsync();
     }
-}
 
-    /// <summary>
-    /// Deletes a course by its unique identifier.
-    /// </summary>
-    /// <param name="id">The unique identifier of the course to delete.</param>
-    /// 
+    /// <inheritdoc />
+    /// <exception cref="CourseNotFoundException">Thrown when the course with the specified ID does not exist.</exception>
     public async Task DeleteAsync(Guid courseId)
     {
         var course = await _unitOfWork.Course.GetCourseAsync(courseId, null);
 
         if (course is null)
             throw new CourseNotFoundException(courseId);
+
+        await _unitOfWork.Course.ClearDocumentRelationsAsync(courseId);
+        await _unitOfWork.CompleteAsync();
+        _unitOfWork.DetachAllEntities();
 
         _unitOfWork.Course.Delete(course);
         await _unitOfWork.CompleteAsync();

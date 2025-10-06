@@ -76,5 +76,11 @@ namespace Domain.Contracts.Repositories
         /// <param name="userId">The unique identifier of the user.</param>
         /// <returns>A task representing the asynchronous operation. The task result contains <c>true</c> if the user is enrolled, otherwise <c>false</c>.</returns>
         Task<bool> IsUserEnrolledInActivityAsync(Guid activityId, string userId);
+
+        /// <summary>
+        /// Retrieves all documents associated with an activity.
+        /// </summary>
+        /// <param name="activityId">The unique identifier of the activity.</param>
+        Task ClearDocumentRelationsAsync(Guid activityId);
     }
 }

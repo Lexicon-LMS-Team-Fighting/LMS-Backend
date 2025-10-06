@@ -10,6 +10,5 @@ namespace Domain.Contracts.Repositories
     /// </summary>
     public interface IDocumentRepository : IRepositoryBase<Document>
     {
-
     }
 }

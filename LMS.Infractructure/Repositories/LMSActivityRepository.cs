@@ -113,5 +113,18 @@ namespace LMS.Infractructure.Repositories
         public async Task<bool> IsUserEnrolledInActivityAsync(Guid activityId, string userId) =>
             await FindByCondition(a => a.Id == activityId && a.Module.Course.UserCourses.Any(uc => uc.UserId == userId), trackChanges: false)
                 .AnyAsync();
+
+        /// <inheritdoc />
+        public async Task ClearDocumentRelationsAsync(Guid activityId)
+        {
+            var activity = await FindByCondition(c => c.Id == activityId, true)
+                .Include(c => c.Documents)
+                .FirstOrDefaultAsync();
+
+            if (activity is null)
+                return;
+
+            var activityDocuments = activity.Documents.ToList();
+        }
     }
 }

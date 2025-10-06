@@ -45,4 +45,5 @@ public class UnitOfWork : IUnitOfWork
     }
 
     public async Task CompleteAsync() => await context.SaveChangesAsync();
+    public void DetachAllEntities() => context.ChangeTracker.Clear();
 }
