@@ -15,4 +15,7 @@ public class UserAlreadyExistsException : ConflictException
     /// </summary>
     public UserAlreadyExistsException(string username)
         : base($"User with username '{username}' already exists.") { }
+
+    public UserAlreadyExistsException(string email, bool isEmail = true)
+        : base($"User with email '{email}' already exists.") { }
 }

@@ -18,11 +18,13 @@ public class MapperProfile : Profile
     public MapperProfile()
     {
         // User mappings
-        CreateMap<UserRegistrationDto, ApplicationUser>();
         CreateMap<ApplicationUser, UserPreviewDto>();
         CreateMap<ApplicationUser, CourseParticipantDto>();
         CreateMap<ApplicationUser, UserExtendedDto>()
             .ForMember(d => d.Courses, o => o.MapFrom(s => s.UserCourses.Select(uc => uc.Course)));
+
+        CreateMap<CreateUserDto, ApplicationUser>()
+            .ForMember(d => d.Id, o => o.MapFrom(_ => Guid.NewGuid().ToString()));
 
         // Course mappings
         CreateMap<Course, CoursePreviewDto>();

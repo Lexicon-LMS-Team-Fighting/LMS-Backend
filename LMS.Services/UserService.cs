@@ -1,6 +1,10 @@
 ﻿using AutoMapper;
 using Domain.Contracts.Repositories;
+using Domain.Exceptions;
+using Domain.Models.Entities;
+using LMS.Shared.DTOs.AuthDtos;
 using LMS.Shared.DTOs.UserDtos;
+using Microsoft.AspNetCore.Identity;
 using Service.Contracts;
 
 namespace LMS.Services;
@@ -24,7 +28,7 @@ public class UserService : IUserService
 	{
 		_unitOfWork = unitOfWork;
 		_mapper = mapper;
-	}
+    }
 
 	/// <inheritdoc/>
 	public async Task<UserExtendedDto> GetUserAsync(string userId)
