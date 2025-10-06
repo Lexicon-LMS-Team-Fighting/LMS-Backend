@@ -16,6 +16,8 @@ namespace LMS.Shared.DTOs.LMSActivityFeedbackDtos
         /// <summary>
         /// Gets or sets the feedback text provided by the user.
         /// </summary>
+        [MinLength(10, ErrorMessage = "Feedback must be at least 10 characters long.")]
+        [MaxLength(500, ErrorMessage = "Feedback cannot exceed 500 characters.")]
         public string? Feedback { get; set; }
 
         /// <summary>
