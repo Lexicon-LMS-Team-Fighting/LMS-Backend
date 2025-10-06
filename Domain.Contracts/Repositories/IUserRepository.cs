@@ -44,4 +44,13 @@ public interface IUserRepository: IRepositoryBase<ApplicationUser>
 	/// A task that represents the asynchronous operation. The task result contains a list of <see cref="ApplicationUser"/> entities.
 	/// </returns>
 	public Task<List<ApplicationUser>> GetUsersAsync(bool changeTracking = false);
+
+    /// <summary>
+    /// Retrieves all participants of a specific course.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    /// <param name="changeTracking">
+    /// If <c>true</c>, Entity Framework change tracking will be enabled. <br/>
+    /// </param>
+    public Task<IEnumerable<ApplicationUser>> GetCourseParticipantsAsync(Guid courseId, bool changeTracking = false);
 }
