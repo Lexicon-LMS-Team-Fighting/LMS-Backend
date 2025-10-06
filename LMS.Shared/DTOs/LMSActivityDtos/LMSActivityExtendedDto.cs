@@ -15,6 +15,16 @@ namespace LMS.Shared.DTOs.LMSActivityDtos
         public Guid Id { get; set; }
 
         /// <summary>
+        /// Gets or sets the unique identifier of the parent course to which the activity belongs.
+        /// </summary>
+        public Guid CourseId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the parent course to which the activity belongs.
+        /// </summary>
+        public string CourseName { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the unique identifier of the parent module to which the activity belongs.
         /// </summary>
         public Guid ModuleId { get; set; }
