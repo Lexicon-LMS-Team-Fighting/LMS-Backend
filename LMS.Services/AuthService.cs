@@ -4,6 +4,7 @@ using Domain.Exceptions;
 using Domain.Models.Configurations;
 using Domain.Models.Entities;
 using Domain.Models.Exceptions;
+using Domain.Models.Exceptions.Authorization;
 using LMS.Shared.DTOs.AuthDtos;
 using LMS.Shared.DTOs.UserDtos;
 using Microsoft.AspNetCore.Http;
@@ -173,8 +174,8 @@ public class AuthService : IAuthService
         if (await _userManager.FindByNameAsync(createDto.UserName) is not null)
             throw new UserAlreadyExistsException(createDto.UserName);
 
-        if (!await _roleManager.RoleExistsAsync("Student"))
-            throw new BadRequestException("Default role 'Student' does not exist in the system.");
+        if (!await _roleManager.RoleExistsAsync(createDto.Role))
+            throw new UserRoleNotFoundException();
 
         var user = _mapper.Map<ApplicationUser>(createDto);
         IdentityResult result = await _userManager.CreateAsync(user, createDto.Password);
@@ -182,7 +183,7 @@ public class AuthService : IAuthService
         if (!result.Succeeded)
             throw new UserOperationException(result.Errors.Select(e => e.Description));
 
-        result = await _userManager.AddToRoleAsync(user, "Student");
+        result = await _userManager.AddToRoleAsync(user, createDto.Role);
 
         if (!result.Succeeded)
         {

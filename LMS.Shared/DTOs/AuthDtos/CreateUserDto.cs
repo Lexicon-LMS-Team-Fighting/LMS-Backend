@@ -50,5 +50,9 @@ namespace LMS.Shared.DTOs.AuthDtos
         [Required]
         [MinLength(6, ErrorMessage = "Password must be at least 6 characters long.")]
         public string Password { get; set; } = string.Empty;
+
+        [Required]
+        [RegularExpression("Student|Teacher", ErrorMessage = "Role must be either 'Student' or 'Teacher'.")]
+        public string Role { get; set; } = "Student";
     }
 }
