@@ -62,7 +62,7 @@ public class UserController: ControllerBase
 
     /// <summary>Retrieves all users.</summary>
     /// <returns>
-    /// An <see cref="ActionResult{T}"/> containing a collection of <see cref="UserWithRoleDto"/> objects.
+    /// An <see cref="ActionResult{T}"/> containing a collection of <see cref="UserWithRolesDto"/> objects.
     /// </returns>
     /// <remarks>Requires authentication as either <c>Teacher</c> or <c>Student</c>.</remarks>
     /// <response code="200">Returns the list of users (empty if none exist).</response>
@@ -74,9 +74,9 @@ public class UserController: ControllerBase
 		Summary = "Get all users",
 		Description = "Retrieves a list of all users in the system."
 	)]
-	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserWithRoleDto>))]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserWithRolesDto>))]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
-	public async Task<ActionResult<IEnumerable<UserWithRoleDto>>> GetUsers() => 
+	public async Task<ActionResult<IEnumerable<UserWithRolesDto>>> GetUsers() => 
 		Ok(await _serviceManager.UserService.GetUsersAsync());
 }

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LMS.Shared.DTOs.UserDtos
+﻿namespace LMS.Shared.DTOs.UserDtos
 {
-    public class UserWithRoleDto
+    public class UserWithRolesDto
     {
         /// <summary>
         /// Gets or sets the unique identifier of the user.
@@ -36,6 +30,6 @@ namespace LMS.Shared.DTOs.UserDtos
         /// <summary>
         /// Gets or sets the role assigned to the user.
         /// </summary>
-        public string Role { get; set; } = string.Empty;
+        public string Roles { get; set; } = string.Empty;
     }
 }

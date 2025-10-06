@@ -20,5 +20,5 @@ public interface IUserService
 	/// <returns>
 	/// A collection of <see cref="UserDto"/> objects representing all users.
 	/// </returns>
-	Task<IEnumerable<UserWithRoleDto>> GetUsersAsync();
+	Task<IEnumerable<UserWithRolesDto>> GetUsersAsync();
 }

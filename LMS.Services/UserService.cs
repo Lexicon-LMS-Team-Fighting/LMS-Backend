@@ -41,16 +41,16 @@ public class UserService : IUserService
 	}
 
 	/// <inheritdoc/>
-	public async Task<IEnumerable<UserWithRoleDto>> GetUsersAsync()
+	public async Task<IEnumerable<UserWithRolesDto>> GetUsersAsync()
 	{
         var users = await _unitOfWork.User.GetUsersAsync();
-        var usersDto = new List<UserWithRoleDto>();
+        var usersDto = new List<UserWithRolesDto>();
 
         foreach (var user in users)
         {
             var roles = await _unitOfWork.User.GetUserRolesAsync(user);
-            var userDto = _mapper.Map<UserWithRoleDto>(user);
-            userDto.Role = string.Join(", ", roles);
+            var userDto = _mapper.Map<UserWithRolesDto>(user);
+            userDto.Roles = string.Join(", ", roles);
             usersDto.Add(userDto);
         }
 
