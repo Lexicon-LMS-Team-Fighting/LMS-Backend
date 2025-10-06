@@ -12,28 +12,33 @@ namespace Service.Contracts
         /// <summary>
         /// Retrieves a feedback by its unique identifier.
         /// </summary>
-        /// <param name="id">The unique identifier of the feedback.</param>
+        /// <param name="activityId">The unique identifier of the activity.</param>
+        /// <param name="userId">The unique identifier of the user to whom the feedback is provided.</param>
         /// <returns>A <see cref="LMSActivityFeedbackExtendedDto"/> representing the feedback.</returns>
-        Task<LMSActivityFeedbackExtendedDto> GetByIdAsync(Guid id);
+        Task<LMSActivityFeedbackExtendedDto> GetByActivityAndUserIdAsync(Guid activityId, string userId);
 
         /// <summary>
         /// Creates a new feedback.
         /// </summary>
+        /// <param name="activityId">The unique identifier of the activity.</param>
+        /// <param name="userId">The unique identifier of the user to whom the feedback is provided.</param>
         /// <param name="createDto">The data for the feedback to create.</param>
         /// <returns>A <see cref="LMSActivityFeedbackExtendedDto"/> representing the created feedback.</returns>
-        Task<LMSActivityFeedbackExtendedDto> CreateAsync(CreateLMSActivityFeedbackDto createDto);
+        Task<LMSActivityFeedbackExtendedDto> CreateAsync(Guid activityId, string userId, CreateLMSActivityFeedbackDto createDto);
 
         /// <summary>
         /// Updates an existing feedback.
         /// </summary>
-        /// <param name="id">The unique identifier of the feedback to update.</param>
+        /// <param name="activityId">The unique identifier of the activity.</param>
+        /// <param name="userId">The unique identifier of the user to whom the feedback is provided.</param>
         /// <param name="updateDto">The updated data for the feedback.</param>
-        Task UpdateAsync(Guid id, UpdateLMSActivityFeedbackDto updateDto);
+        Task UpdateAsync(Guid activityId, string userId, UpdateLMSActivityFeedbackDto updateDto);
 
         /// <summary>
         /// Deletes a feedback by its unique identifier.
         /// </summary>
-        /// <param name="id">The unique identifier of the feedback to delete.</param>
-        Task DeleteAsync(Guid id);
+        /// <param name="activityId">The unique identifier of the activity.</param>
+        /// <param name="userId">The unique identifier of the user to whom the feedback is provided.</param>
+        Task DeleteAsync(Guid activityId, string userId);
     }
 }

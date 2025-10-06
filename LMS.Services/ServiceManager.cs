@@ -13,6 +13,7 @@ public class ServiceManager : IServiceManager
     private readonly Lazy<ILMSActivityService> _lmsActivityService;
     private readonly Lazy<IActivityTypeService> _activityTypeService;
     private readonly Lazy<IDocumentService> _documentService;
+    private readonly Lazy<ILMSActivityFeedbackService> _lmsActivityFeedbackService;
 
     public ITestService TestService => _testService.Value;
     public IAuthService AuthService => _authService.Value;
@@ -22,6 +23,7 @@ public class ServiceManager : IServiceManager
     public ILMSActivityService LMSActivityService => _lmsActivityService.Value;
     public IActivityTypeService ActivityTypeService => _activityTypeService.Value;
     public IDocumentService DocumentService => _documentService.Value;
+    public ILMSActivityFeedbackService LMSActivityFeedbackService => _lmsActivityFeedbackService.Value;
 
     public ServiceManager(
         Lazy<ITestService> testService,
@@ -31,7 +33,8 @@ public class ServiceManager : IServiceManager
         Lazy<IModuleService> moduleService,
         Lazy<ILMSActivityService> lmsActivityService,
         Lazy<IActivityTypeService> activityTypeService,
-        Lazy<IDocumentService> documentService)
+        Lazy<IDocumentService> documentService,
+        Lazy<ILMSActivityFeedbackService> lmsActivityFeedbackService)
     {
         _testService = testService;
         _authService = authService;
@@ -41,5 +44,6 @@ public class ServiceManager : IServiceManager
         _lmsActivityService = lmsActivityService;
         _activityTypeService = activityTypeService;
         _documentService = documentService;
+        _lmsActivityFeedbackService = lmsActivityFeedbackService;
     }
 }

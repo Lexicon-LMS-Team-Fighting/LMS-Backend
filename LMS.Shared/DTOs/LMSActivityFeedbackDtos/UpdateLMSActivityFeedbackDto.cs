@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LMS.Shared.DTOs.LMSActivityFeedbackDtos
 {
@@ -14,11 +11,14 @@ namespace LMS.Shared.DTOs.LMSActivityFeedbackDtos
         /// <summary>
         /// Gets or sets the feedback text provided by the user.
         /// </summary>
+        [AllowNull]
         public string? Feedback { get; set; }
 
         /// <summary>
         /// Gets or sets the status of the feedback (e.g., "Pending", "Reviewed", "Resolved").
         /// </summary>
-        public string Status { get; set; } = string.Empty;
+        [AllowNull]
+        [RegularExpression("^(Godkänd|Genomförd|Försenad)$", ErrorMessage = "Status must be 'Godkänd', 'Genomförd' or 'Försenad'.")]
+        public string? Status { get; set; }
     }
 }

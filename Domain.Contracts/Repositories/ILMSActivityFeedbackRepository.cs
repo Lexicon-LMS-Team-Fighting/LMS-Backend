@@ -20,10 +20,11 @@ namespace Domain.Contracts.Repositories
         /// <summary>
         /// Retrieves a single <see cref="LMSActivityFeedback"/> entity by its unique identifier
         /// </summary>
-        /// <param name="feedbackId">The uniqueidentifier of the activity.</param>
+        /// <param name="activityId">The unique identifier of the activity.</param>
+        /// <param name="userId">The unique identifier of the user for whom the feedback is given.</param>
         /// <param name="changeTracking">If <c>true</c>, Entity Framework change tracking will be enabled (suitable for updates). <br/></param>
         /// <returns>Matching <see cref="LMSActivityFeedback"/> with all feedbacks or <c>null</c> if not found.</returns>
-        Task<LMSActivityFeedback?> GetByIdAsync(Guid feedbackId, bool changeTracking = false);
+        Task<LMSActivityFeedback?> GetByActivityAndUserIdAsync(Guid activityId, string userId, bool changeTracking = false);
 
         /// <summary>
         /// Checks if feedback from a specific user for a specific activity already exists.

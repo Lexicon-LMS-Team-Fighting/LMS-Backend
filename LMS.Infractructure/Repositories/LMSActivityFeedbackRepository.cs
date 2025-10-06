@@ -32,9 +32,9 @@ namespace LMS.Infractructure.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<LMSActivityFeedback?> GetByIdAsync(Guid feedbackId, bool changeTracking = false)
+        public async Task<LMSActivityFeedback?> GetByActivityAndUserIdAsync(Guid activityId, string userId, bool changeTracking = false)
         {
-            return await FindByCondition(f => f.Id == feedbackId, trackChanges: changeTracking)
+            return await FindByCondition(f => f.LMSActivityId == activityId && f.UserId == userId, changeTracking)
                 .FirstOrDefaultAsync();
         }
 
