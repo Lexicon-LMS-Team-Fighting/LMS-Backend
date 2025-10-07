@@ -239,6 +239,23 @@ public class AuthService : IAuthService
                 throw new UserOperationException(passwordResult.Errors.Select(e => e.Description));
         }
 
+        if (updateDto.Role is not null)
+        {
+            if (!await _roleManager.RoleExistsAsync(updateDto.Role))
+                throw new UserRoleNotFoundException();
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+            if (!removeResult.Succeeded)
+                throw new UserOperationException(removeResult.Errors.Select(e => e.Description));
+
+            var addResult = await _userManager.AddToRoleAsync(user, updateDto.Role);
+
+            if (!addResult.Succeeded)
+                throw new UserOperationException(addResult.Errors.Select(e => e.Description));
+        }
+
         IdentityResult result = await _userManager.UpdateAsync(user);
 
         if (!result.Succeeded)

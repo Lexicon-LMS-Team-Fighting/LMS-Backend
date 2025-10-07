@@ -136,5 +136,9 @@ namespace LMS.Infractructure.Repositories
             moduleDocuments.ForEach(d => d.ModuleId = null);
             activityDocuments.ForEach(d => d.ActivityId = null);
         }
+
+        public async Task<bool> IsUserEnrolledInModuleAsync(Guid moduleId, string userId) =>
+            await FindByCondition(m => m.Id == moduleId)
+                .AnyAsync(m => m.Course.UserCourses.Any(uc => uc.UserId == userId));
     }
 }

@@ -1,4 +1,6 @@
-﻿using LMS.Shared.DTOs.ModuleDtos;
+﻿using LMS.Shared.DTOs.DocumentDtos;
+using LMS.Shared.DTOs.ModuleDtos;
+using LMS.Shared.DTOs.PaginationDtos;
 using LMS.Shared.DTOs.UserDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -69,7 +71,7 @@ public class UserController: ControllerBase
     /// <response code="401">The request is unauthorized (missing or invalid token).</response>
     /// <response code="403">The authenticated user does not have the required role.</response>
     [HttpGet]
-	[Authorize(Roles = "Teacher,Student")]
+	[Authorize(Roles = "Teacher")]
 	[SwaggerOperation(
 		Summary = "Get all users",
 		Description = "Retrieves a list of all users in the system."
@@ -79,4 +81,37 @@ public class UserController: ControllerBase
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	public async Task<ActionResult<IEnumerable<UserWithRolesDto>>> GetUsers() => 
 		Ok(await _serviceManager.UserService.GetUsersAsync());
+
+
+    /// <summary>
+	/// Retrieves a paginated list of documents available to the specified user.
+	/// </summary>
+	/// <remarks>This endpoint is restricted to users with the "Teacher" role.  If the user is not authorized, a 401
+	/// Unauthorized response is returned.  If the user does not have the required role, a 403 Forbidden response is
+	/// returned.</remarks>
+	/// <param name="userId">The unique identifier of the user whose documents are being retrieved.</param>
+	/// <param name="page">The page number of the results to retrieve. Defaults to <see langword="1"/>.</param>
+	/// <param name="pageSize">The number of items per page. Defaults to <see langword="10"/>.</param>
+	/// <returns>A <see cref="PaginatedResultDto{T}"/> containing a paginated list of <see cref="DocumentPreviewDto"/> objects.
+	/// Returns a 200 OK response if successful.</returns>
+	/// <response code="200">Returns the list of users (empty if none exist).</response>
+    /// <response code="401">The request is unauthorized (missing or invalid token).</response>
+    /// <response code="403">The authenticated user does not have the required role.</response>
+    [HttpGet("{userId}/documents")]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(
+        Summary = "Get all documents (paginated)",
+        Description = "Retrieves a paginated list of all documents available to the user."
+    )]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<DocumentPreviewDto>))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<PaginatedResultDto<DocumentPreviewDto>>> GetDocuments(
+		[FromRoute] string userId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        var documents = await _serviceManager.DocumentService.GetAllByUserIdAsync(userId, page, pageSize);
+        return Ok(documents);
+    }
 }

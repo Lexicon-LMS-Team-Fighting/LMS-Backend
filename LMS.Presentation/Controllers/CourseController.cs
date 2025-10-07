@@ -1,4 +1,5 @@
 ﻿using LMS.Shared.DTOs.CourseDtos;
+using LMS.Shared.DTOs.DocumentDtos;
 using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.DTOs.PaginationDtos;
 using LMS.Shared.DTOs.UserDtos;
@@ -272,4 +273,83 @@ public class CourseController: ControllerBase
         await _serviceManager.CourseService.DeleteAsync(courseId);
         return NoContent();
     }
+
+    /// <summary>
+    /// Retrieves paginated documents attached to a specific course.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    /// <param name="page">The page number to retrieve (default is 1).</param>
+    /// <param name="pageSize">The number of items per page (default is 10).</param>
+    /// <response code="200">Returns a paginated list of documents for the specified course.</response>
+    /// <response code="404">If the course is not found.</response>
+    [HttpGet("courses/{courseId}/documents")]
+    [Authorize]
+    [SwaggerOperation(
+        Summary = "Get paginated documents for a course",
+        Description = "Returns paginated documents attached to the specified course."
+    )]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<DocumentPreviewDto>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    public async Task<IActionResult> GetDocumentsByCourse(
+        Guid courseId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        var documents = await _serviceManager.DocumentService.GetAllByCourseIdAsync(courseId, page, pageSize);
+        return Ok(documents);
+    }
+
+
+    /// <summary>
+    /// Attaches an existing document to a course.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    /// <param name="documentId">The unique identifier of the document to attach.</param>
+    /// <response code="204">Document was successfully attached.</response>
+    /// <response code="404">If no course or document is found with the specified GUID.</response>
+    /// <response code="409">If the document is already attached to this course.</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="403">Forbidden.</response>
+    [HttpPost("{courseId}/documents/{documentId}")]
+    [Authorize(Roles = "Student,Teacher")]
+    [SwaggerOperation(
+        Summary = "Attach a document to a course",
+        Description = "Attaches an existing document to the specified course."
+    )]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> AttachDocumentToCourse(Guid courseId, Guid documentId)
+    {
+        await _serviceManager.DocumentService.AttachToCourseAsync(courseId, documentId);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Removes a document from a course.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    /// <param name="documentId">The unique identifier of the document to remove.</param>
+    /// <response code="204">Document was successfully detached.</response>
+    /// <response code="404">If no course or document is found with the specified GUID.</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="403">Forbidden.</response>
+    [HttpDelete("{courseId}/documents/{documentId}")]
+    [Authorize(Roles = "Student,Teacher")]
+    [SwaggerOperation(
+        Summary = "Detach a document from a course",
+        Description = "Removes an existing document from the specified course."
+    )]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> DetachDocumentFromCourse(Guid courseId, Guid documentId)
+    {
+        await _serviceManager.DocumentService.DetachFromCourseAsync(courseId, documentId);
+        return NoContent();
+    }
+
 }

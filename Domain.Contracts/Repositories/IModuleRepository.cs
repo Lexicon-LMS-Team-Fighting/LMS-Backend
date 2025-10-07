@@ -96,5 +96,14 @@ namespace Domain.Contracts.Repositories
         /// </summary>
         /// <param name="moduleId">The unique identifier of the module.</param>
         Task ClearDocumentRelationsAsync(Guid moduleId);
+
+        /// <summary>
+        /// Determines whether the specified user is enrolled in the given module.
+        /// </summary>
+        /// <param name="moduleId">The unique identifier of the module to check.</param>
+        /// <param name="userId">The unique identifier of the user to check enrollment for.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the user is
+        /// enrolled in the module; otherwise, <see langword="false"/>.</returns>
+        Task<bool> IsUserEnrolledInModuleAsync(Guid moduleId, string userId);
     }
 }
