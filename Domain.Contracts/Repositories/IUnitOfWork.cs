@@ -46,4 +46,9 @@ public interface IUnitOfWork
     /// </summary>
     /// <returns>A task representing the asynchronous save operation.</returns>
     Task CompleteAsync();
+
+    /// <summary>
+    /// Detaches all tracked entities from the context to prevent memory leaks and stale data issues.
+    /// </summary>
+    void DetachAllEntities();
 }

@@ -18,15 +18,11 @@ namespace LMS.Infractructure.Repositories
         {
         }
 
-        /// <summary>
-        /// Deletes all <see cref="UserCourse"/> entries associated with a specific user.
-        /// </summary>
-        /// <param name="studentId">The unique identifier of the user whose enrollments are being deleted.</param>
-        /// <returns>A task that represents the asynchronous delete operation.</returns>
+        /// <inheritdoc />
         public async Task DeleteAllByUserId(string studentId)
         {
             var enrollments = await FindAll()
-                .Where(enrollment => enrollment.UserId == studentId)
+                .Where(e => e.UserId == studentId)
                 .ToListAsync();
 
             if (!enrollments.Any())

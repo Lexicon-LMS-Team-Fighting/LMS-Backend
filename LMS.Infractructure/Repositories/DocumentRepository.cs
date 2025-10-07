@@ -1,6 +1,7 @@
 ﻿using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Infractructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Infractructure.Repositories
 {
@@ -10,6 +11,9 @@ namespace LMS.Infractructure.Repositories
     /// </summary>
     public class DocumentRepository : RepositoryBase<Document>, IDocumentRepository
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DocumentRepository"/> class with the specified <see cref="ApplicationDbContext"/>.
+        /// </summary>
         public DocumentRepository(ApplicationDbContext context) : base(context)
         {
         }

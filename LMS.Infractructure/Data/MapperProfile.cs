@@ -20,6 +20,7 @@ public class MapperProfile : Profile
         // User mappings
         CreateMap<ApplicationUser, UserPreviewDto>();
         CreateMap<ApplicationUser, CourseParticipantDto>();
+        CreateMap<ApplicationUser, UserWithRolesDto>();
         CreateMap<ApplicationUser, UserExtendedDto>()
             .ForMember(d => d.Courses, o => o.MapFrom(s => s.UserCourses.Select(uc => uc.Course)));
 

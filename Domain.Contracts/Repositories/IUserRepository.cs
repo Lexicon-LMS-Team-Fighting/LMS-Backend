@@ -10,6 +10,11 @@ namespace Domain.Contracts.Repositories;
 public interface IUserRepository: IRepositoryBase<ApplicationUser>
 {
     /// <summary>
+    /// Retrieves the roles associated with a specific user. <br/>
+    /// </summary>
+    Task<IEnumerable<string>> GetUserRolesAsync(ApplicationUser user);
+
+    /// <summary>
     /// Checks if a user belongs to the "Teacher" role. <br/>
     /// </summary>
     /// <param name="userId">The unique identifier of the user.</param>

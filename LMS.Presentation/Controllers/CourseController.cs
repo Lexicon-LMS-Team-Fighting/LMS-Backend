@@ -248,4 +248,28 @@ public class CourseController: ControllerBase
         await _serviceManager.CourseService.UpdateAsync(guid, updateDto);
         return NoContent();
     }
+
+    /// <summary>
+    /// Deletes a course by its unique identifier.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course to delete.</param>
+    /// <response code="204">Course was successfully deleted.</response>
+    /// <response code="404">If no course is found with the specified GUID.</response>
+    /// <response code="401">Unauthorized.</response>
+    /// <response code="403">Forbidden.</response>
+    [HttpDelete("{courseId}")]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(
+        Summary = "Delete a course",
+        Description = "Deletes the course identified by its Id."
+    )]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> DeleteCourse(Guid courseId)
+    {
+        await _serviceManager.CourseService.DeleteAsync(courseId);
+        return NoContent();
+    }
 }

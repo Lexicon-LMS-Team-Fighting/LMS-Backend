@@ -97,7 +97,7 @@ namespace LMS.Infractructure.Repositories
                 .ToListAsync();
 
         /// <inheritdoc/>
-        public async Task<decimal> CalculateProgress(Guid moduleId, string? userId = null)
+        public async Task<decimal> CalculateProgressAsync(Guid moduleId, string? userId = null)
         {
             var activities = await FindByCondition(m => m.Id == moduleId)
                     .Include(m => m.LMSActivities)
@@ -116,6 +116,25 @@ namespace LMS.Infractructure.Repositories
             );
 
             return Math.Round((decimal)completedCount / activities.Count, 4);
+        }
+
+        /// <inheritdoc />
+        public async Task ClearDocumentRelationsAsync(Guid moduleId)
+        {
+            var module = await FindByCondition(c => c.Id == moduleId, true)
+                .Include(c => c.Documents)
+                .Include(m => m.LMSActivities)
+                    .ThenInclude(a => a.Documents)
+                .FirstOrDefaultAsync();
+
+            if (module is null)
+                return;
+
+            var moduleDocuments = module.Documents.ToList();
+            var activityDocuments = module.LMSActivities.SelectMany(m => m.Documents).ToList();
+
+            moduleDocuments.ForEach(d => d.ModuleId = null);
+            activityDocuments.ForEach(d => d.ActivityId = null);
         }
     }
 }
