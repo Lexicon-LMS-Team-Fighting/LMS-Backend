@@ -3,7 +3,9 @@ using Domain.Models.Entities;
 using LMS.Infractructure.Data;
 using LMS.Shared;
 using LMS.Shared.DTOs.CourseDtos;
+using LMS.Shared.DTOs.PaginationDtos;
 using LMS.Shared.Extensions;
+using LMS.Shared.Pagination;
 using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Infractructure.Repositories;
@@ -70,16 +72,48 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
         return await BuildCourseQuery(query, include, userId).FirstOrDefaultAsync();
     }
 
-    /// <inheritdoc/>
-    public async Task<IEnumerable<Course>> GetCoursesAsync(bool changeTracking = false) => 
-		await FindAll(changeTracking)
+    /// <summary>
+    /// Retrieves a paginated list of courses based on the specified query and pagination parameters.
+    /// </summary>
+    /// <remarks>The method applies filtering and sorting to the query based on the values provided in
+    /// <paramref name="queryDto"/>. It then calculates the total number of items and retrieves the appropriate subset
+    /// of courses for the requested page.</remarks>
+    /// <param name="query">The <see cref="IQueryable{T}"/> representing the base query for courses.</param>
+    /// <param name="queryDto">The pagination and filtering parameters, including page number, page size, sorting, and filtering options.</param>
+    /// <returns>A <see cref="PaginatedResultDto{T}"/> containing the paginated list of courses and associated pagination
+    /// metadata.</returns>
+    private async Task<PaginatedResult<Course>> GetPaginatedCoursesAsync(IQueryable<Course> query, PaginatedQueryDto queryDto)
+    {
+        if (!string.IsNullOrEmpty(queryDto.FilterBy))
+            query = query.WhereContains(queryDto.FilterBy, queryDto.Filter);
+
+        if (!string.IsNullOrEmpty(queryDto.SortBy))
+            query = query.OrderByField(queryDto.SortBy, queryDto.SortDirection);
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((queryDto.Page - 1) * queryDto.PageSize)
+            .Take(queryDto.PageSize)
             .ToListAsync();
 
+        return new PaginatedResult<Course>(items, new PaginationMetadata(totalCount, queryDto.Page, queryDto.PageSize));
+    }
+
     /// <inheritdoc/>
-    public async Task<IEnumerable<Course>> GetCoursesAsync(string userId, bool changeTracking = false) =>
-        await FindAll(changeTracking)
-            .Where(c => c.UserCourses.Any(uc => uc.UserId == userId))
-            .ToListAsync();
+    public Task<PaginatedResult<Course>> GetCoursesAsync(PaginatedQueryDto queryDto, bool changeTracking = false)
+    {
+        var query = FindAll(changeTracking).AsQueryable();
+        return GetPaginatedCoursesAsync(query, queryDto);
+    }
+
+    /// <inheritdoc/>
+    public Task<PaginatedResult<Course>> GetCoursesAsync(string userId, PaginatedQueryDto queryDto, bool changeTracking = false)
+    {
+        var query = FindByCondition(c => c.UserCourses.Any(uc => uc.UserId == userId), changeTracking)
+            .AsQueryable();
+        return GetPaginatedCoursesAsync(query, queryDto);
+    }
 
     /// <inheritdoc/>
     public async Task<bool> IsUniqueNameAsync(string name, Guid excludedCourseId = default)

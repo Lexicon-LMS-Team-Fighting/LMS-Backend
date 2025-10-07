@@ -20,19 +20,17 @@ namespace Service.Contracts
         /// <summary>
         /// Retrieves a paginated list of all activities.
         /// </summary>
-        /// <param name="pageNumber">The page number to retrieve.</param>
-        /// <param name="pageSize">The number of items per page.</param>
+        /// <param name="query">Pagination and filtering parameters.</param>
         /// <returns>A <see cref="PaginatedResultDto{LMSActivityDto}"/> containing the paginated list of activities.</returns>
-        Task<PaginatedResultDto<LMSActivityPreviewDto>> GetAllAsync(int pageNumber, int pageSize);
+        Task<PaginatedResultDto<LMSActivityPreviewDto>> GetAllAsync(PaginatedQueryDto query);
 
         /// <summary>
         /// Retrieves a paginated list of activities associated with a specific module.
         /// </summary>
         /// <param name="moduleId">The unique identifier of the module.</param>
-        /// <param name="pageNumber">The page number to retrieve.</param>
-        /// <param name="pageSize">The number of items per page.</param>
+        /// <param name="query">Pagination and filtering parameters.</param>
         /// <returns>A <see cref="PaginatedResultDto{LMSActivityDto}"/> containing the paginated list of activities for the specified module.</returns>
-        Task<PaginatedResultDto<LMSActivityPreviewDto>> GetAllByModuleIdAsync(Guid moduleId, int pageNumber, int pageSize);
+        Task<PaginatedResultDto<LMSActivityPreviewDto>> GetAllByModuleIdAsync(Guid moduleId, PaginatedQueryDto query);
 
         /// <summary>
         /// Creates a new activity.
@@ -53,16 +51,5 @@ namespace Service.Contracts
         /// </summary>
         /// <param name="id">The unique identifier of the activity to delete.</param>
         Task DeleteAsync(Guid id);
-
-        /// <summary>
-        /// Checks if an activity title is unique within a specific module.
-        /// </summary>
-        /// <param name="title">The title of the activity to check.</param>
-        /// <param name="moduleId">The unique identifier of the module.</param>
-        /// <param name="excludedActivityId">
-        /// Optional. The unique identifier of an activity to exclude from the check (useful when updating an existing activity).
-        /// </param>
-        /// <returns><c>true</c> if the activity title is unique; otherwise, <c>false</c>.</returns>
-        Task<bool> IsUniqueNameAsync(string title, Guid moduleId, Guid excludedActivityId = default);
     }
 }

@@ -59,55 +59,47 @@ namespace LMS.Services
         }
 
         /// <inheritdoc />
-        public async Task<PaginatedResultDto<LMSActivityPreviewDto>> GetAllAsync(int pageNumber, int pageSize)
+        /// <exception cref="UserRoleNotSupportedException">Thrown when the current user's role is neither Teacher nor Student.</exception>
+        public async Task<PaginatedResultDto<LMSActivityPreviewDto>> GetAllAsync(PaginatedQueryDto queryDto)
         {
-            IEnumerable<LMSActivity>? activities = null;
+            PaginatedResult<LMSActivity> paginatedActivities;
 
             if (_currentUserService.IsTeacher)
-                activities = await _unitOfWork.LMSActivity.GetAllAsync();
-            else if (_currentUserService.IsStudent)
-                activities = await _unitOfWork.LMSActivity.GetAllAsync(_currentUserService.Id);
-            else
-                throw new UserRoleNotSupportedException();
-
-            var paginatedActivities = activities.ToPaginatedResult(new PagingParameters
             {
-                PageNumber = pageNumber,
-                PageSize = pageSize
-            });
+                paginatedActivities = await _unitOfWork.LMSActivity.GetAllAsync(queryDto);
+            }
+            else if (_currentUserService.IsStudent)
+            {
+                paginatedActivities = await _unitOfWork.LMSActivity.GetAllAsync(_currentUserService.Id, queryDto);
+            }
+            else throw new UserRoleNotSupportedException();
 
             return _mapper.Map<PaginatedResultDto<LMSActivityPreviewDto>>(paginatedActivities);
         }
 
         /// <inheritdoc />
-        /// <exception cref="ModuleNotFoundException">Thrown if the module is not found.</exception>
-        /// <exception cref="UserRoleNotSupportedException">Thrown if the current user's role is not supported.</exception>
-        public async Task<PaginatedResultDto<LMSActivityPreviewDto>> GetAllByModuleIdAsync(Guid moduleId, int pageNumber, int pageSize)
+        /// <exception cref="UserRoleNotSupportedException">Thrown when the current user's role is neither Teacher nor Student.</exception>
+        /// <exception cref="ModuleNotFoundException">Thrown if the module is not found or the user does not have access to it.</exception>
+        public async Task<PaginatedResultDto<LMSActivityPreviewDto>> GetAllByModuleIdAsync(Guid moduleId, PaginatedQueryDto queryDto)
         {
-            IEnumerable<LMSActivity>? activities = null;
+            PaginatedResult<LMSActivity> paginatedActivities;
 
             if (_currentUserService.IsTeacher)
             {
                 if (await _unitOfWork.Module.GetByIdAsync(moduleId, null) is null)
                     throw new ModuleNotFoundException(moduleId);
 
-                activities = await _unitOfWork.LMSActivity.GetByModuleIdAsync(moduleId);
+                paginatedActivities = await _unitOfWork.LMSActivity.GetByModuleIdAsync(moduleId, queryDto);
             }
             else if (_currentUserService.IsStudent)
             {
                 if (await _unitOfWork.Module.GetByIdAsync(moduleId, _currentUserService.Id) is null)
                     throw new ModuleNotFoundException(moduleId);
 
-                activities = await _unitOfWork.LMSActivity.GetByModuleIdAsync(moduleId, _currentUserService.Id);
+                paginatedActivities = await _unitOfWork.LMSActivity.GetByModuleIdAsync(moduleId, _currentUserService.Id, queryDto);
             }
-            else throw new UserRoleNotSupportedException();
-
-
-            var paginatedActivities = activities.ToPaginatedResult(new PagingParameters
-            {
-                PageNumber = pageNumber,
-                PageSize = pageSize
-            });
+            else
+                throw new UserRoleNotSupportedException();
 
             return _mapper.Map<PaginatedResultDto<LMSActivityPreviewDto>>(paginatedActivities);
         }
@@ -133,7 +125,7 @@ namespace LMS.Services
 
             activityEntity.ActivityTypeId = activityType.Id;
 
-            if (!await IsUniqueNameAsync(activity.Name, activity.ModuleId))
+            if (!await _unitOfWork.LMSActivity.IsUniqueNameAsync(activity.Name, activity.ModuleId))
                 throw new LMSActivityNameAlreadyExistsException(activity.Name, activity.ModuleId);
 
             if (activity.StartDate >= activity.EndDate)
@@ -195,7 +187,7 @@ namespace LMS.Services
 
             if (updateDto.Name is not null)
             {
-                if (!await IsUniqueNameAsync(updateDto.Name, activity.ModuleId, activity.Id))
+                if (!await _unitOfWork.LMSActivity.IsUniqueNameAsync(updateDto.Name, activity.ModuleId, activity.Id))
                     throw new LMSActivityNameAlreadyExistsException(updateDto.Name, activity.ModuleId);
 
                 activity.Name = updateDto.Name;
@@ -219,16 +211,6 @@ namespace LMS.Services
             _unitOfWork.LMSActivity.Update(activity);
 
             await _unitOfWork.CompleteAsync();
-        }
-
-        /// <inheritdoc />
-        public async Task<bool> IsUniqueNameAsync(string name, Guid moduleId, Guid excludedActivityId = default)
-        {
-            var activities = await _unitOfWork.LMSActivity.GetByModuleIdAsync(moduleId);
-
-            return !activities.Any(activity =>
-                activity.Name.Equals(name, StringComparison.OrdinalIgnoreCase) &&
-                activity.Id != excludedActivityId);
         }
 
         /// <inheritdoc />

@@ -1,4 +1,5 @@
-﻿namespace Domain.Contracts.Repositories;
+﻿
+namespace Domain.Contracts.Repositories;
 
 public interface IUnitOfWork
 {

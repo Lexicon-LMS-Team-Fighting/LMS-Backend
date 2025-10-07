@@ -3,14 +3,10 @@ using Domain.Models.Entities;
 using LMS.Infractructure.Data;
 using LMS.Shared;
 using LMS.Shared.DTOs.ModuleDtos;
+using LMS.Shared.DTOs.PaginationDtos;
 using LMS.Shared.Extensions;
+using LMS.Shared.Pagination;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace LMS.Infractructure.Repositories
 {
@@ -73,30 +69,6 @@ namespace LMS.Infractructure.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Module>> GetAllAsync(bool changeTracking = false) =>
-            await FindAll(trackChanges: changeTracking)
-                .ToListAsync();
-
-        /// <inheritdoc/>
-        public async Task<IEnumerable<Module>> GetAllAsync(string userId, bool changeTracking = false) =>
-            await FindAll(trackChanges: changeTracking)
-                .Where(m => m.Course.UserCourses.Any(uc => uc.UserId == userId))
-                .ToListAsync();
-
-        /// <inheritdoc/>
-        public async Task<IEnumerable<Module>> GetByCourseIdAsync(Guid courseId, bool changeTracking = false) =>
-            await FindByCondition(m => m.CourseId == courseId, trackChanges: changeTracking)
-                .ToListAsync();
-
-        /// <inheritdoc/>
-        public async Task<IEnumerable<Module>> GetByCourseIdAsync(Guid courseId, string userId, bool changeTracking = false) =>
-            await FindByCondition(m => m.CourseId == courseId, trackChanges: changeTracking)
-                .Include(m => m.Course)
-                    .ThenInclude(c => c.UserCourses)
-                .Where(m => m.Course.UserCourses.Any(uc => uc.UserId == userId))
-                .ToListAsync();
-
-        /// <inheritdoc/>
         public async Task<decimal> CalculateProgressAsync(Guid moduleId, string? userId = null)
         {
             var activities = await FindByCondition(m => m.Id == moduleId)
@@ -140,5 +112,67 @@ namespace LMS.Infractructure.Repositories
         public async Task<bool> IsUserEnrolledInModuleAsync(Guid moduleId, string userId) =>
             await FindByCondition(m => m.Id == moduleId)
                 .AnyAsync(m => m.Course.UserCourses.Any(uc => uc.UserId == userId));
+
+        /// <summary>
+        /// Retrieves a paginated list of modules based on the specified query and pagination parameters.
+        /// </summary>
+        /// <param name="query">The base query for modules.</param>
+        /// <param name="queryDto">Pagination, filtering, and sorting parameters.</param>
+        /// <returns>A <see cref="PaginatedResult{T}"/> with modules and pagination metadata.</returns>
+        private async Task<PaginatedResult<Module>> GetPaginatedModulesAsync(IQueryable<Module> query, PaginatedQueryDto queryDto)
+        {
+            if (!string.IsNullOrEmpty(queryDto.FilterBy))
+                query = query.WhereContains(queryDto.FilterBy, queryDto.Filter);
+
+            if (!string.IsNullOrEmpty(queryDto.SortBy))
+                query = query.OrderByField(queryDto.SortBy, queryDto.SortDirection);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((queryDto.Page - 1) * queryDto.PageSize)
+                .Take(queryDto.PageSize)
+                .ToListAsync();
+
+            return new PaginatedResult<Module>(items, new PaginationMetadata(totalCount, queryDto.Page, queryDto.PageSize));
+        }
+
+        /// <inheritdoc/>
+        public Task<PaginatedResult<Module>> GetAllAsync(PaginatedQueryDto queryDto, bool changeTracking = false)
+        {
+            var query = FindAll(changeTracking).AsQueryable();
+            return GetPaginatedModulesAsync(query, queryDto);
+        }
+
+        /// <inheritdoc/>
+        public Task<PaginatedResult<Module>> GetAllAsync(string userId, PaginatedQueryDto queryDto, bool changeTracking = false)
+        {
+            var query = FindByCondition(m => m.Course.UserCourses.Any(uc => uc.UserId == userId), changeTracking)
+                .Include(m => m.Course)
+                .AsQueryable();
+            return GetPaginatedModulesAsync(query, queryDto);
+        }
+
+        /// <inheritdoc/>
+        public Task<PaginatedResult<Module>> GetByCourseIdAsync(Guid courseId, PaginatedQueryDto queryDto, bool changeTracking = false)
+        {
+            var query = FindByCondition(m => m.CourseId == courseId, changeTracking)
+                .AsQueryable();
+            return GetPaginatedModulesAsync(query, queryDto);
+        }
+
+        /// <inheritdoc/>
+        public Task<PaginatedResult<Module>> GetByCourseIdAsync(Guid courseId, string userId, PaginatedQueryDto queryDto, bool changeTracking = false)
+        {
+            var query = FindByCondition(m => m.CourseId == courseId && m.Course.UserCourses.Any(uc => uc.UserId == userId), changeTracking)
+                .Include(m => m.Course)
+                .AsQueryable();
+            return GetPaginatedModulesAsync(query, queryDto);
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> IsUniqueNameAsync(string name, Guid courseId, Guid excludeModuleId) =>
+            !await FindByCondition(m => m.Name.ToUpper().Equals(name.ToUpper()) && m.CourseId == courseId && m.Id != excludeModuleId)
+                .AnyAsync();
     }
 }

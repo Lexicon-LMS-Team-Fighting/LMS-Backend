@@ -20,13 +20,11 @@ public interface ICourseService
     /// <summary>
     /// Retrieves all courses from the data source.
     /// </summary>
-    /// <param name="pageNumber">The page number to retrieve (1-based).</param>
-    /// <param name="pageSize">The number of items per page.</param>
-    /// <param name="include">Optional fields to include (e.g., "progress").</param>
+    /// <param name="query">Pagination and filtering parameters.</param>
     /// <returns>
     /// A collection of <see cref="PaginatedResultDto{CoursePreviewDto}"/> objects representing all users.
     /// </returns>
-    Task<PaginatedResultDto<CoursePreviewDto>> GetCoursesAsync(int pageNumber, int pageSize, string? include = null);
+    Task<PaginatedResultDto<CoursePreviewDto>> GetCoursesAsync(PaginatedQueryDto query);
 
     /// <summary>
     /// Creates a new course based on the provided data.
