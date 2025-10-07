@@ -1,10 +1,6 @@
 ﻿using AutoMapper;
 using Domain.Contracts.Repositories;
-using Domain.Exceptions;
-using Domain.Models.Entities;
-using LMS.Shared.DTOs.AuthDtos;
 using LMS.Shared.DTOs.UserDtos;
-using Microsoft.AspNetCore.Identity;
 using Service.Contracts;
 
 namespace LMS.Services;
@@ -30,8 +26,9 @@ public class UserService : IUserService
 		_mapper = mapper;
     }
 
-	/// <inheritdoc/>
-	public async Task<UserExtendedDto> GetUserAsync(string userId)
+    /// <inheritdoc/>
+    /// <exception cref="BadRequestException">Thrown when the provided user ID is not a valid GUID.</exception>
+    public async Task<UserExtendedDto> GetUserAsync(string userId)
 	{
 		if (!Guid.TryParse(userId, out Guid guid))
 			throw new BadRequestException($"Provided id: {userId} is not a valid Guid");
@@ -44,10 +41,19 @@ public class UserService : IUserService
 	}
 
 	/// <inheritdoc/>
-	public async Task<IEnumerable<UserPreviewDto>> GetUsersAsync()
+	public async Task<IEnumerable<UserWithRolesDto>> GetUsersAsync()
 	{
-		var user = await _unitOfWork.User.GetUsersAsync();
+        var users = await _unitOfWork.User.GetUsersAsync();
+        var usersDto = new List<UserWithRolesDto>();
 
-		return _mapper.Map<IEnumerable<UserPreviewDto>>(user);
-	}
+        foreach (var user in users)
+        {
+            var roles = await _unitOfWork.User.GetUserRolesAsync(user);
+            var userDto = _mapper.Map<UserWithRolesDto>(user);
+            userDto.Roles = string.Join(", ", roles);
+            usersDto.Add(userDto);
+        }
+
+        return usersDto;
+    }
 }

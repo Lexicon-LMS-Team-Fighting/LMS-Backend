@@ -60,23 +60,23 @@ public class UserController: ControllerBase
 	public async Task<ActionResult<UserExtendedDto>> GetUser(string guid) => 
 		Ok(await _serviceManager.UserService.GetUserAsync(guid));
 
-	/// <summary>Retrieves all users.</summary>
-	/// <returns>
-	/// An <see cref="ActionResult{T}"/> containing a collection of <see cref="UserDto"/> objects.
-	/// </returns>
-	/// <remarks>Requires authentication as either <c>Teacher</c> or <c>Student</c>.</remarks>
-	/// <response code="200">Returns the list of users (empty if none exist).</response>
-	/// <response code="401">The request is unauthorized (missing or invalid token).</response>
-	/// <response code="403">The authenticated user does not have the required role.</response>
-	[HttpGet]
+    /// <summary>Retrieves all users.</summary>
+    /// <returns>
+    /// An <see cref="ActionResult{T}"/> containing a collection of <see cref="UserWithRolesDto"/> objects.
+    /// </returns>
+    /// <remarks>Requires authentication as either <c>Teacher</c> or <c>Student</c>.</remarks>
+    /// <response code="200">Returns the list of users (empty if none exist).</response>
+    /// <response code="401">The request is unauthorized (missing or invalid token).</response>
+    /// <response code="403">The authenticated user does not have the required role.</response>
+    [HttpGet]
 	[Authorize(Roles = "Teacher,Student")]
 	[SwaggerOperation(
 		Summary = "Get all users",
 		Description = "Retrieves a list of all users in the system."
 	)]
-	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserPreviewDto>))]
+	[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserWithRolesDto>))]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
-	public async Task<ActionResult<IEnumerable<UserPreviewDto>>> GetUsers() => 
+	public async Task<ActionResult<IEnumerable<UserWithRolesDto>>> GetUsers() => 
 		Ok(await _serviceManager.UserService.GetUsersAsync());
 }

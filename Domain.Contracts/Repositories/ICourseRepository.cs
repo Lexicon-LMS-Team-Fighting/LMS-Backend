@@ -62,5 +62,11 @@ public interface ICourseRepository : IRepositoryBase<Course>
     /// If null, can be used for teacher view (aggregate or max per student logic can be added later).
     /// </param>
     /// <returns>A decimal value between 0 and 1 representing course progress.</returns>
-    Task<decimal> CalculateProgress(Guid courseId, string? userId = null);
+    Task<decimal> CalculateProgressAsync(Guid courseId, string? userId = null);
+
+    /// <summary>
+    /// Retrieves all documents associated with a course and its modules and activities.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course.</param>
+    Task ClearDocumentRelationsAsync(Guid courseId);
 }

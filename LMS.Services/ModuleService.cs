@@ -51,14 +51,14 @@ namespace LMS.Services
                 module = await _unitOfWork.Module.GetByIdAsync(id, include, true);
 
                 if (includeProgress)
-                    progress = await _unitOfWork.Module.CalculateProgress(id);
+                    progress = await _unitOfWork.Module.CalculateProgressAsync(id);
             }
             else if (_currentUserService.IsStudent)
             {
                 module = await _unitOfWork.Module.GetByIdAsync(id, _currentUserService.Id, include);
 
                 if (includeProgress)
-                    progress = await _unitOfWork.Module.CalculateProgress(id, _currentUserService.Id);
+                    progress = await _unitOfWork.Module.CalculateProgressAsync(id, _currentUserService.Id);
             }
             else throw new UserRoleNotSupportedException();
 
@@ -149,9 +149,9 @@ namespace LMS.Services
         private async Task AddProgress(PaginatedResultDto<ModulePreviewDto> modulesDto)
         {
             Func<Guid, Task<decimal>> calculateProgressFunc = _currentUserService.IsTeacher
-                ? (async (moduleId) => await _unitOfWork.Module.CalculateProgress(moduleId))
+                ? (async (moduleId) => await _unitOfWork.Module.CalculateProgressAsync(moduleId))
                 : _currentUserService.IsStudent
-                    ? (async (moduleId) => await _unitOfWork.Module.CalculateProgress(moduleId, _currentUserService.Id))
+                    ? (async (moduleId) => await _unitOfWork.Module.CalculateProgressAsync(moduleId, _currentUserService.Id))
                     : throw new UserRoleNotSupportedException();
 
             foreach (var module in modulesDto.Items)
@@ -188,20 +188,6 @@ namespace LMS.Services
             await _unitOfWork.CompleteAsync();
 
             return _mapper.Map<ModuleExtendedDto>(moduleEntity);
-        }
-
-        /// <inheritdoc />
-        /// <exception cref="ModuleNotFoundException">Thrown if the module is not found.</exception>
-        public async Task DeleteAsync(Guid id)
-        {
-            // ToDo: Check depentent entities before delete
-            var module = await _unitOfWork.Module.GetByIdAsync(id, null);
-
-            if (module is null)
-                throw new ModuleNotFoundException(id);
-
-            _unitOfWork.Module.Delete(module);
-            await _unitOfWork.CompleteAsync();
         }
 
         /// <inheritdoc />
@@ -260,6 +246,23 @@ namespace LMS.Services
             return !modules.Any(module =>
                 module.Name.Equals(name, StringComparison.OrdinalIgnoreCase) &&
                 module.Id != excludedModuleId);
+        }
+
+        /// <inheritdoc />
+        /// <exception cref="ModuleNotFoundException">Thrown if the module is not found.</exception>
+        public async Task DeleteAsync(Guid moduleId)
+        {
+            var module = await _unitOfWork.Module.GetByIdAsync(moduleId, null);
+
+            if (module is null)
+                throw new ModuleNotFoundException(moduleId);
+
+            await _unitOfWork.Module.ClearDocumentRelationsAsync(moduleId);
+            await _unitOfWork.CompleteAsync();
+            _unitOfWork.DetachAllEntities();
+
+            _unitOfWork.Module.Delete(module);
+            await _unitOfWork.CompleteAsync();
         }
     }
 }

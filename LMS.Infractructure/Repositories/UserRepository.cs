@@ -47,18 +47,6 @@ public class UserRepository : RepositoryBase<ApplicationUser>, IUserRepository
         return await _userManager.IsInRoleAsync(user, roleName);
     }
 
-    // Not used yet. Parameters set to change.
-    void IRepositoryBase<ApplicationUser>.Create(ApplicationUser entity)
-	{
-		throw new NotImplementedException();
-	}
-
-	// Not used yet. Parameters set to change.
-	void IRepositoryBase<ApplicationUser>.Delete(ApplicationUser entity)
-	{
-		throw new NotImplementedException();
-	}
-
 	/// <inheritdoc/>
 	public async Task<ApplicationUser?> GetUserAsync(string userId, bool changeTracking) => 
 		await FindByCondition(u => u.Id.Equals(userId), changeTracking)
@@ -76,4 +64,8 @@ public class UserRepository : RepositoryBase<ApplicationUser>, IUserRepository
         await FindAll(changeTracking)
             .Where(u => u.UserCourses.Any(uc => uc.CourseId == courseId))
             .ToListAsync();
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<string>> GetUserRolesAsync(ApplicationUser user) =>
+         await _userManager.GetRolesAsync(user);
 }

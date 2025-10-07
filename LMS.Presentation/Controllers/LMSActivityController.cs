@@ -131,30 +131,6 @@ namespace LMS.Presentation.Controllers
         }
 
         /// <summary>
-        /// Deletes an activity by its unique identifier.
-        /// </summary>
-        /// <param name="guid">The unique identifier of the activity to delete.</param>
-        /// <response code="204">Activity was successfully deleted.</response>
-        /// <response code="404">If no activity is found with the specified GUID.</response>
-        /// <response code="401">Unauthorized.</response>
-        /// <response code="403">Forbidden.</response>
-        //[HttpDelete("{guid}")]
-        //[Authorize(Roles = "Teacher")]
-        //[SwaggerOperation(
-        //    Summary = "Delete an activity",
-        //    Description = "Deletes the LMS activity identified by its GUID."
-        //)]
-        //[ProducesResponseType(StatusCodes.Status204NoContent)]
-        //[ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        //[ProducesResponseType(StatusCodes.Status403Forbidden)]
-        //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        //public async Task<IActionResult> DeleteActivity(Guid guid)
-        //{
-        //    await _serviceManager.LMSActivityService.DeleteAsync(guid);
-        //    return NoContent();
-        //}
-
-        /// <summary>
         /// Retrieves a specific feedback for a given activity and user.
         /// </summary>
         /// <param name="activityId">The unique identifier of the activity.</param>
@@ -188,6 +164,16 @@ namespace LMS.Presentation.Controllers
         /// <summary>
         /// Creates a new feedback.
         /// </summary>
+        /// <param name="activityId">The unique identifier of the activity.</param>
+        /// <param name="userId">The unique identifier of the user to whom the feedback is provided.</param>
+        /// <param name="createDto">The data for the feedback to create.</param>
+        /// <returns>A <see cref="LMSActivityFeedbackExtendedDto"/> representing the created feedback.</returns>
+        /// <response code="201">Returns the created feedback.</response>
+        /// <response code="400">If the provided feedback data is invalid.</response>
+        /// <response code="404">If the activity or user is not found.</response>
+        /// <response code="409">If a feedback already exists for this activity and user.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
         [HttpPost("{activityId}/participants/{userId}/feedback")]
         [Authorize(Roles = "Teacher")]
         [SwaggerOperation(
@@ -214,6 +200,16 @@ namespace LMS.Presentation.Controllers
         /// <summary>
         /// Updates an existing feedback.
         /// </summary>
+        /// <param name="activityId">The unique identifier of the activity.</param>
+        /// <param name="userId">The unique identifier of the user to whom the feedback is provided.</param>
+        /// <param name="updateDto">The updated data for the feedback.</param>
+        /// <returns>No content if the update is successful.</returns>
+        /// <response code="204">If the feedback was successfully updated.</response>
+        /// <response code="400">If the provided feedback data is invalid.</response>
+        /// <response code="404">If no feedback is found for the specified activity and user.</response>
+        /// <response code="409">If there is a conflict during the update operation.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
         [HttpPut("{activityId}/participants/{userId}/feedback")]
         [Authorize(Roles = "Teacher")]
         [SwaggerOperation(
@@ -238,6 +234,13 @@ namespace LMS.Presentation.Controllers
         /// <summary>
         /// Deletes a feedback by activity ID and user ID.
         /// </summary>
+        /// <param name="activityId">The unique identifier of the activity.</param>
+        /// <param name="userId">The unique identifier of the user to whom the feedback is provided.</param>
+        /// <returns>No content if the deletion is successful.</returns>
+        /// <response code="204">If the feedback was successfully deleted.</response>
+        /// <response code="404">If no feedback is found for the specified activity and user.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
         [HttpDelete("{activityId}/participants/{userId}/feedback")]
         [Authorize(Roles = "Teacher")]
         [SwaggerOperation(
@@ -256,5 +259,29 @@ namespace LMS.Presentation.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes an activity by its unique identifier.
+        /// </summary>
+        /// <param name="activityId">The unique identifier of the activity to delete.</param>
+        /// <returns>No content if the deletion is successful.</returns>
+        /// <response code="204">If the activity was successfully deleted.</response>
+        /// <response code="404">If no activity is found with the specified ID.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
+        [HttpDelete("{activityId}")]
+        [Authorize(Roles = "Teacher")]
+        [SwaggerOperation(
+            Summary = "Delete an activity",
+            Description = "Deletes the LMS activity identified by its Id."
+        )]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> DeleteActivity(Guid activityId)
+        {
+            await _serviceManager.LMSActivityService.DeleteAsync(activityId);
+            return NoContent();
+        }
     }
 }
