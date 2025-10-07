@@ -1,4 +1,5 @@
 ﻿using Domain.Models.Entities;
+using LMS.Shared.DTOs.PaginationDtos;
 using LMS.Shared.Pagination;
 
 namespace Domain.Contracts.Repositories;
@@ -32,17 +33,19 @@ public interface ICourseRepository : IRepositoryBase<Course>
     /// <summary>
     /// Retrieves all <see cref="Course"/> entities from the data source.
     /// </summary>
+    /// <param name="query">Pagination and filtering parameters.</param>
     /// <param name="changeTracking">If <c>true</c>, Entity Framework change tracking will be enabled.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="Course"/> entities.</returns>
-    Task<IEnumerable<Course>> GetCoursesAsync(bool changeTracking = false);
+    Task<PaginatedResult<Course>> GetCoursesAsync(PaginatedQueryDto query, bool changeTracking = false);
 
     /// <summary>
     /// Retrieves all <see cref="Course"/> entities from the data source for a specific user.
     /// </summary>
+    /// <param name="query">Pagination and filtering parameters.</param>
     /// <param name="userId">The unique identifier of the user.</param>
     /// <param name="changeTracking">If <c>true</c>, Entity Framework change tracking will be enabled.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="Course"/> entities.</returns>
-    Task<IEnumerable<Course>> GetCoursesAsync(string userId, bool changeTracking = false);
+    /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="Course"/> entities associated with the given user.</returns>
+    Task<PaginatedResult<Course>> GetCoursesAsync(string userId, PaginatedQueryDto query, bool changeTracking = false);
 
     /// <summary>
     /// Checks if a course name is unique, excluding a specific course if provided.

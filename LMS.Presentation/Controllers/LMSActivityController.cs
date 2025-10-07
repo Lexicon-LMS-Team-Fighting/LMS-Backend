@@ -57,8 +57,7 @@ namespace LMS.Presentation.Controllers
         /// <summary>
         /// Retrieves a paginated list of all activities.
         /// </summary>
-        /// <param name="page">The page number to retrieve (default is 1).</param>
-        /// <param name="pageSize">The number of items per page (default is 10).</param>
+        /// <param name="query">Pagination and filtering parameters.</param>
         /// <returns>A paginated list of activities.</returns>
         /// <response code="200">Returns a paginated list of activities.</response>
         /// <response code="401">Unauthorized.</response>
@@ -72,8 +71,8 @@ namespace LMS.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<LMSActivityPreviewDto>))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<PaginatedResultDto<LMSActivityPreviewDto>>> GetActivities([FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
-            Ok(await _serviceManager.LMSActivityService.GetAllAsync(page, pageSize));
+        public async Task<ActionResult<PaginatedResultDto<LMSActivityPreviewDto>>> GetActivities([FromQuery] PaginatedQueryDto query) =>
+            Ok(await _serviceManager.LMSActivityService.GetAllAsync(query));
 
         /// <summary>
         /// Creates a new activity.

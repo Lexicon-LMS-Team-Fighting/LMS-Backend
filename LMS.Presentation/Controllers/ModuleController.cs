@@ -57,9 +57,7 @@ namespace LMS.Presentation.Controllers
         /// <summary>
         /// Retrieves a paginated list of all modules.
         /// </summary>
-        /// <param name="page">The page number to retrieve (default is 1).</param>
-        /// <param name="pageSize">The number of items per page (default is 10).</param>
-        /// <param name="include">Optional fileds to include (e.g., "progress").</param>
+        /// <param name="query">Pagination and filtering parameters.</param>
         /// <returns>A paginated list of modules.</returns>
         /// <response code="200">Returns a paginated list of modules.</response>
         /// <response code="401">Unauthorized.</response>
@@ -73,11 +71,8 @@ namespace LMS.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<ModulePreviewDto>))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<PaginatedResultDto<ModulePreviewDto>>> GetModules(
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10,
-            [FromQuery] string? include = null) =>
-            Ok(await _serviceManager.ModuleService.GetAllAsync(page, pageSize, include));
+        public async Task<ActionResult<PaginatedResultDto<ModulePreviewDto>>> GetModules([FromQuery] PaginatedQueryDto query) =>
+            Ok(await _serviceManager.ModuleService.GetAllAsync(query));
 
         /// <summary>
         /// Creates a new module.
@@ -139,8 +134,7 @@ namespace LMS.Presentation.Controllers
         /// Retrieves a paginated list of activities for a specific module.
         /// </summary>
         /// <param name="moduleId">The unique identifier of the module.</param>
-        /// <param name="page">The page number to retrieve (default is 1).</param>
-        /// <param name="pageSize">The number of items per page (default is 10).</param>
+        /// <param name="query">Pagination and filtering parameters.</param>
         /// <returns>A paginated list of activities for the specified module.</returns>
         /// <response code="200">Returns the paginated list of activities.</response>
         /// <response code="400">If the provided GUID is not valid.</response>
@@ -160,10 +154,9 @@ namespace LMS.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<PaginatedResultDto<LMSActivityPreviewDto>>> GetActivitiesByModuleId(
             Guid moduleId,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10
+            [FromQuery] PaginatedQueryDto query
         ) =>
-            Ok(await _serviceManager.LMSActivityService.GetAllByModuleIdAsync(moduleId, page, pageSize));
+            Ok(await _serviceManager.LMSActivityService.GetAllByModuleIdAsync(moduleId, query));
 
         /// <summary>
         /// Deletes a module by its unique identifier.

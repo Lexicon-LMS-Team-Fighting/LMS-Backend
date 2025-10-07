@@ -67,21 +67,20 @@ public class CourseService : ICourseService
     }
 
     /// <inheritdoc />
-    public async Task<PaginatedResultDto<CoursePreviewDto>> GetCoursesAsync(int pageNumber, int pageSize, string? include = null)
+    public async Task<PaginatedResultDto<CoursePreviewDto>> GetCoursesAsync(PaginatedQueryDto queryDto)
     {
-        IEnumerable<Course>? courses = null;
+        PaginatedResult<Course>? paginatedCourses = null;
 
         if (_currentUserService.IsTeacher)
-            courses = await _unitOfWork.Course.GetCoursesAsync();
+            paginatedCourses = await _unitOfWork.Course.GetCoursesAsync(queryDto);
         else if (_currentUserService.IsStudent)
-            courses = await _unitOfWork.Course.GetCoursesAsync(_currentUserService.Id);
+            paginatedCourses = await _unitOfWork.Course.GetCoursesAsync(_currentUserService.Id, queryDto);
         else
             throw new UserRoleNotSupportedException();
 
-        var paginatedCourses = courses.ToPaginatedResult(new PagingParameters { PageNumber = pageNumber, PageSize = pageSize });
         var coursesDto = _mapper.Map<PaginatedResultDto<CoursePreviewDto>>(paginatedCourses);
 
-        if (!string.IsNullOrEmpty(include) && include.Contains(nameof(CoursePreviewDto.Progress), StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrEmpty(queryDto.Include) && queryDto.Include.Contains(nameof(CoursePreviewDto.Progress), StringComparison.OrdinalIgnoreCase))
         {
             Func<Guid, Task<decimal>> calculateProgressFunc = _currentUserService.IsTeacher
                 ? (async (courseId) => await _unitOfWork.Course.CalculateProgressAsync(courseId))

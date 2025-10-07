@@ -75,26 +75,20 @@ namespace LMS.Services
 
         /// <inheritdoc />
         /// <exception cref="UserRoleNotSupportedException">Thrown when the current user's role is neither Teacher nor Student.</exception>
-        public async Task<PaginatedResultDto<ModulePreviewDto>> GetAllAsync(int pageNumber, int pageSize, string? include = null)
+        public async Task<PaginatedResultDto<ModulePreviewDto>> GetAllAsync(PaginatedQueryDto queryDto)
         {
-            IEnumerable<Module>? modules = null;
+            PaginatedResult<Module> paginatedModules;
 
             if (_currentUserService.IsTeacher)
-                modules = await _unitOfWork.Module.GetAllAsync(true);
+                paginatedModules = await _unitOfWork.Module.GetAllAsync(queryDto);
             else if (_currentUserService.IsStudent)
-                modules = await _unitOfWork.Module.GetAllAsync(_currentUserService.Id);
+                paginatedModules = await _unitOfWork.Module.GetAllAsync(_currentUserService.Id, queryDto);
             else
                 throw new UserRoleNotSupportedException();
 
-            var paginatedModules = modules.ToPaginatedResult(new PagingParameters
-            {
-                PageNumber = pageNumber,
-                PageSize = pageSize
-            });
-
             var modulesDto = _mapper.Map<PaginatedResultDto<ModulePreviewDto>>(paginatedModules);
 
-            if (!string.IsNullOrEmpty(include) && include.Contains(nameof(ModulePreviewDto.Progress), StringComparison.OrdinalIgnoreCase))
+            if (queryDto.Include is not null && queryDto.Include.Contains(nameof(ModulePreviewDto.Progress), StringComparison.OrdinalIgnoreCase))
             {
                 await AddProgress(modulesDto);
             }
@@ -105,35 +99,29 @@ namespace LMS.Services
         /// <inheritdoc />
         /// <exception cref="UserRoleNotSupportedException">Thrown when the current user's role is neither Teacher nor Student.</exception>
         /// <exception cref="CourseNotFoundException">Thrown if the course is not found or the user does not have access to it.</exception>
-        public async Task<PaginatedResultDto<ModulePreviewDto>> GetAllByCourseIdAsync(Guid courseId, int pageNumber, int pageSize, string? include = null)
+        public async Task<PaginatedResultDto<ModulePreviewDto>> GetAllByCourseIdAsync(Guid courseId, PaginatedQueryDto queryDto)
         {
-            IEnumerable<Module>? modules = null;
+            PaginatedResult<Module> paginatedModules;
 
             if (_currentUserService.IsTeacher)
             {
                 if (await _unitOfWork.Course.GetCourseAsync(courseId, null) is null)
                     throw new CourseNotFoundException(courseId);
 
-                modules = await _unitOfWork.Module.GetByCourseIdAsync(courseId, true);
+                paginatedModules = await _unitOfWork.Module.GetByCourseIdAsync(courseId, queryDto);
             }
             else if (_currentUserService.IsStudent)
             {
-                if (await _unitOfWork.Course.GetCourseAsync(courseId, _currentUserService.Id, null) is null)
+                if (await _unitOfWork.Course.GetCourseAsync(courseId, _currentUserService.Id) is null)
                     throw new CourseNotFoundException(courseId);
 
-                modules = await _unitOfWork.Module.GetByCourseIdAsync(courseId, _currentUserService.Id);
+                paginatedModules = await _unitOfWork.Module.GetByCourseIdAsync(courseId, _currentUserService.Id, queryDto);
             }
             else throw new UserRoleNotSupportedException();
 
-            var paginatedModules = modules.ToPaginatedResult(new PagingParameters
-            {
-                PageNumber = pageNumber,
-                PageSize = pageSize
-            });
-
             var modulesDto = _mapper.Map<PaginatedResultDto<ModulePreviewDto>>(paginatedModules);
 
-            if (!string.IsNullOrEmpty(include) && include.Contains(nameof(ModulePreviewDto.Progress), StringComparison.OrdinalIgnoreCase))
+            if (queryDto.Include is not null && queryDto.Include.Contains(nameof(ModulePreviewDto.Progress), StringComparison.OrdinalIgnoreCase))
             {
                 await AddProgress(modulesDto);
             }
@@ -175,7 +163,7 @@ namespace LMS.Services
             if (course is null)
                 throw new CourseNotFoundException(module.CourseId);
 
-            if (!await IsUniqueNameAsync(module.Name, module.CourseId))
+            if (!await _unitOfWork.Module.IsUniqueNameAsync(module.Name, module.CourseId))
                 throw new ModuleNameAlreadyExistsException(module.Name, module.CourseId);
 
             if (module.StartDate >= module.EndDate)
@@ -213,7 +201,7 @@ namespace LMS.Services
 
             if (updateDto.Name is not null)
             {
-                if (!await IsUniqueNameAsync(updateDto.Name, module.CourseId, module.Id))
+                if (!await _unitOfWork.Module.IsUniqueNameAsync(updateDto.Name, module.CourseId, module.Id))
                     throw new ModuleNameAlreadyExistsException(updateDto.Name, module.CourseId);
 
                 module.Name = updateDto.Name;
@@ -238,15 +226,6 @@ namespace LMS.Services
             await _unitOfWork.CompleteAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<bool> IsUniqueNameAsync(string name, Guid courseId, Guid excludedModuleId = default)
-        {
-            var modules = await _unitOfWork.Module.GetByCourseIdAsync(courseId);
-
-            return !modules.Any(module =>
-                module.Name.Equals(name, StringComparison.OrdinalIgnoreCase) &&
-                module.Id != excludedModuleId);
-        }
 
         /// <inheritdoc />
         /// <exception cref="ModuleNotFoundException">Thrown if the module is not found.</exception>
