@@ -22,6 +22,16 @@ namespace Service.Contracts
         Task<PaginatedResultDto<DocumentPreviewDto>> GetAllAsync(int page, int pageSize);
 
         /// <summary>
+        /// Retrieves a paginated list of document previews associated with a specific user.
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user whose documents are to be retrieved.</param>
+        /// <param name="page">The page number to retrieve. Must be greater than or equal to 1.</param>
+        /// <param name="pageSize">The number of items per page. Must be greater than or equal to 1.</param>
+        /// <returns>A <see cref="PaginatedResultDto{T}"/> containing a collection of <see cref="DocumentPreviewDto"/>  objects
+        /// for the specified page and page size.</returns>
+        Task<PaginatedResultDto<DocumentPreviewDto>> GetAllByUserIdAsync(string userId, int page, int pageSize);
+
+        /// <summary>
         /// Retrieves detailed information about a specific document by its unique identifier.
         /// </summary>
         /// <param name="documentId">The unique identifier of the document.</param>
@@ -66,9 +76,10 @@ namespace Service.Contracts
         /// <summary>
         /// Removes a document from a specific course.
         /// </summary>
+        /// <param name="courseId">The unique identifier of the course.</param>
         /// <param name="documentId">The unique identifier of the document to remove.</param>
         /// <returns>A task representing the asynchronous detach operation.</returns>
-        Task DetachFromCourseAsync(Guid documentId);
+        Task DetachFromCourseAsync(Guid courseId, Guid documentId);
 
         /// <summary>
         /// Attaches an existing document to a specific module.
@@ -81,9 +92,10 @@ namespace Service.Contracts
         /// <summary>
         /// Removes a document from a specific module.
         /// </summary>
+        /// /// <param name="moduleId">The unique identifier of the module.</param>
         /// <param name="documentId">The unique identifier of the document to remove.</param>
         /// <returns>A task representing the asynchronous detach operation.</returns>
-        Task DetachFromModuleAsync(Guid documentId);
+        Task DetachFromModuleAsync(Guid moduleId, Guid documentId);
 
         /// <summary>
         /// Attaches an existing document to a specific activity.
@@ -96,9 +108,53 @@ namespace Service.Contracts
         /// <summary>
         /// Removes a document from a specific activity.
         /// </summary>
+        /// <param name="activityId">The unique identifier of the activity.</param>
         /// <param name="documentId">The unique identifier of the document to remove.</param>
         /// <returns>A task representing the asynchronous detach operation.</returns>
-        Task DetachFromActivityAsync(Guid documentId);
+        Task DetachFromActivityAsync(Guid activityId, Guid documentId);
+
+        /// <summary>
+        /// Retrieves a paginated list of document previews associated with the specified activity.
+        /// </summary>
+        /// <param name="activityId">The unique identifier of the activity for which to retrieve document previews.</param>
+        /// <param name="page">The page number to retrieve. Must be greater than or equal to 1.</param>
+        /// <param name="pageSize">The number of items to include per page. Must be greater than or equal to 1.</param>
+        /// <returns>A <see cref="PaginatedResultDto{T}"/> containing a collection of <see cref="DocumentPreviewDto"/> objects 
+        /// for the specified page and page size. If no documents are found, the collection will be empty.</returns>
+        Task<PaginatedResultDto<DocumentPreviewDto>> GetAllByActivityIdAsync(Guid activityId, int page, int pageSize);
+
+        /// <summary>
+        /// Retrieves a paginated list of document previews associated with the specified module.
+        /// </summary>
+        /// <param name="moduleId">The unique identifier of the module whose documents are to be retrieved.</param>
+        /// <param name="page">The page number to retrieve. Must be greater than or equal to 1.</param>
+        /// <param name="pageSize">The number of items to include per page. Must be greater than 0.</param>
+        /// <returns>A <see cref="PaginatedResultDto{T}"/> containing a collection of <see cref="DocumentPreviewDto"/> objects 
+        /// for the specified page and page size. If no documents are found, the collection will be empty.</returns>
+        Task<PaginatedResultDto<DocumentPreviewDto>> GetAllByModuleIdAsync(Guid moduleId, int page, int pageSize);
+
+        /// <summary>
+        /// Retrieves a paginated list of document previews associated with a specific course.
+        /// </summary>
+        /// <remarks>This method is asynchronous and returns a task that represents the operation. The
+        /// caller must await the task  to retrieve the result. If no documents are found for the specified course, the
+        /// returned collection will be empty.</remarks>
+        /// <param name="courseId">The unique identifier of the course for which to retrieve documents.</param>
+        /// <param name="page">The page number to retrieve. Must be greater than or equal to 1.</param>
+        /// <param name="pageSize">The number of items to include per page. Must be greater than or equal to 1.</param>
+        /// <returns>A <see cref="PaginatedResultDto{T}"/> containing a collection of <see cref="DocumentPreviewDto"/> objects 
+        /// for the specified course, along with pagination metadata.</returns>
+        Task<PaginatedResultDto<DocumentPreviewDto>> GetAllByCourseIdAsync(Guid courseId, int page, int pageSize);
+
+        /// <summary>
+        /// Retrieves the file path of a document based on its unique identifier.
+        /// </summary>
+        /// <remarks>The returned file path is relative to the application's root directory. Ensure the
+        /// document exists  before calling this method to avoid unexpected results.</remarks>
+        /// <param name="documentId">The unique identifier of the document whose path is to be retrieved.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the file path of the document 
+        /// as a string.</returns>
+        Task<string> GetDocumentFilePathAsync(Guid documentId);
     }
 
 }

@@ -135,4 +135,9 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
         moduleDocuments.ForEach(d => d.ModuleId = null);
         activityDocuments.ForEach(d => d.ActivityId = null);
     }
+
+    // / <inheritdoc />
+    public async Task<bool> IsUserEnrolledInCourseAsync(Guid courseId, string userId) =>
+        await FindByCondition(c => c.Id == courseId)
+            .AnyAsync(c => c.UserCourses.Any(uc => uc.UserId == userId));
 }

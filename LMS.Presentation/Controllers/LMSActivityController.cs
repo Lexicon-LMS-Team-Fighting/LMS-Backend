@@ -1,4 +1,5 @@
-﻿using LMS.Shared.DTOs.LMSActivityDtos;
+﻿using LMS.Shared.DTOs.DocumentDtos;
+using LMS.Shared.DTOs.LMSActivityDtos;
 using LMS.Shared.DTOs.LMSActivityFeedbackDtos;
 using LMS.Shared.DTOs.PaginationDtos;
 using Microsoft.AspNetCore.Authorization;
@@ -281,6 +282,68 @@ namespace LMS.Presentation.Controllers
         public async Task<IActionResult> DeleteActivity(Guid activityId)
         {
             await _serviceManager.LMSActivityService.DeleteAsync(activityId);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Retrieves paginated documents attached to a specific activity.
+        /// </summary>
+        /// <param name="activityId">The unique identifier of the activity.</param>
+        /// <param name="page">The page number to retrieve (default is 1).</param>
+        /// <param name="pageSize">The number of items per page (default is 10).</param>
+        /// <response code="200">Returns a paginated list of documents for the specified activity.</response>
+        /// <response code="404">If the activity is not found.</response>
+        [HttpGet("activities/{activityId}/documents")]
+        [Authorize]
+        [SwaggerOperation(
+            Summary = "Get paginated documents for an activity",
+            Description = "Returns paginated documents attached to the specified activity."
+        )]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<DocumentPreviewDto>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        public async Task<IActionResult> GetDocumentsByActivity(
+            Guid activityId,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var documents = await _serviceManager.DocumentService.GetAllByActivityIdAsync(activityId, page, pageSize);
+            return Ok(documents);
+        }
+
+        /// <summary>
+        /// Attaches an existing document to an LMS activity.
+        /// </summary>
+        /// <param name="activityId">The unique identifier of the activity.</param>
+        /// <param name="documentId">The unique identifier of the document to attach.</param>
+        /// <response code="204">Document was successfully attached.</response>
+        /// <response code="404">If no activity or document is found with the specified GUID.</response>
+        /// <response code="409">If the document is already attached to this activity.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
+        [HttpPost("activities/{activityId}/documents/{documentId}")]
+        [Authorize(Roles = "Teacher")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> AttachDocumentToActivity(Guid activityId, Guid documentId)
+        {
+            await _serviceManager.DocumentService.AttachToActivityAsync(activityId, documentId);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Removes a document from an LMS activity.
+        /// </summary>
+        /// <param name="activityId">The unique identifier of the activity.</param>
+        /// <param name="documentId">The unique identifier of the document to remove.</param>
+        /// <response code="204">Document was successfully detached.</response>
+        /// <response code="404">If no activity or document is found with the specified GUID.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
+        [HttpDelete("activities/{activityId}/documents/{documentId}")]
+        [Authorize(Roles = "Teacher")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> DetachDocumentFromActivity(Guid activityId, Guid documentId)
+        {
+            await _serviceManager.DocumentService.DetachFromActivityAsync(activityId, documentId);
             return NoContent();
         }
     }

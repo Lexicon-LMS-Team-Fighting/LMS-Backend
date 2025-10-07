@@ -69,4 +69,13 @@ public interface ICourseRepository : IRepositoryBase<Course>
     /// </summary>
     /// <param name="courseId">The unique identifier of the course.</param>
     Task ClearDocumentRelationsAsync(Guid courseId);
+
+    /// <summary>
+    /// Determines whether the specified user is enrolled in the given course.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course to check.</param>
+    /// <param name="userId">The unique identifier of the user to check.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the user is
+    /// enrolled in the course; otherwise, <see langword="false"/>.</returns>
+    Task<bool> IsUserEnrolledInCourseAsync(Guid courseId, string userId);
 }

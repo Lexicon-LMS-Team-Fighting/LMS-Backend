@@ -1,4 +1,5 @@
-﻿using LMS.Shared.DTOs.LMSActivityDtos;
+﻿using LMS.Shared.DTOs.DocumentDtos;
+using LMS.Shared.DTOs.LMSActivityDtos;
 using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.DTOs.PaginationDtos;
 using Microsoft.AspNetCore.Authorization;
@@ -185,6 +186,69 @@ namespace LMS.Presentation.Controllers
         public async Task<IActionResult> DeleteModule(Guid moduleId)
         {
             await _serviceManager.ModuleService.DeleteAsync(moduleId);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Retrieves paginated documents attached to a specific module.
+        /// </summary>
+        /// <param name="moduleId">The unique identifier of the module.</param>
+        /// <param name="page">The page number to retrieve (default is 1).</param>
+        /// <param name="pageSize">The number of items per page (default is 10).</param>
+        /// <response code="200">Returns a paginated list of documents for the specified module.</response>
+        /// <response code="404">If the module is not found.</response>
+        [HttpGet("modules/{moduleId}/documents")]
+        [Authorize]
+        [SwaggerOperation(
+            Summary = "Get paginated documents for a module",
+            Description = "Returns paginated documents attached to the specified module."
+        )]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<DocumentPreviewDto>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        public async Task<IActionResult> GetDocumentsByModule(
+            Guid moduleId,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var documents = await _serviceManager.DocumentService.GetAllByModuleIdAsync(moduleId, page, pageSize);
+            return Ok(documents);
+        }
+
+
+        /// <summary>
+        /// Attaches an existing document to a module.
+        /// </summary>
+        /// <param name="moduleId">The unique identifier of the module.</param>
+        /// <param name="documentId">The unique identifier of the document to attach.</param>
+        /// <response code="204">Document was successfully attached.</response>
+        /// <response code="404">If no module or document is found with the specified GUID.</response>
+        /// <response code="409">If the document is already attached to this module.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
+        [HttpPost("modules/{moduleId}/documents/{documentId}")]
+        [Authorize(Roles = "Teacher")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> AttachDocumentToModule(Guid moduleId, Guid documentId)
+        {
+            await _serviceManager.DocumentService.AttachToModuleAsync(moduleId, documentId);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Removes a document from a module.
+        /// </summary>
+        /// <param name="moduleId">The unique identifier of the module.</param>
+        /// <param name="documentId">The unique identifier of the document to remove.</param>
+        /// <response code="204">Document was successfully detached.</response>
+        /// <response code="404">If no module or document is found with the specified GUID.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
+        [HttpDelete("modules/{moduleId}/documents/{documentId}")]
+        [Authorize(Roles = "Teacher")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> DetachDocumentFromModule(Guid moduleId, Guid documentId)
+        {
+            await _serviceManager.DocumentService.DetachFromModuleAsync(moduleId, documentId);
             return NoContent();
         }
     }

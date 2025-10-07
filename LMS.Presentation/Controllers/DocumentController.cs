@@ -37,6 +37,86 @@ namespace LMS.Presentation.Controllers
             }
 
             /// <summary>
+            /// Retrieves all documents (paginated).
+            /// </summary>
+            /// <param name="page">The page number to retrieve (default is 1).</param>
+            /// <param name="pageSize">The number of items per page (default is 10).</param>
+            /// <returns>A paginated list of documents.</returns>
+            /// <response code="200">Returns a list of documents.</response>
+            /// <response code="401">Unauthorized.</response>
+            /// <response code="403">Forbidden.</response>
+            [HttpGet]
+            [Authorize(Roles = "Teacher,Student")]
+            [SwaggerOperation(
+                Summary = "Get all documents",
+                Description = "Retrieves a paginated list of all documents available to the user."
+            )]
+            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<DocumentPreviewDto>))]
+            [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+            [ProducesResponseType(StatusCodes.Status403Forbidden)]
+            public async Task<ActionResult<PaginatedResultDto<DocumentPreviewDto>>> GetDocuments(
+                [FromQuery] int page = 1,
+                [FromQuery] int pageSize = 10)
+            {
+                var documents = await _serviceManager.DocumentService.GetAllAsync(page, pageSize);
+                return Ok(documents);
+            }
+
+            /// <summary>
+            /// Retrieves a specific document by its unique identifier.
+            /// </summary>
+            /// <param name="documentId">The unique identifier of the document.</param>
+            /// <returns>The requested document.</returns>
+            /// <response code="200">Returns the document.</response>
+            /// <response code="404">If no document is found with the specified ID.</response>
+            /// <response code="401">Unauthorized.</response>
+            /// <response code="403">Forbidden.</response>
+            [HttpGet("{documentId}")]
+            [Authorize(Roles = "Teacher,Student")]
+            [SwaggerOperation(
+                Summary = "Get document by ID",
+                Description = "Retrieves a document and its metadata by its unique ID."
+            )]
+            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DocumentExtendedDto))]
+            [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+            [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+            [ProducesResponseType(StatusCodes.Status403Forbidden)]
+            public async Task<ActionResult<DocumentExtendedDto>> GetDocumentById(Guid documentId)
+            {
+                var document = await _serviceManager.DocumentService.GetByIdAsync(documentId);
+                return Ok(document);
+            }
+
+            /// <summary>
+            /// Downloads a specific document by its unique identifier.
+            /// </summary>
+            /// <param name="documentId">The unique identifier of the document to download.</param>
+            /// <response code="200">Returns the requested document as a file.</response>
+            /// <response code="404">If the document is not found.</response>
+            /// <response code="401">Unauthorized.</response>
+            /// <response code="403">Forbidden.</response>
+            [HttpGet("{documentId}/download")]
+            [Authorize(Roles = "Teacher,Student")]
+            [SwaggerOperation(
+                Summary = "Download a document",
+                Description = "Downloads the specified document as a file."
+            )]
+            [ProducesResponseType(StatusCodes.Status200OK)]
+            [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+            [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+            [ProducesResponseType(StatusCodes.Status403Forbidden)]
+            public async Task<IActionResult> DownloadDocument(Guid documentId)
+            {
+                var path = await _serviceManager.DocumentService.GetDocumentFilePathAsync(documentId);
+
+                var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+                var contentType = "application/octet-stream";
+                var fileName = Path.GetFileName(path);
+
+                return File(fileStream, contentType, fileName);
+            }
+
+            /// <summary>
             /// Creates a new document.
             /// </summary>
             /// <param name="createDto">The document data to create.</param>
@@ -55,61 +135,11 @@ namespace LMS.Presentation.Controllers
             [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
             [ProducesResponseType(StatusCodes.Status401Unauthorized)]
             [ProducesResponseType(StatusCodes.Status403Forbidden)]
-            public async Task<ActionResult<DocumentExtendedDto>> CreateDocument([FromBody] CreateDocumentDto createDto)
+            [Consumes("multipart/form-data")]
+            public async Task<ActionResult<DocumentExtendedDto>> CreateDocument([FromForm] CreateDocumentDto createDto)
             {
                 var created = await _serviceManager.DocumentService.CreateAsync(createDto);
-                return CreatedAtAction(nameof(GetDocumentById), new { id = created.Id }, created);
-            }
-
-            /// <summary>
-            /// Retrieves a specific document by its unique identifier.
-            /// </summary>
-            /// <param name="documentId">The unique identifier of the document.</param>
-            /// <returns>The requested document.</returns>
-            /// <response code="200">Returns the document.</response>
-            /// <response code="404">If no document is found with the specified ID.</response>
-            /// <response code="401">Unauthorized.</response>
-            /// <response code="403">Forbidden.</response>
-            [HttpGet("{id}")]
-            [Authorize(Roles = "Teacher,Student")]
-            [SwaggerOperation(
-                Summary = "Get document by ID",
-                Description = "Retrieves a document and its metadata by its unique ID."
-            )]
-            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DocumentExtendedDto))]
-            [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-            [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-            [ProducesResponseType(StatusCodes.Status403Forbidden)]
-            public async Task<ActionResult<DocumentExtendedDto>> GetDocumentById(Guid documentId)
-            {
-                var document = await _serviceManager.DocumentService.GetByIdAsync(documentId);
-                return Ok(document);
-            }
-
-            /// <summary>
-            /// Retrieves all documents (paginated).
-            /// </summary>
-            /// <param name="page">The page number to retrieve (default is 1).</param>
-            /// <param name="pageSize">The number of items per page (default is 10).</param>
-            /// <returns>A paginated list of documents.</returns>
-            /// <response code="200">Returns a list of documents.</response>
-            /// <response code="401">Unauthorized.</response>
-            /// <response code="403">Forbidden.</response>
-            [HttpGet]
-            [Authorize(Roles = "Teacher,Student")]
-            [SwaggerOperation(
-                Summary = "Get all documents (paginated)",
-                Description = "Retrieves a paginated list of all documents available to the user."
-            )]
-            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<DocumentPreviewDto>))]
-            [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-            [ProducesResponseType(StatusCodes.Status403Forbidden)]
-            public async Task<ActionResult<PaginatedResultDto<DocumentPreviewDto>>> GetDocuments(
-                [FromQuery] int page = 1,
-                [FromQuery] int pageSize = 10)
-            {
-                var documents = await _serviceManager.DocumentService.GetAllAsync(page, pageSize);
-                return Ok(documents);
+                return CreatedAtAction(nameof(GetDocumentById), new { documentId = created.Id }, created);
             }
 
             /// <summary>
@@ -122,7 +152,7 @@ namespace LMS.Presentation.Controllers
             /// <response code="404">If no document is found with the specified ID.</response>
             /// <response code="401">Unauthorized.</response>
             /// <response code="403">Forbidden.</response>
-            [HttpPut("{id}")]
+            [HttpPut("{documentId}")]
             [Authorize(Roles = "Teacher,Student")]
             [SwaggerOperation(
                 Summary = "Update document metadata",
@@ -147,7 +177,7 @@ namespace LMS.Presentation.Controllers
             /// <response code="404">If no document is found with the specified ID.</response>
             /// <response code="401">Unauthorized.</response>
             /// <response code="403">Forbidden.</response>
-            [HttpDelete("{id}")]
+            [HttpDelete("{documentId}")]
             [Authorize(Roles = "Teacher")]
             [SwaggerOperation(
                 Summary = "Delete a document",

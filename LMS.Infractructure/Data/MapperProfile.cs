@@ -48,7 +48,9 @@ public class MapperProfile : Profile
 
         // Document mappings
         CreateMap<Document, DocumentPreviewDto>();
-        CreateMap<Document, DocumentExtendedDto>();
+        CreateMap<Document, DocumentExtendedDto>()
+            .ForMember(d => d.UserFullName, o => o.MapFrom(s => $"{s.User.FirstName} {s.User.LastName}"));
+
         CreateMap<CreateDocumentDto, Document>()
             .ForMember(d => d.Id, o => o.MapFrom(_ => Guid.NewGuid()))
             .ForMember(d => d.TimeStamp, o => o.MapFrom(_ => DateTime.UtcNow));
