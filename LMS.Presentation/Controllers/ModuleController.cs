@@ -190,7 +190,7 @@ namespace LMS.Presentation.Controllers
         /// <param name="pageSize">The number of items per page (default is 10).</param>
         /// <response code="200">Returns a paginated list of documents for the specified module.</response>
         /// <response code="404">If the module is not found.</response>
-        [HttpGet("modules/{moduleId}/documents")]
+        [HttpGet("{moduleId}/documents")]
         [Authorize]
         [SwaggerOperation(
             Summary = "Get paginated documents for a module",
@@ -218,7 +218,7 @@ namespace LMS.Presentation.Controllers
         /// <response code="409">If the document is already attached to this module.</response>
         /// <response code="401">Unauthorized.</response>
         /// <response code="403">Forbidden.</response>
-        [HttpPost("modules/{moduleId}/documents/{documentId}")]
+        [HttpPost("{moduleId}/documents/{documentId}")]
         [Authorize(Roles = "Student,Teacher")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> AttachDocumentToModule(Guid moduleId, Guid documentId)
@@ -236,7 +236,7 @@ namespace LMS.Presentation.Controllers
         /// <response code="404">If no module or document is found with the specified GUID.</response>
         /// <response code="401">Unauthorized.</response>
         /// <response code="403">Forbidden.</response>
-        [HttpDelete("modules/{moduleId}/documents/{documentId}")]
+        [HttpDelete("{moduleId}/documents/{documentId}")]
         [Authorize(Roles = "Student,Teacher")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> DetachDocumentFromModule(Guid moduleId, Guid documentId)
