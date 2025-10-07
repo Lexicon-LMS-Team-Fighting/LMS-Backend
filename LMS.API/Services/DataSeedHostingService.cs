@@ -81,9 +81,6 @@ public class DataSeedHostingService : IHostedService
 
         try
         {
-            // Populate the database with initial data
-            //await SeedDatabaseAsync(cancellationToken);
-
             logger.LogInformation("Seed complete");
         }
         catch (Exception ex)
