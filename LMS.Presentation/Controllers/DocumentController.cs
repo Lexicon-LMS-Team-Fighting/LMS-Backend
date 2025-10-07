@@ -178,7 +178,7 @@ namespace LMS.Presentation.Controllers
             /// <response code="401">Unauthorized.</response>
             /// <response code="403">Forbidden.</response>
             [HttpDelete("{documentId}")]
-            [Authorize(Roles = "Teacher")]
+            [Authorize(Roles = "Student,Teacher")]
             [SwaggerOperation(
                 Summary = "Delete a document",
                 Description = "Deletes an existing document and removes all associations with courses, modules, or activities."

@@ -321,7 +321,7 @@ namespace LMS.Presentation.Controllers
         /// <response code="401">Unauthorized.</response>
         /// <response code="403">Forbidden.</response>
         [HttpPost("activities/{activityId}/documents/{documentId}")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = "Student,Teacher")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> AttachDocumentToActivity(Guid activityId, Guid documentId)
         {
@@ -339,7 +339,7 @@ namespace LMS.Presentation.Controllers
         /// <response code="401">Unauthorized.</response>
         /// <response code="403">Forbidden.</response>
         [HttpDelete("activities/{activityId}/documents/{documentId}")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = "Student,Teacher")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> DetachDocumentFromActivity(Guid activityId, Guid documentId)
         {

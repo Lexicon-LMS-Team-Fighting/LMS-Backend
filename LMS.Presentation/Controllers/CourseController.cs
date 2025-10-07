@@ -311,7 +311,7 @@ public class CourseController: ControllerBase
     /// <response code="401">Unauthorized.</response>
     /// <response code="403">Forbidden.</response>
     [HttpPost("{courseId}/documents/{documentId}")]
-    [Authorize(Roles = "Teacher")]
+    [Authorize(Roles = "Student,Teacher")]
     [SwaggerOperation(
         Summary = "Attach a document to a course",
         Description = "Attaches an existing document to the specified course."
@@ -337,7 +337,7 @@ public class CourseController: ControllerBase
     /// <response code="401">Unauthorized.</response>
     /// <response code="403">Forbidden.</response>
     [HttpDelete("{courseId}/documents/{documentId}")]
-    [Authorize(Roles = "Teacher")]
+    [Authorize(Roles = "Student,Teacher")]
     [SwaggerOperation(
         Summary = "Detach a document from a course",
         Description = "Removes an existing document from the specified course."
