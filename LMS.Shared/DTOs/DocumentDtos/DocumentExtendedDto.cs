@@ -36,11 +36,6 @@
         public Guid? ActivityId { get; set; }
 
         /// <summary>
-        /// Gets or sets the file path or URL where the document is stored.
-        /// </summary>
-        public string Path { get; set; } = string.Empty;
-
-        /// <summary>
         /// Gets or sets the name of the document.
         /// </summary>
         public string Name { get; set; } = string.Empty;

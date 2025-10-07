@@ -14,10 +14,5 @@
         /// Gets or sets the name of the document.
         /// </summary>
         public string Name { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets the description of the document.
-        /// </summary>
-        public string Path { get; set; } = string.Empty;
     }
 }
