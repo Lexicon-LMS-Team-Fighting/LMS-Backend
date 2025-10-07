@@ -275,7 +275,7 @@ public class CourseController: ControllerBase
     /// <param name="pageSize">The number of items per page (default is 10).</param>
     /// <response code="200">Returns a paginated list of documents for the specified course.</response>
     /// <response code="404">If the course is not found.</response>
-    [HttpGet("courses/{courseId}/documents")]
+    [HttpGet("{courseId}/documents")]
     [Authorize]
     [SwaggerOperation(
         Summary = "Get paginated documents for a course",

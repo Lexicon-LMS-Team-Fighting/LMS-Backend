@@ -153,6 +153,8 @@ namespace LMS.Infractructure.Repositories
         {
             var query = FindByCondition(a => a.ModuleId == moduleId, changeTracking)
                 .Include(a => a.ActivityType)
+                .Include(a => a.Module)
+                    .ThenInclude(m => m.Course)
                 .AsQueryable();
 
             return GetPaginatedActivitiesAsync(query, queryDto);
@@ -163,6 +165,8 @@ namespace LMS.Infractructure.Repositories
         {
             var query = FindByCondition(a => a.ModuleId == moduleId && a.Module.Course.UserCourses.Any(uc => uc.UserId == userId), changeTracking)
                 .Include(a => a.ActivityType)
+                .Include(a => a.Module)
+                    .ThenInclude(m => m.Course)
                 .AsQueryable();
 
             return GetPaginatedActivitiesAsync(query, queryDto);
