@@ -16,6 +16,11 @@
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
+        /// Gets or sets the description of the course.
+        /// </summary>
+        public string Description { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the start date of the course.
         /// </summary>
         public DateTime StartDate { get; set; }
