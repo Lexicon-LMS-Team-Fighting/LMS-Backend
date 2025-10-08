@@ -21,6 +21,11 @@
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
+        /// Gets or sets the description of the module.
+        /// </summary>
+        public string Description { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the start date of the module.
         /// </summary>
         public DateTime StartDate { get; set; }
