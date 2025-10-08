@@ -22,6 +22,7 @@ namespace LMS.Shared.DTOs.ModuleDtos
         /// </summary>
         [AllowNull]
         [MinLength(3, ErrorMessage = "Module name must be at least 3 characters long.")]
+        [MaxLength(100, ErrorMessage = "Module name cant be longer than 100 characters.")]
         public string? Name { get; set; }
         /// <summary>
         /// Gets or sets the description of the module.
@@ -29,6 +30,7 @@ namespace LMS.Shared.DTOs.ModuleDtos
         /// </summary>
         [AllowNull]
         [MinLength(10, ErrorMessage = "Module description must be at least 10 characters long.")]
+        [MaxLength(500, ErrorMessage = "Module description cant be longer than 500 characters.")]
         public string? Description { get; set; }
 
         /// <summary>

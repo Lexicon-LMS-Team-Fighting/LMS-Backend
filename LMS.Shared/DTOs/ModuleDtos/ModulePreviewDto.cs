@@ -1,12 +1,9 @@
-﻿using LMS.Shared.DTOs.DocumentDtos;
-
-namespace LMS.Shared.DTOs.ModuleDtos
+﻿namespace LMS.Shared.DTOs.ModuleDtos
 {
     /// <summary>
-    /// Data Transfer Object (DTO) representing a module.
-    /// This class is used to transfer module data
+    /// Data Transfer Object (DTO) representing an extended view of a module, including its details and associated entities.
     /// </summary>
-    public class ModuleDetailedDto
+    public class ModulePreviewDto
     {
         /// <summary>
         /// Gets or sets the unique identifier of the module.
@@ -39,8 +36,8 @@ namespace LMS.Shared.DTOs.ModuleDtos
         public DateTime EndDate { get; set; }
 
         /// <summary>
-        /// Gets or sets the collection of documents associated with the module in a preview format.
+        /// Gets or sets the normilized progress of the module (0 to 1).
         /// </summary>
-        public IEnumerable<DocumentPreviewDto> Documents { get; set; } = [];
+        public decimal? Progress { get; set; }
     }
 }

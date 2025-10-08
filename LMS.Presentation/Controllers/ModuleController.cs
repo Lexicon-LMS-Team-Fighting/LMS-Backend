@@ -1,4 +1,5 @@
-﻿using LMS.Shared.DTOs.LMSActivityDtos;
+﻿using LMS.Shared.DTOs.DocumentDtos;
+using LMS.Shared.DTOs.LMSActivityDtos;
 using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.DTOs.PaginationDtos;
 using Microsoft.AspNetCore.Authorization;
@@ -34,7 +35,8 @@ namespace LMS.Presentation.Controllers
         /// Retrieves a specific module by its unique identifier.
         /// </summary>
         /// <param name="guid">The unique identifier of the module.</param>
-        /// <returns>A <see cref="ModuleDto"/> representing the module.</returns>
+        /// <param name="include">Related entities to include (e.g., "lmsactivities", "participants", "documents").</param>
+        /// <returns>A <see cref="ModuleExtendedDto"/> representing the module.</returns>
         /// <response code="200">Returns the module details.</response>
         /// <response code="404">If no module is found with the specified GUID.</response>
         /// <response code="401">Unauthorized.</response>
@@ -45,18 +47,17 @@ namespace LMS.Presentation.Controllers
             Summary = "Get specified module by ID",
             Description = "Retrieves module details by their unique GUID identifier."
         )]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModuleDto))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModuleExtendedDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<ModuleDetailedDto>> GetModule(Guid guid) =>
-            Ok(await _serviceManager.ModuleService.GetByIdAsync(guid));
+        public async Task<ActionResult<ModuleExtendedDto>> GetModule(Guid guid, [FromQuery] string? include) =>
+            Ok(await _serviceManager.ModuleService.GetByIdAsync(guid, include));
 
         /// <summary>
         /// Retrieves a paginated list of all modules.
         /// </summary>
-        /// <param name="page">The page number to retrieve (default is 1).</param>
-        /// <param name="pageSize">The number of items per page (default is 10).</param>
+        /// <param name="query">Pagination and filtering parameters.</param>
         /// <returns>A paginated list of modules.</returns>
         /// <response code="200">Returns a paginated list of modules.</response>
         /// <response code="401">Unauthorized.</response>
@@ -67,11 +68,11 @@ namespace LMS.Presentation.Controllers
             Summary = "Get all modules",
             Description = "Retrieves a list of all modules in the system."
         )]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<ModuleDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<ModulePreviewDto>))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<PaginatedResultDto<ModuleDto>>> GetModules([FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
-            Ok(await _serviceManager.ModuleService.GetAllAsync(page, pageSize));
+        public async Task<ActionResult<PaginatedResultDto<ModulePreviewDto>>> GetModules([FromQuery] PaginatedQueryDto query) =>
+            Ok(await _serviceManager.ModuleService.GetAllAsync(query));
 
         /// <summary>
         /// Creates a new module.
@@ -89,12 +90,12 @@ namespace LMS.Presentation.Controllers
             Summary = "Create a new module",
             Description = "Creates a new module with the provided details."
         )]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ModuleDto))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ModuleExtendedDto))]
         [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<ModuleDto>> CreateModule([FromBody] CreateModuleDto module)
+        public async Task<ActionResult<ModuleExtendedDto>> CreateModule([FromBody] CreateModuleDto module)
         {
             var createdModule = await _serviceManager.ModuleService.CreateAsync(module);
             return CreatedAtAction(nameof(GetModule), new { guid = createdModule.Id }, createdModule);
@@ -133,8 +134,7 @@ namespace LMS.Presentation.Controllers
         /// Retrieves a paginated list of activities for a specific module.
         /// </summary>
         /// <param name="moduleId">The unique identifier of the module.</param>
-        /// <param name="page">The page number to retrieve (default is 1).</param>
-        /// <param name="pageSize">The number of items per page (default is 10).</param>
+        /// <param name="query">Pagination and filtering parameters.</param>
         /// <returns>A paginated list of activities for the specified module.</returns>
         /// <response code="200">Returns the paginated list of activities.</response>
         /// <response code="400">If the provided GUID is not valid.</response>
@@ -147,40 +147,102 @@ namespace LMS.Presentation.Controllers
             Summary = "Get all activities for a specific module",
             Description = "Retrieves all activities associated with the specified module ID."
         )]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<LMSActivityDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<LMSActivityPreviewDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
-        public async Task<ActionResult<PaginatedResultDto<LMSActivityDto>>> GetActivitiesByModuleId(
+        public async Task<ActionResult<PaginatedResultDto<LMSActivityPreviewDto>>> GetActivitiesByModuleId(
             Guid moduleId,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10
+            [FromQuery] PaginatedQueryDto query
         ) =>
-            Ok(await _serviceManager.LMSActivityService.GetAllByModuleIdAsync(moduleId, page, pageSize));
+            Ok(await _serviceManager.LMSActivityService.GetAllByModuleIdAsync(moduleId, query));
 
         /// <summary>
         /// Deletes a module by its unique identifier.
         /// </summary>
-        /// <param name="guid">The unique identifier of the module to delete.</param>
+        /// <param name="moduleId">The unique identifier of the module to delete.</param>
         /// <response code="204">Module was successfully deleted.</response>
         /// <response code="404">If no module is found with the specified GUID.</response>
         /// <response code="401">Unauthorized.</response>
         /// <response code="403">Forbidden.</response>
-        //[HttpDelete("{guid}")]
-        //[Authorize(Roles = "Teacher")]
-        //[SwaggerOperation(
-        //    Summary = "Delete a module",
-        //    Description = "Deletes the module identified by its GUID."
-        //)]
-        //[ProducesResponseType(StatusCodes.Status204NoContent)]
-        //[ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
-        //[ProducesResponseType(StatusCodes.Status403Forbidden)]
-        //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        //public async Task<IActionResult> DeleteModule(Guid guid)
-        //{
-        //    await _serviceManager.ModuleService.DeleteAsync(guid);
-        //    return NoContent();
-        //}
+        [HttpDelete("{moduleId}")]
+        [Authorize(Roles = "Teacher")]
+        [SwaggerOperation(
+            Summary = "Delete a module",
+            Description = "Deletes the module identified by its Id."
+        )]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> DeleteModule(Guid moduleId)
+        {
+            await _serviceManager.ModuleService.DeleteAsync(moduleId);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Retrieves paginated documents attached to a specific module.
+        /// </summary>
+        /// <param name="moduleId">The unique identifier of the module.</param>
+        /// <param name="page">The page number to retrieve (default is 1).</param>
+        /// <param name="pageSize">The number of items per page (default is 10).</param>
+        /// <response code="200">Returns a paginated list of documents for the specified module.</response>
+        /// <response code="404">If the module is not found.</response>
+        [HttpGet("{moduleId}/documents")]
+        [Authorize]
+        [SwaggerOperation(
+            Summary = "Get paginated documents for a module",
+            Description = "Returns paginated documents attached to the specified module."
+        )]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedResultDto<DocumentPreviewDto>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        public async Task<IActionResult> GetDocumentsByModule(
+            Guid moduleId,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var documents = await _serviceManager.DocumentService.GetAllByModuleIdAsync(moduleId, page, pageSize);
+            return Ok(documents);
+        }
+
+
+        /// <summary>
+        /// Attaches an existing document to a module.
+        /// </summary>
+        /// <param name="moduleId">The unique identifier of the module.</param>
+        /// <param name="documentId">The unique identifier of the document to attach.</param>
+        /// <response code="204">Document was successfully attached.</response>
+        /// <response code="404">If no module or document is found with the specified GUID.</response>
+        /// <response code="409">If the document is already attached to this module.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
+        [HttpPost("{moduleId}/documents/{documentId}")]
+        [Authorize(Roles = "Student,Teacher")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> AttachDocumentToModule(Guid moduleId, Guid documentId)
+        {
+            await _serviceManager.DocumentService.AttachToModuleAsync(moduleId, documentId);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Removes a document from a module.
+        /// </summary>
+        /// <param name="moduleId">The unique identifier of the module.</param>
+        /// <param name="documentId">The unique identifier of the document to remove.</param>
+        /// <response code="204">Document was successfully detached.</response>
+        /// <response code="404">If no module or document is found with the specified GUID.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="403">Forbidden.</response>
+        [HttpDelete("{moduleId}/documents/{documentId}")]
+        [Authorize(Roles = "Student,Teacher")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> DetachDocumentFromModule(Guid moduleId, Guid documentId)
+        {
+            await _serviceManager.DocumentService.DetachFromModuleAsync(moduleId, documentId);
+            return NoContent();
+        }
     }
 }

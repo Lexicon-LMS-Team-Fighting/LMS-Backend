@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
 namespace LMS.Shared.DTOs.LMSActivityDtos
@@ -30,6 +29,7 @@ namespace LMS.Shared.DTOs.LMSActivityDtos
         /// </summary>
         [Required]
         [MinLength(3, ErrorMessage = "LMS Activity name must be at least 3 characters long.")]
+        [MaxLength(100, ErrorMessage = "LMS Activity name cant be longer than 100 characters.")]
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
@@ -38,6 +38,7 @@ namespace LMS.Shared.DTOs.LMSActivityDtos
         /// </summary>
         [AllowNull]
         [MinLength(10, ErrorMessage = "LMS Activity description must be at least 10 characters long.")]
+        [MaxLength(500, ErrorMessage = "LMS Activity description cant be longer than 500 characters.")]
         public string? Description { get; set; } = string.Empty;
 
         /// <summary>

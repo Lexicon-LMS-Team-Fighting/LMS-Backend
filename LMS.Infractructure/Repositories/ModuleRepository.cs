@@ -1,11 +1,12 @@
 ﻿using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Infractructure.Data;
+using LMS.Shared;
+using LMS.Shared.DTOs.ModuleDtos;
+using LMS.Shared.DTOs.PaginationDtos;
+using LMS.Shared.Extensions;
+using LMS.Shared.Pagination;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace LMS.Infractructure.Repositories
 {
@@ -19,76 +20,159 @@ namespace LMS.Infractructure.Repositories
         {
         }
 
-        /// <summary>
-        /// Retrieves a single <see cref="Module"/> entity by its unique identifier.
-        /// </summary>
-        /// <param name="moduleId">The unique identifier of the module.</param>
-        /// <param name="changeTracking">If true, enables change tracking.</param>
-        /// <returns>The module if found, otherwise null.</returns>
-        public async Task<Module?> GetByIdAsync(Guid moduleId, bool changeTracking = false) =>
-            await FindByCondition(m => m.Id == moduleId, trackChanges: changeTracking)
-                .Include(m => m.Documents)
+        /// <inheritdoc/>
+        private IQueryable<Module> BuildModuleQuery(IQueryable<Module> query, string? include, string? userId = null)
+        {
+            if (!string.IsNullOrEmpty(userId))
+            {
+                query = query.Where(m => m.Course.UserCourses.Any(uc => uc.UserId == userId));
+            }
+
+            if (!string.IsNullOrEmpty(include))
+            {
+                if (include.Contains(nameof(ModuleExtendedDto.Activities), StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query
+                        .Include(m => m.LMSActivities)
+                            .ThenInclude(a => a.ActivityType);
+                }
+
+                if (include.Contains(nameof(ModuleExtendedDto.Participants), StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query
+                        .Include(m => m.Course)
+                            .ThenInclude(c => c.UserCourses)
+                                .ThenInclude(uc => uc.User);
+                }
+
+                if (include.Contains(nameof(ModuleExtendedDto.Documents), StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query.Include(m => m.Documents);
+                }
+            }
+
+            return query.Include(m => m.Course);
+        }
+
+        /// <inheritdoc/>
+        public async Task<Module?> GetByIdAsync(Guid moduleId, string? include, bool changeTracking = false)
+        {
+            var query = FindByCondition(m => m.Id == moduleId, trackChanges: changeTracking);
+            return await BuildModuleQuery(query, include).FirstOrDefaultAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<Module?> GetByIdAsync(Guid moduleId, string userId, string? include, bool changeTracking = false)
+        {
+            var query = FindByCondition(m => m.Id == moduleId, trackChanges: changeTracking);
+            return await BuildModuleQuery(query, include, userId).FirstOrDefaultAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<decimal> CalculateProgressAsync(Guid moduleId, string? userId = null)
+        {
+            var activities = await FindByCondition(m => m.Id == moduleId)
+                    .Include(m => m.LMSActivities)
+                        .ThenInclude(a => a.LMSActivityFeedbacks)
+                .SelectMany(m => m.LMSActivities)
+                .Where(a => string.IsNullOrEmpty(userId)
+                            || a.Module.Course.UserCourses.Any(uc => uc.UserId == userId))
+                .ToListAsync();
+
+            if (!activities.Any())
+                return 0m;
+
+            var completedCount = activities.Count(a =>
+                a.LMSActivityFeedbacks.All(f => f.Status == LMSActivityFeedbackStatus.Approved.ToDbString() ||
+                                                f.Status == LMSActivityFeedbackStatus.Completed.ToDbString())
+            );
+
+            return Math.Round((decimal)completedCount / activities.Count, 4);
+        }
+
+        /// <inheritdoc />
+        public async Task ClearDocumentRelationsAsync(Guid moduleId)
+        {
+            var module = await FindByCondition(c => c.Id == moduleId, true)
+                .Include(c => c.Documents)
+                .Include(m => m.LMSActivities)
+                    .ThenInclude(a => a.Documents)
                 .FirstOrDefaultAsync();
 
+            if (module is null)
+                return;
+
+            var moduleDocuments = module.Documents.ToList();
+            var activityDocuments = module.LMSActivities.SelectMany(m => m.Documents).ToList();
+
+            moduleDocuments.ForEach(d => d.ModuleId = null);
+            activityDocuments.ForEach(d => d.ActivityId = null);
+        }
+
+        public async Task<bool> IsUserEnrolledInModuleAsync(Guid moduleId, string userId) =>
+            await FindByCondition(m => m.Id == moduleId)
+                .AnyAsync(m => m.Course.UserCourses.Any(uc => uc.UserId == userId));
+
         /// <summary>
-        /// Retrieves a single <see cref="Module"/> entity by its unique identifier from the perspective of a specific user.
+        /// Retrieves a paginated list of modules based on the specified query and pagination parameters.
         /// </summary>
-        /// <param name="moduleId">The unique identifier of the module.</param>
-        /// <param name="userId">The unique identifier of the user whose perspective to consider.</param>
-        /// <param name="changeTracking">If true, enables change tracking.</param>
-        /// <returns>The module if found, otherwise null.</returns>
-        public async Task<Module?> GetByIdAsync(Guid moduleId, string userId, bool changeTracking = false) =>
-            await FindByCondition(m => m.Id == moduleId, trackChanges: changeTracking)
+        /// <param name="query">The base query for modules.</param>
+        /// <param name="queryDto">Pagination, filtering, and sorting parameters.</param>
+        /// <returns>A <see cref="PaginatedResult{T}"/> with modules and pagination metadata.</returns>
+        private async Task<PaginatedResult<Module>> GetPaginatedModulesAsync(IQueryable<Module> query, PaginatedQueryDto queryDto)
+        {
+            if (!string.IsNullOrEmpty(queryDto.FilterBy))
+                query = query.WhereContains(queryDto.FilterBy, queryDto.Filter);
+
+            if (!string.IsNullOrEmpty(queryDto.SortBy))
+                query = query.OrderByField(queryDto.SortBy, queryDto.SortDirection);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((queryDto.Page - 1) * queryDto.PageSize)
+                .Take(queryDto.PageSize)
+                .ToListAsync();
+
+            return new PaginatedResult<Module>(items, new PaginationMetadata(totalCount, queryDto.Page, queryDto.PageSize));
+        }
+
+        /// <inheritdoc/>
+        public Task<PaginatedResult<Module>> GetAllAsync(PaginatedQueryDto queryDto, bool changeTracking = false)
+        {
+            var query = FindAll(changeTracking).AsQueryable();
+            return GetPaginatedModulesAsync(query, queryDto);
+        }
+
+        /// <inheritdoc/>
+        public Task<PaginatedResult<Module>> GetAllAsync(string userId, PaginatedQueryDto queryDto, bool changeTracking = false)
+        {
+            var query = FindByCondition(m => m.Course.UserCourses.Any(uc => uc.UserId == userId), changeTracking)
                 .Include(m => m.Course)
-                    .ThenInclude(c => c.UserCourses)
-                .Where(m => m.Course.UserCourses.Any(uc => uc.UserId == userId))
-                .Include(m => m.Documents)
-                .FirstOrDefaultAsync();
+                .AsQueryable();
+            return GetPaginatedModulesAsync(query, queryDto);
+        }
 
-        /// <summary>
-        /// Retrieves all <see cref="Module"/> entities.
-        /// </summary>
-        /// <param name="changeTracking">If true, enables change tracking.</param>
-        /// <returns>A collection of modules.</returns>
-        public async Task<IEnumerable<Module>> GetAllAsync(bool changeTracking = false) =>
-            await FindAll(trackChanges: changeTracking)
-                .ToListAsync();
+        /// <inheritdoc/>
+        public Task<PaginatedResult<Module>> GetByCourseIdAsync(Guid courseId, PaginatedQueryDto queryDto, bool changeTracking = false)
+        {
+            var query = FindByCondition(m => m.CourseId == courseId, changeTracking)
+                .AsQueryable();
+            return GetPaginatedModulesAsync(query, queryDto);
+        }
 
-        /// <summary>
-        /// Retrieves all <see cref="Module"/> entities from the perspective of a specific user.
-        /// </summary>
-        /// <param name="userId">The unique identifier of the user whose perspective to consider.</param>
-        /// <param name="changeTracking">If true, enables change tracking.</param>
-        /// <returns>A collection of modules.</returns>
-        public async Task<IEnumerable<Module>> GetAllAsync(string userId, bool changeTracking = false) =>
-            await FindAll(trackChanges: changeTracking)
+        /// <inheritdoc/>
+        public Task<PaginatedResult<Module>> GetByCourseIdAsync(Guid courseId, string userId, PaginatedQueryDto queryDto, bool changeTracking = false)
+        {
+            var query = FindByCondition(m => m.CourseId == courseId && m.Course.UserCourses.Any(uc => uc.UserId == userId), changeTracking)
                 .Include(m => m.Course)
-                    .ThenInclude(c => c.UserCourses)
-                .Where(m => m.Course.UserCourses.Any(uc => uc.UserId == userId))
-                .ToListAsync();
+                .AsQueryable();
+            return GetPaginatedModulesAsync(query, queryDto);
+        }
 
-        /// <summary>
-        /// Retrieves all <see cref="Module"/> entities associated with a specific <see cref="Course"/>.
-        /// </summary>
-        /// <param name="courseId">The unique identifier of the course.</param>
-        /// <param name="changeTracking">If true, enables change tracking.</param>
-        /// <returns>A collection of modules.</returns>
-        public async Task<IEnumerable<Module>> GetByCourseIdAsync(Guid courseId, bool changeTracking = false) =>
-            await FindByCondition(m => m.CourseId == courseId, trackChanges: changeTracking)
-                .ToListAsync();
-
-        /// <summary>
-        /// Retrieves all <see cref="Module"/> entities associated with a specific <see cref="Course"/> from the perspective of a specific user.
-        /// </summary>
-        /// <param name="courseId">The unique identifier of the course.</param>
-        /// <param name="userId">The unique identifier of the user whose perspective to consider.</param>
-        /// <param name="changeTracking">If true, enables change tracking.</param>
-        /// <returns>A collection of modules.</returns>
-        public async Task<IEnumerable<Module>> GetByCourseIdAsync(Guid courseId, string userId, bool changeTracking = false) =>
-            await FindByCondition(m => m.CourseId == courseId, trackChanges: changeTracking)
-                .Include(m => m.Course)
-                    .ThenInclude(c => c.UserCourses)
-                .Where(m => m.Course.UserCourses.Any(uc => uc.UserId == userId))
-                .ToListAsync();
+        /// <inheritdoc/>
+        public async Task<bool> IsUniqueNameAsync(string name, Guid courseId, Guid excludeModuleId) =>
+            !await FindByCondition(m => m.Name.ToUpper().Equals(name.ToUpper()) && m.CourseId == courseId && m.Id != excludeModuleId)
+                .AnyAsync();
     }
 }

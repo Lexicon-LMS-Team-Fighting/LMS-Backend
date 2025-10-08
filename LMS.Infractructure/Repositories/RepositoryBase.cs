@@ -31,4 +31,6 @@ public abstract class RepositoryBase<T> : IRepositoryBase<T>, IInternalRepositor
     public void Update(T entity) => DbSet.Update(entity);
 
     public void Delete(T entity) => DbSet.Remove(entity);
+
+    public void DeleteRange(IEnumerable<T> entities) => DbSet.RemoveRange(entities);
 }

@@ -1,10 +1,9 @@
 ﻿namespace LMS.Shared.DTOs.LMSActivityDtos
 {
     /// <summary>
-    /// Data Transfer Object (DTO) representing an <see cref="LMSActivity"/>.
-    /// This class is used to transfer activity data.
+    /// Data Transfer Object (DTO) representing an extended view of a Learning Management System (LMS) activity.
     /// </summary>
-    public class LMSActivityDto
+    public class LMSActivityPreviewDto
     {
         /// <summary>
         /// Gets or sets the unique identifier of the activity.
@@ -17,19 +16,25 @@
         public Guid ModuleId { get; set; }
 
         /// <summary>
-        /// Gets or sets the ID of the activity type.
+        /// Gets or sets the name of the parent module.
         /// </summary>
-        public Guid ActivityTypeId { get; set; }
+        public Guid CourseId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the course.
+        /// </summary>
+        public string CourseName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the name of the activity type.
+        /// </summary>
+        public string ActivityTypeName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the name of the activity.
         /// </summary>
         public string Name { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the description of the activity.
-        /// </summary>
-        public string Description { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the start date of the activity.
@@ -40,5 +45,6 @@
         /// Gets or sets the end date of the activity.
         /// </summary>
         public DateTime EndDate { get; set; }
+
     }
 }

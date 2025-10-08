@@ -24,10 +24,11 @@ public class UserService : IUserService
 	{
 		_unitOfWork = unitOfWork;
 		_mapper = mapper;
-	}
+    }
 
-	/// <inheritdoc/>
-	public async Task<UserDto> GetUserAsync(string userId)
+    /// <inheritdoc/>
+    /// <exception cref="BadRequestException">Thrown when the provided user ID is not a valid GUID.</exception>
+    public async Task<UserExtendedDto> GetUserAsync(string userId)
 	{
 		if (!Guid.TryParse(userId, out Guid guid))
 			throw new BadRequestException($"Provided id: {userId} is not a valid Guid");
@@ -36,14 +37,23 @@ public class UserService : IUserService
 
 		if (user is null) throw new UserNotFoundException(guid); 
 		
-		return _mapper.Map<UserDto>(user);
+		return _mapper.Map<UserExtendedDto>(user);
 	}
 
 	/// <inheritdoc/>
-	public async Task<IEnumerable<UserDto>> GetUsersAsync()
+	public async Task<IEnumerable<UserWithRolesDto>> GetUsersAsync()
 	{
-		var user = await _unitOfWork.User.GetUsersAsync();
+        var users = await _unitOfWork.User.GetUsersAsync();
+        var usersDto = new List<UserWithRolesDto>();
 
-		return _mapper.Map<IEnumerable<UserDto>>(user);
-	}
+        foreach (var user in users)
+        {
+            var roles = await _unitOfWork.User.GetUserRolesAsync(user);
+            var userDto = _mapper.Map<UserWithRolesDto>(user);
+            userDto.Roles = string.Join(", ", roles);
+            usersDto.Add(userDto);
+        }
+
+        return usersDto;
+    }
 }
