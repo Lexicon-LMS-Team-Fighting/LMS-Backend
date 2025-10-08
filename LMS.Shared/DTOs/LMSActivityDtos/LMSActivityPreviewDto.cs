@@ -46,5 +46,10 @@
         /// </summary>
         public DateTime EndDate { get; set; }
 
-    }
+        /// <summary>
+        /// Gets or sets the description of the activity.
+        /// </summary>
+        public string Description { get; set; } = string.Empty;
+
+	}
 }
