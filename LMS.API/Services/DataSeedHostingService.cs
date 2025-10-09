@@ -166,7 +166,7 @@ public class DataSeedHostingService : IHostedService
             e.Id = Guid.NewGuid();
             e.Name = f.Company.CatchPhrase();
             e.Description = f.Lorem.Paragraph();
-            e.StartDate = f.Date.Past(1);
+            e.StartDate = f.Date.Recent(20);
             e.EndDate = f.Date.Future(1, e.StartDate);
         });
 
@@ -386,8 +386,8 @@ public class DataSeedHostingService : IHostedService
         var faker = new Faker<ApplicationUser>("sv").Rules((f, e) =>
         {
             e.Id = Guid.NewGuid().ToString();
-            e.FirstName = f.Name.FirstName();
-            e.LastName = f.Name.LastName();
+            e.FirstName = f.Person.FirstName;
+            e.LastName = f.Person.LastName;
             e.Email = f.Person.Email;
             e.UserName = f.Person.UserName;
         });
